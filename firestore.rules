@@ -1,0 +1,228 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() {
+      return isSignedIn() && 
+        (request.auth.token.email == 'aistudioblack@gmail.com' ||
+         request.auth.token.email == 'pasamotor@gmail.com' ||
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' || 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin')));
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.\\ \\=]+$'); }
+
+    // Validation definitions
+    function isValidAdminAuditLog(data) {
+      return data.keys().hasAll(['action', 'actor_user_id', 'created_at', 'entity_type']) &&
+             data.action is string && data.action.size() <= 200 &&
+             data.actor_user_id is string && data.actor_user_id.size() <= 128 &&
+             data.created_at is string && data.created_at.size() <= 100 &&
+             data.entity_type is string && data.entity_type.size() <= 100;
+    }
+    function isValidAILog(data) {
+      return data.keys().hasAll(['action', 'created_at', 'status']) &&
+             data.action is string && data.action.size() <= 200 &&
+             data.created_at is string && data.created_at.size() <= 100 &&
+             data.status is string && data.status.size() <= 50;
+    }
+    function isValidFaq(data) {
+      return data.keys().hasAll(['answer', 'created_at', 'question']) &&
+             data.question is string && data.question.size() <= 1000 &&
+             data.answer is string && data.answer.size() <= 5000 &&
+             data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidGalleryImage(data) {
+      return data.keys().hasAll(['created_at', 'title', 'url']) &&
+             data.title is string && data.title.size() <= 200 &&
+             data.url is string && data.url.size() <= 1000 &&
+             data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidMessage(data) {
+      return data.keys().hasAll(['message', 'name', 'phone', 'subject']) &&
+             data.name is string && data.name.size() <= 200 &&
+             data.phone is string && data.phone.size() <= 100 &&
+             data.subject is string && data.subject.size() <= 500 &&
+             data.message is string && data.message.size() <= 10000;
+    }
+    function isValidPost(data) {
+      return data.keys().hasAll(['slug', 'title', 'created_at']) &&
+             data.slug is string && data.slug.size() <= 1000 &&
+             data.title is string && data.title.size() <= 1000 &&
+             data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidPage(data) {
+      return data.keys().hasAll(['slug', 'title', 'created_at']) &&
+             data.slug is string && data.slug.size() <= 1000 &&
+             data.title is string && data.title.size() <= 1000 &&
+             data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidProduct(data) {
+      return data.keys().hasAll(['brand', 'category', 'slug', 'title', 'created_at']) &&
+             data.brand is string && data.brand.size() <= 500 &&
+             data.category is string && data.category.size() <= 500 &&
+             data.slug is string && data.slug.size() <= 1000 &&
+             data.title is string && data.title.size() <= 1000 &&
+             data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidSiteContent(data) {
+      return data.keys().hasAll(['page_key', 'created_at']) &&
+             data.page_key is string && data.page_key.size() <= 100 &&
+             data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidUser(data) {
+      return data.keys().hasAll(['role', 'email']) &&
+             data.role is string && data.role.size() <= 100 &&
+             data.email is string && data.email.size() <= 500;
+    }
+    function isValidSupplier(data) {
+      return data.keys().hasAll(['name', 'created_at']) &&
+             data.name is string && data.name.size() <= 500 &&
+             data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidSupplierProduct(data) {
+      return data.keys().hasAll(['name', 'supplier_sku', 'supplier_id', 'created_at']) &&
+             data.name is string && data.name.size() <= 1000 &&
+             data.supplier_sku is string && data.supplier_sku.size() <= 500 &&
+             data.supplier_id is string && data.supplier_id.size() <= 200 &&
+             data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidPricingRule(data) {
+       return data.keys().hasAll(['scope', 'margin_percent', 'created_at']) &&
+              data.scope is string && data.scope.size() <= 500 &&
+              data.margin_percent is number &&
+              data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidProductMapping(data) {
+       return data.keys().hasAll(['supplier_id', 'supplier_sku', 'created_at']) &&
+              data.supplier_id is string && data.supplier_id.size() <= 200 &&
+              data.supplier_sku is string && data.supplier_sku.size() <= 500 &&
+              data.created_at is string && data.created_at.size() <= 100;
+    }
+    function isValidSyncJob(data) {
+       return data.keys().hasAll(['job_type', 'started_at', 'status', 'supplier_id']) &&
+              data.job_type is string && data.job_type.size() <= 200 &&
+              data.started_at is string && data.started_at.size() <= 100 &&
+              data.status is string && data.status.size() <= 100 &&
+              data.supplier_id is string && data.supplier_id.size() <= 200;
+    }
+
+    match /admin_audit_logs/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidId(id) && isValidAdminAuditLog(incoming());
+      allow update: if false; 
+      allow delete: if false;
+    }
+    match /ai_logs/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidId(id) && isValidAILog(incoming());
+      allow update: if false;
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /faqs/{id} {
+      allow get: if isAdmin() || existing().is_active == true;
+      allow list: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+    match /gallery_images/{id} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(id) && isValidGalleryImage(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidGalleryImage(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /messages/{id} {
+      allow create: if isValidId(id) && isValidMessage(incoming());
+      allow get: if isAdmin() && isValidId(id);
+      allow list: if isAdmin();
+      allow update, delete: if isAdmin() && isValidId(id);
+    }
+    match /pages/{id} {
+      allow get: if isAdmin() || existing().is_published == true;
+      allow list: if isAdmin() || resource.data.is_published == true;
+      allow create: if isAdmin() && isValidId(id) && isValidPage(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidPage(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /posts/{id} {
+      allow get: if isAdmin() || existing().is_published == true;
+      allow list: if isAdmin() || resource.data.is_published == true;
+      allow create: if isAdmin() && isValidId(id) && isValidPost(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidPost(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /products/{id} {
+      allow get: if isAdmin() || existing().is_active == true;
+      allow list: if isAdmin() || resource.data.is_active == true;
+      allow create: if isAdmin() && isValidId(id) && isValidProduct(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidProduct(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /site_content/{id} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(id) && isValidSiteContent(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidSiteContent(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isAdmin() || request.auth.uid == userId);
+      allow list: if isAdmin();
+      allow create: if isAdmin() && isValidId(userId) && isValidUser(incoming());
+      allow update: if isAdmin() && isValidId(userId) && isValidUser(incoming());
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+    match /suppliers/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidId(id) && isValidSupplier(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidSupplier(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /supplier_products/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidId(id) && isValidSupplierProduct(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidSupplierProduct(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /pricing_rules/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidId(id) && isValidPricingRule(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidPricingRule(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /product_mappings/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidId(id) && isValidProductMapping(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidProductMapping(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    match /sync_jobs/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidId(id) && isValidSyncJob(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidSyncJob(incoming());
+      allow delete: if isAdmin() && isValidId(id);
+    }
+    function isValidAdminBackup(data) {
+       return data.keys().hasAll(['name', 'data', 'created_at']) &&
+              data.name is string && data.name.size() <= 200 &&
+              data.data is string &&
+              data.created_at is string && data.created_at.size() <= 100;
+    }
+
+    match /admin_backups/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidId(id) && isValidAdminBackup(incoming());
+      allow update: if false; 
+      allow delete: if isAdmin() && isValidId(id);
+    }
+  }
+}

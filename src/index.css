@@ -1,0 +1,413 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2026 Modern Map Interface Styling */
+.map-container-wrapper {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #f1f5f9 !important;
+}
+
+[class*="ymaps-2-1-"][class*="-map"] {
+  width: 100% !important;
+  height: 100% !important;
+  filter: saturate(1.1) contrast(1.02);
+}
+
+/* Hide branding for ultra-clean UI */
+.ymaps-2-1-79-copyrights-promo,
+.ymaps-2-1-79-copyright__wrap,
+.ymaps-2-1-79-map-copyrights-promo {
+  display: none !important;
+}
+
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #f1f5f9 !important;
+  outline: none !important;
+  z-index: 1 !important;
+}
+
+.leaflet-tile-pane {
+  filter: saturate(1.15) contrast(1.02) brightness(1.02);
+}
+
+.leaflet-container img {
+  max-width: none !important;
+  max-height: none !important;
+  border: none !important;
+}
+
+.leaflet-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-top, .leaflet-bottom {
+  z-index: 2 !important;
+}
+
+/* Premium Apple-style Popups */
+.apple-popup .leaflet-popup-content-wrapper {
+  padding: 0 !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.18) !important;
+  margin-bottom: 8px;
+}
+
+.apple-popup .leaflet-popup-content {
+  margin: 0 !important;
+  padding: 12px 16px !important;
+  width: auto !important;
+}
+
+.apple-popup .leaflet-popup-tip-container {
+  display: none !important;
+}
+
+.leaflet-control-attribution {
+  font-size: 8px !important;
+  background: transparent !important;
+  opacity: 0.3 !important;
+}
+
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+}
+
+
+@layer base {
+  :root {
+    --background: 220 20% 7%;
+    --foreground: 0 0% 95%;
+
+    --card: 220 18% 10%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 220 18% 10%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 0 85% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 80% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 215 80% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 0 85% 55%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --glass-bg: 220 18% 10% / 0.6;
+    --glass-border: 220 15% 25% / 0.3;
+    --gradient-primary: linear-gradient(135deg, hsl(0 85% 55%), hsl(215 80% 55%));
+    --gradient-hero: linear-gradient(180deg, hsl(220 20% 7% / 0) 0%, hsl(220 20% 7% / 0.85) 60%, hsl(220 20% 7%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 18% 12%), hsl(220 18% 8%));
+    --shadow-glow-red: 0 0 40px hsl(0 85% 55% / 0.3);
+    --shadow-glow-blue: 0 0 40px hsl(215 80% 55% / 0.3);
+
+    --sidebar-background: 220 18% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 0 85% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 0 85% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+/* Glass morphism utility */
+@layer components {
+  .glass {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .glass-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-red {
+    box-shadow: var(--shadow-glow-red);
+  }
+
+  .glow-blue {
+    box-shadow: var(--shadow-glow-blue);
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* ============================================================
+   Logo Animations — 20 variants. Selected via admin panel.
+   All transform/opacity based, GPU friendly.
+   ============================================================ */
+
+/* 1. Motor Yağı Temizliği */
+@keyframes logo-oil-cleanse {
+  0%   { filter: brightness(1) sepia(0); transform: rotate(0deg); }
+  20%  { filter: brightness(0.2) sepia(1) hue-rotate(-50deg) saturate(3); transform: rotate(0deg); }
+  60%  { filter: brightness(0.2) sepia(1) hue-rotate(-50deg) saturate(3); transform: rotate(1080deg); }
+  80%  { filter: brightness(1.5) sepia(0); transform: rotate(1080deg); }
+  100% { filter: brightness(1) sepia(0); transform: rotate(1080deg); }
+}
+.animate-logo-oil-cleanse { animation: logo-oil-cleanse 3s cubic-bezier(0.25, 1, 0.5, 1) 1; }
+
+/* 2. Kontağı Çevir (Marş) */
+@keyframes logo-engine-start {
+  0%   { transform: scale(1) translateX(0); filter: brightness(1); }
+  10%, 20%, 30%, 40% { transform: scale(1.02) translateX(4px); filter: brightness(0.8); }
+  15%, 25%, 35%, 45% { transform: scale(1.02) translateX(-4px); filter: brightness(1.2); }
+  50%  { transform: scale(1.15) translateY(-10px); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255,100,0,0.5)); }
+  75%  { transform: scale(1.05) translateY(0); filter: brightness(1); }
+  100% { transform: scale(1) translateX(0); filter: brightness(1); }
+}
+.animate-logo-engine-start { animation: logo-engine-start 2.5s ease-in-out 1; }
+
+/* 3. Egzoz Ateşi */
+@keyframes logo-exhaust-fire {
+  0%, 100% { filter: drop-shadow(0 0 0px #ff5500); transform: translateX(0); }
+  20% { filter: drop-shadow(-30px 10px 20px #ff2200); transform: translateX(10px); }
+  30% { filter: drop-shadow(-50px 20px 40px #ff8800) drop-shadow(-80px 30px 50px #ffef00); transform: translateX(15px) rotate(5deg); }
+  50% { filter: drop-shadow(-20px 5px 15px #ff0000); transform: translateX(5px) rotate(-2deg); }
+}
+.animate-logo-exhaust-fire { animation: logo-exhaust-fire 1.5s cubic-bezier(0.1, 0.8, 0.3, 1) 1; }
+
+/* 4. Patinaj & Duman */
+@keyframes logo-tire-spin {
+  0% { transform: rotate(0deg) skewX(0deg); filter: blur(0); }
+  10% { transform: rotate(30deg) skewX(-10deg); filter: blur(0); }
+  20%, 40%, 60% { transform: rotate(-5deg) skewX(5deg) translateY(-5px); filter: blur(1px) drop-shadow(10px -10px 20px rgba(100,100,100,0.8)); }
+  30%, 50%, 70% { transform: rotate(5deg) skewX(-5deg) translateY(0); filter: blur(2px) drop-shadow(-10px -10px 30px rgba(200,200,200,0.9)); }
+  80% { transform: translateX(50px) skewX(-20deg) scale(0.9); filter: blur(5px) opacity(0); }
+  81% { transform: translateX(-50px) scale(0.9); filter: blur(5px) opacity(0); }
+  100% { transform: translateX(0) scale(1); filter: blur(0) opacity(1); }
+}
+.animate-logo-tire-spin { animation: logo-tire-spin 2s ease-in-out 1; }
+
+/* 5. Tek Teker */
+@keyframes logo-wheelie-ride {
+  0%   { transform: rotate(0deg) translateY(0); }
+  15%  { transform: rotate(-45deg) translateY(-40px); }
+  50%  { transform: rotate(-35deg) translateY(-30px); }
+  85%  { transform: rotate(5deg) translateY(5px); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+.animate-logo-wheelie-ride { animation: logo-wheelie-ride 2.5s ease-out 1; transform-origin: bottom right; }
+
+/* 6. Gece Sürüşü (Far) */
+@keyframes logo-night-rider {
+  0% { filter: brightness(1); }
+  10%, 30% { filter: brightness(0.1); }
+  40% { filter: brightness(0.1) drop-shadow(0 0 50px #fff); }
+  45% { filter: brightness(0.1); }
+  50%, 100% { filter: brightness(1.2) drop-shadow(0 -10px 30px rgba(200, 230, 255, 0.8)); }
+}
+.animate-logo-night-rider { animation: logo-night-rider 3s ease-in-out 1; }
+
+/* 7. Zincir Şaklaması */
+@keyframes logo-chain-whip {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  20% { transform: translateY(-20px) scaleY(1.3); }
+  40% { transform: translateY(30px) scaleY(0.7); }
+  60% { transform: translateY(-10px) scaleY(1.1); }
+  80% { transform: translateY(5px) scaleY(0.9); }
+}
+.animate-logo-chain-whip { animation: logo-chain-whip 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1; }
+
+/* 8. Piston Hareketi */
+@keyframes logo-piston-pump {
+  0%, 100% { transform: translateY(0); }
+  12%, 37%, 62%, 87% { transform: translateY(-40px); }
+  25%, 50%, 75% { transform: translateY(0); }
+}
+.animate-logo-piston-pump { animation: logo-piston-pump 1.2s cubic-bezier(0.4, 0, 0.6, 1) 1; }
+
+/* 9. Kask Vizörü */
+@keyframes logo-helmet-visor {
+  0% { clip-path: inset(0 0 0 0); filter: brightness(1); }
+  20% { clip-path: inset(0 0 40% 0); filter: brightness(1); }
+  40%, 60% { clip-path: inset(0 0 0 0); filter: brightness(0.8) drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+  80% { clip-path: inset(0 0 20% 0); filter: brightness(1); }
+  100% { clip-path: inset(0 0 0 0); filter: brightness(1); }
+}
+.animate-logo-helmet-visor { animation: logo-helmet-visor 2s ease-in-out 1; }
+
+/* Shared base for all logo animations */
+[class*="animate-logo-"] {
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-logo-"] {
+    animation: none !important;
+  }
+}
+
+/* Animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out both;
+}
+
+/* Stagger children animations */
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+
+/* Mobile improvements */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Admin form input utility */
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+}
+.input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+}
