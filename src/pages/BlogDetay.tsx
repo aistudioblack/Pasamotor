@@ -8,6 +8,7 @@ import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/lib/firebase-types";
+import { getCachedPostBySlug, addPostToCache, getCachedPosts } from "@/lib/blog-cache";
 
 type Post = Tables<"posts">;
 
@@ -20,34 +21,68 @@ const readingTime = (html: string | null) => {
 const BlogDetay = () => {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
-  const [post, setPost] = useState<Post | null>(null);
+  
+  const [post, setPost] = useState<Post | null>(() => {
+    return slug ? getCachedPostBySlug(slug) : null;
+  });
   const [related, setRelated] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    return slug ? !getCachedPostBySlug(slug) : true;
+  });
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const fetchPost = async () => {
       if (!slug) return;
-      setLoading(true);
-      const { data } = await dbClient
-        .from("posts")
-        .select("*")
-        .eq("slug", slug)
-        .eq("is_published", true)
-        .maybeSingle();
-      setPost(data);
+      
+      const cached = getCachedPostBySlug(slug);
+      if (cached) {
+        setPost(cached);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
 
-      if (data) {
-        const { data: rel } = await dbClient
+      try {
+        const { data } = await dbClient
           .from("posts")
           .select("*")
+          .eq("slug", slug)
           .eq("is_published", true)
-          .neq("id", data.id)
-          .order("published_at", { ascending: false })
-          .limit(3);
-        setRelated(rel || []);
+          .maybeSingle();
+        
+        if (data) {
+          setPost(data);
+          addPostToCache(data);
+        }
+      } catch (err) {
+        console.error("Fetch post error:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
+
+      // Related posts optimization using local cached data
+      const allCached = getCachedPosts();
+      if (allCached && allCached.length > 1) {
+        const rel = allCached
+          .filter((p) => p.slug !== slug)
+          .slice(0, 3);
+        setRelated(rel);
+      } else {
+        try {
+          const { data: rel } = await dbClient
+            .from("posts")
+            .select("*")
+            .eq("is_published", true)
+            .neq("slug", slug)
+            .order("published_at", { ascending: false })
+            .limit(3);
+          setRelated(rel || []);
+        } catch (err) {
+          console.error("Fetch related error:", err);
+        }
+      }
+      
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     };
     fetchPost();

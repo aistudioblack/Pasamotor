@@ -1,11 +1,12 @@
 import Layout from "@/components/layout/Layout";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import { dbClient } from "@/lib/firebase-client";
 import { Link } from "react-router-dom";
-import { Calendar, ArrowRight, BookOpen, Search, Clock } from "lucide-react";
+import { Calendar, ArrowRight, BookOpen, Search, Clock, RefreshCw } from "lucide-react";
 import type { Tables } from "@/lib/firebase-types";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
+import { getCachedPosts, setCachedPosts } from "@/lib/blog-cache";
 
 type Post = Tables<"posts">;
 
@@ -18,9 +19,17 @@ const readingTime = (html: string | null) => {
 };
 
 const Blog = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<Post[]>(() => {
+    return getCachedPosts() || [];
+  });
+  const [loading, setLoading] = useState(() => {
+    return !getCachedPosts(); // önbellek varsa loading false olarak başlar (0.01 ms render)
+  });
+  const [backgroundUpdating, setBackgroundUpdating] = useState(false);
   const [q, setQ] = useState("");
+  const [deferredQ, setDeferredQ] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const [visibleCount, setVisibleCount] = useState(6);
 
   const seo = useSEO(
     "blog",
@@ -30,29 +39,70 @@ const Blog = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const { data } = await dbClient
-        .from("posts")
-        .select("*")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false });
-      setPosts(data || []);
-      setLoading(false);
+      const hasCache = !!getCachedPosts();
+      if (hasCache) {
+        setBackgroundUpdating(true);
+      }
+      try {
+        const { data } = await dbClient
+          .from("posts")
+          .select("*")
+          .eq("is_published", true)
+          .order("created_at", { ascending: false });
+        
+        const postsData = data || [];
+        setPosts(postsData);
+        setCachedPosts(postsData);
+      } catch (error) {
+        console.error("Post fetch error:", error);
+      } finally {
+        setLoading(false);
+        setBackgroundUpdating(false);
+      }
     };
     fetchPosts();
   }, []);
 
+  // Okuma sürelerini ve verileri memoize edelim ki her renderda regex çalışmasın
+  const memoizedPosts = useMemo(() => {
+    return posts.map((p) => ({
+      ...p,
+      calcReadingTime: readingTime(p.content),
+    }));
+  }, [posts]);
+
+  // Arama inputu için gecikmesiz güncelleme (useTransition)
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setQ(val);
+    startTransition(() => {
+      setDeferredQ(val);
+      setVisibleCount(6); // Arama yapıldığında listeyi sıfırla
+    });
+  };
+
   const filtered = useMemo(() => {
-    if (!q.trim()) return posts;
-    const t = q.toLowerCase();
-    return posts.filter(
+    if (!deferredQ.trim()) return memoizedPosts;
+    const t = deferredQ.toLowerCase();
+    return memoizedPosts.filter(
       (p) =>
         p.title.toLowerCase().includes(t) ||
         (p.excerpt || "").toLowerCase().includes(t),
     );
-  }, [posts, q]);
+  }, [memoizedPosts, deferredQ]);
 
   const featured = filtered[0];
   const rest = filtered.slice(1);
+
+  const visibleRest = useMemo(() => {
+    return rest.slice(0, visibleCount);
+  }, [rest, visibleCount]);
+
+  const hasMore = rest.length > visibleCount;
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 6);
+  };
 
   const formatDate = (date: string | null) => {
     if (!date) return "";
@@ -102,6 +152,9 @@ const Blog = () => {
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-5">
             <BookOpen className="w-3.5 h-3.5" /> Paşa Motor Blog
+            {backgroundUpdating && (
+              <RefreshCw className="w-3 h-3 animate-spin text-primary" />
+            )}
           </span>
           <h1 className="font-heading font-bold text-4xl md:text-6xl text-foreground mb-5 tracking-tight leading-[1.05]">
             Motosiklet bilgisinin{" "}
@@ -119,10 +172,15 @@ const Blog = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={handleSearchChange}
               placeholder="Yazılar arasında ara..."
               className="w-full pl-11 pr-4 py-3 rounded-full bg-card border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
             />
+            {isPending && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -187,7 +245,7 @@ const Blog = () => {
                         <div className="w-1 h-1 rounded-full bg-border" />
                         <span className="inline-flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5" />
-                          {readingTime(featured.content)} dk okuma
+                          {featured.calcReadingTime} dk okuma
                         </span>
                       </div>
                       <h2 className="font-heading font-black text-3xl md:text-5xl text-foreground mb-5 leading-[1.1] tracking-tight group-hover:text-primary transition-colors duration-300 drop-shadow-sm">
@@ -209,7 +267,7 @@ const Blog = () => {
 
               {/* Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {(q ? filtered : rest).map((post) => (
+                {(q ? filtered : visibleRest).map((post) => (
                   <Link
                     key={post.id}
                     to={`/blog/${post.slug}`}
@@ -237,7 +295,7 @@ const Blog = () => {
                         </span>
                         <span className="inline-flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded">
                           <Clock className="w-3 h-3" />
-                          {readingTime(post.content)} dk
+                          {post.calcReadingTime} dk
                         </span>
                       </div>
                       <h3 className="font-heading font-bold text-xl text-foreground mb-3 group-hover:text-primary transition-colors leading-[1.3] line-clamp-2 tracking-tight">
@@ -256,6 +314,19 @@ const Blog = () => {
                   </Link>
                 ))}
               </div>
+
+              {/* Load more button */}
+              {hasMore && !q && (
+                <div className="flex justify-center mt-12 md:mt-16">
+                  <button
+                    onClick={handleLoadMore}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm shadow-md hover:bg-primary/90 hover:scale-[1.02] transition-all duration-300"
+                  >
+                    Daha Fazla Yazı Yükle
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
