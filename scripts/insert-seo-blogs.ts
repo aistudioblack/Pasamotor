@@ -229,7 +229,7 @@ const seoBlogs = [
 <p>Vitesli motosikletlerde şanzımandan gelen torku arka tekerleğe ileten çelik zincir ve ön/arka dişli mekanizmasıdır.</p>
 <ul>
   <li><strong>Yıpranma Belirtileri:</strong> Zincirin aşırı uzaması, dişlilerin sivrilişerek aşınması ve zincirin dişliden atma/çıkma eğilimi göstermesi.</li>
-  <li><strong>Değişim Sıklığı:</strong> Düzenli temizlenip yağlanan zincirler 15.000 - 20.000 km gidebilir. Dişliler ile zincir mutlaka **set halinde** değiştirilmelidir.</li>
+  <li><strong>Değişim Sıklığı:</strong> Düzenli temizlenip yağlanan zincirler 15.000 - 20.000 km gidebilir. Dişliler ile zincir mutlaka <strong>set halinde</strong> değiştirilmelidir.</li>
 </ul>
 
 <hr />
@@ -367,7 +367,7 @@ const seoBlogs = [
     is_published: true,
     content: `
 <h1>TVS Apache RTR ve Jupiter Sahipleri İçin Kapsamlı Parça ve Arıza Kılavuzu</h1>
-<p>Hindistan’ın dev kuruluşu TVS Motor Company, ülkemizde özellikle **Apache RTR 150 / 160 / 200** serisi vitesli modelleri ve efsanevi şehir içi scooter modeli **TVS Jupiter** ile tanınır. TVS motorlarının en dikkat çeken yönü, inanılmaz malzeme kalitesi, sağlamlıkları ve uzun motor ömürleridir. Ancak en kaliteli makine bile doğru bakım görmediğinde veya yanlış yedek parça kullanıldığında arıza verebilir.</p>
+<p>Hindistan’ın dev kuruluşu TVS Motor Company, ülkemizde özellikle <strong>Apache RTR 150 / 160 / 200</strong> serisi vitesli modelleri ve efsanevi şehir içi scooter modeli <strong>TVS Jupiter</strong> ile tanınır. TVS motorlarının en dikkat çeken yönü, inanılmaz malzeme kalitesi, sağlamlıkları ve uzun motor ömürleridir. Ancak en kaliteli makine bile doğru bakım görmediğinde veya yanlış yedek parça kullanıldığında arıza verebilir.</p>
 
 <p>Bu kılavuzda, TVS Apache ve TVS Jupiter kullanıcılarının karşılaştığı tipik arıza durumlarını, doğru parça tedarikinin yollarını ve profesyonel usta tavsiyelerini derledik.</p>
 
@@ -458,7 +458,7 @@ const seoBlogs = [
 
 <h2>Debriyaj ve Şanzıman Ömrünü Uzatmak İçin Yapılması Gerekenler</h2>
 <ul>
-  <li><strong>Doğru Yağ Seçimi:</strong> Motosikletlerde debriyaj motor yağı içinde çalışır (ıslak debriyaj). Arabalar için üretilmiş sürtünme azaltıcı katkılı yağlar motosiklet debriyajının kaçırmasına yol açar. Mutlaka **JASO MA / MA2** standartlarındaki motosiklet yağı kullanın.</li>
+  <li><strong>Doğru Yağ Seçimi:</strong> Motosikletlerde debriyaj motor yağı içinde çalışır (ıslak debriyaj). Arabalar için üretilmiş sürtünme azaltıcı katkılı yağlar motosiklet debriyajının kaçırmasına yol açar. Mutlaka <strong>JASO MA / MA2</strong> standartlarındaki motosiklet yağı kullanın.</li>
   <li><strong>Yarım Debriyaj Yapmayın:</strong> Motoru sürekli yarım debriyajda tutmak balata sürtünmesini artırarak balatayı yakar.</li>
   <li><strong>Debriyaj Telini Yağlayın:</strong> Yılda bir kez debriyaj teline tazyikli sıvı gres sıkarak telin yumuşak kalmasını sağlayın.</li>
 </ul>
@@ -527,7 +527,7 @@ const seoBlogs = [
 <hr />
 
 <h2>1. Scooter Varyatör Sistemi Nasıl Çalışır?</h2>
-<p>Ön varyatör motorun krank miline bağlıdır ve içinde santrifüj gücüyle hareket eden **varyatör bagaları (misketleri)** yer alır. Motor devri arttıkça bagalar dışarıya doğru savrulur, ön varyatör kasnaklarını birbirine yaklaştırır ve aradaki kayış yukarı tırmanır. Arka varyatör ise tam tersi hareketle genişler. Bu sayede sonsuz vites oranlı pürüzsüz bir kalkış ve hızlanma gerçekleşir.</p>
+<p>Ön varyatör motorun krank miline bağlıdır ve içinde santrifüj gücüyle hareket eden <strong>varyatör bagaları (misketleri)</strong> yer alır. Motor devri arttıkça bagalar dışarıya doğru savrulur, ön varyatör kasnaklarını birbirine yaklaştırır ve aradaki kayış yukarı tırmanır. Arka varyatör ise tam tersi hareketle genişler. Bu sayede sonsuz vites oranlı pürüzsüz bir kalkış ve hızlanma gerçekleşir.</p>
 
 <hr />
 
@@ -600,7 +600,7 @@ const seoBlogs = [
 <h2>4. Lastiklerin Şeklini Koruyun (Düzleşmeyi Önleyin)</h2>
 <p>Motosiklet tek bir noktada aylarca aynı ağırlık altında durduğunda, lastiğin yerle temas eden yüzeyi düzleşir ve kalıcı balans bozukluğu oluşur.</p>
 <ul>
-  <li><strong>Yapılması Gereken:</strong> Motosikletinizi mutlaka **orta sehpaya** alın. Eğer orta sehpanız yoksa her iki tekerleği de yerden kesecek sehpa sistemleri (paddock) kullanın. Bu da mümkün değilse haftada bir kez motosikleti ileri geri hareket ettirerek lastik temas noktasını değiştirin.</li>
+  <li><strong>Yapılması Gereken:</strong> Motosikletinizi mutlaka <strong>orta sehpaya</strong> alın. Eğer orta sehpanız yoksa her iki tekerleği de yerden kesecek sehpa sistemleri (paddock) kullanın. Bu da mümkün değilse haftada bir kez motosikleti ileri geri hareket ettirerek lastik temas noktasını değiştirin.</li>
 </ul>
 
 <h2>5. Dış Yüzey Koruma ve Kılıf Seçimi</h2>
