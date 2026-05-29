@@ -104,14 +104,24 @@ const AdminAITester = () => {
           if (data.error) throw new Error(data.error.message || "OpenRouter Hatası");
           setResult({ text: data.choices?.[0]?.message?.content });
         } else if (provider === "puter") {
+          // Dinamik Puter.js Yüklemesi
+          if (typeof window.puter === "undefined") {
+            await new Promise((resolve, reject) => {
+              const script = document.createElement("script");
+              script.src = "https://js.puter.com/v2/";
+              script.onload = resolve;
+              script.onerror = () => reject(new Error("Puter.js yüklenemedi."));
+              document.head.appendChild(script);
+            });
+          }
           // @ts-expect-error: Puter object is loaded dynamically in window
           if (typeof window.puter === "undefined") {
-            throw new Error("Puter.js henüz yüklenmedi veya engellendi.");
+            throw new Error("Puter.js engellendi veya yüklenemedi.");
           }
           // @ts-expect-error: Puter AI chat is dynamic helper
           const response = await window.puter.ai.chat(prompt);
           // @ts-expect-error: response object from puter is generic
-          setResult({ text: response.message.content || response });
+          setResult({ text: response.message?.content || response.text || response });
         } else if (provider === "huggingface") {
           if (!apiKey) throw new Error("API Anahtarı gerekli");
           const response = await fetch(`https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1`, {

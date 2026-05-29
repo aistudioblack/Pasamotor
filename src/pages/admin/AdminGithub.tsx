@@ -123,10 +123,12 @@ export default function AdminGithub() {
     // Simulate progression while waiting for the request
     const interval = setInterval(() => {
       setPushProgress(prev => {
-        if (prev >= 90) return prev; // Hold at 90% until done
+        if (prev >= 98) return prev; 
+        // 90'ı geçtikten sonra çok yavaş arttır
+        if (prev >= 90) return prev + 1;
         return prev + 5;
       });
-    }, 300);
+    }, 400);
 
     try {
       const response = await fetch("/api/github/push", {
@@ -251,7 +253,7 @@ export default function AdminGithub() {
                 <DialogTrigger asChild>
                   <Button className="w-full" disabled={isPushing}>
                     {isPushing ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {pushProgress < 100 ? "Pushlanıyor..." : "Tamamlandı"}</>
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {pushProgress < 90 ? "Pushlanıyor..." : "Son Adımlar, Bekleyin..."}</>
                     ) : (
                       "Değişiklikleri Gönder (Push)"
                     )}
@@ -304,7 +306,10 @@ export default function AdminGithub() {
                   onChange={(e) => setDeployUrl(e.target.value)}
                   className="bg-background"
                 />
-                <p className="text-xs text-muted-foreground">Sunucunuzdan aldığınız deploy URL'sini girin.</p>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-xs text-muted-foreground">Sunucunuzdan aldığınız deploy URL'sini girin.</p>
+                  <a href="https://vercel.com/docs/deployments/deploy-hooks" target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline font-medium">Bu URL'yi Nereden Alırım?</a>
+                </div>
               </div>
               <Dialog open={deployDialogOpen} onOpenChange={setDeployDialogOpen}>
                 <DialogTrigger asChild>
