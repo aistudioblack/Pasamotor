@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Analytics } from "@vercel/analytics/react";
+import Index from "./pages/Index";
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: { children: React.ReactNode }) {
@@ -40,7 +41,6 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const Index = lazy(() => import("./pages/Index.tsx"));
 const Hakkimizda = lazy(() => import("./pages/Hakkimizda.tsx"));
 const Hizmetler = lazy(() => import("./pages/Hizmetler.tsx"));
 const Galeri = lazy(() => import("./pages/Galeri.tsx"));
