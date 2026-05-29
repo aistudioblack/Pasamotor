@@ -63,7 +63,9 @@ const AdminSettings = lazy(() => import("./pages/admin/AdminSettings.tsx"));
 const AdminSuppliers = lazy(() => import("./pages/admin/AdminSuppliers.tsx"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers.tsx"));
 const AdminAPI = lazy(() => import("./pages/admin/AdminAPI.tsx"));
-const AdminSEOAgent = lazy(() => import("./pages/admin/AdminSEOAgent.tsx"));
+const AdminAITester = lazy(() => import("./pages/admin/AdminAITester.tsx"));
+const AdminBlogAgent = lazy(() => import("./pages/admin/AdminBlogAgent.tsx"));
+const AdminNotes = lazy(() => import("./pages/admin/AdminNotes.tsx"));
 const AdminGithub = lazy(() => import("./pages/admin/AdminGithub.tsx"));
 const AdminDatabase = lazy(() => import("./pages/admin/AdminDatabase.tsx"));
 const AdminBrands = lazy(() => import("./pages/admin/AdminBrands.tsx"));
@@ -105,7 +107,8 @@ const App = () => (
                 <Route path="/admin/markalar" element={<AdminBrands />} />
                 <Route path="/admin/hizmetler" element={<AdminServices />} />
                 <Route path="/admin/blog" element={<AdminPosts />} />
-                <Route path="/admin/seo-ajani" element={<AdminSEOAgent />} />
+                <Route path="/admin/blog-ajani" element={<AdminBlogAgent />} />
+                <Route path="/admin/notlar" element={<AdminNotes />} />
                 <Route path="/admin/sayfalar" element={<AdminPages />} />
                 <Route path="/admin/mesajlar" element={<AdminMessages />} />
                 <Route path="/admin/galeri" element={<AdminGallery />} />
@@ -115,6 +118,7 @@ const App = () => (
                 <Route path="/admin/tedarikciler" element={<AdminSuppliers />} />
                 <Route path="/admin/kullanicilar" element={<AdminUsers />} />
                 <Route path="/admin/api" element={<AdminAPI />} />
+                <Route path="/admin/yapay-zeka-test" element={<AdminAITester />} />
                 <Route path="/admin/github" element={<AdminGithub />} />
                 <Route path="/admin/veritabani" element={<AdminDatabase />} />
                 <Route path="*" element={<NotFound />} />

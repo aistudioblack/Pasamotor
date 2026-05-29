@@ -73,11 +73,11 @@ const AdminDashboard = () => {
       
       const [products, posts, messages, gallery, unread, recentMsgs, recentPostsRes, activeSnap, passiveSnap, lowStockSnap, outOfStockSnap] =
         await Promise.all([
-          supabase.from("products").select("*", { count: "exact" }),
-          supabase.from("posts").select("*", { count: "exact" }),
-          supabase.from("messages").select("*", { count: "exact" }),
-          supabase.from("gallery_images").select("*", { count: "exact" }),
-          supabase.from("messages").select("*", { count: "exact" }).eq("is_read", false),
+          supabase.from("products").select("*", { count: "exact", head: true }),
+          supabase.from("posts").select("*", { count: "exact", head: true }),
+          supabase.from("messages").select("*", { count: "exact", head: true }),
+          supabase.from("gallery_images").select("*", { count: "exact", head: true }),
+          supabase.from("messages").select("*", { count: "exact", head: true }).eq("is_read", false),
           supabase
             .from("messages")
             .select("id,name,phone,subject,is_read,created_at")
@@ -88,10 +88,10 @@ const AdminDashboard = () => {
             .select("id,title,slug,is_published,created_at")
             .order("created_at", { ascending: false })
             .limit(5),
-          supabase.from("products").select("*", { count: "exact" }).eq("is_active", true),
-          supabase.from("products").select("*", { count: "exact" }).eq("is_active", false),
-          supabase.from("products").select("*", { count: "exact" }).filter("stock", "lte", 5).filter("stock", "gt", 0),
-          supabase.from("products").select("*", { count: "exact" }).eq("stock", 0)
+          supabase.from("products").select("*", { count: "exact", head: true }).eq("is_active", true),
+          supabase.from("products").select("*", { count: "exact", head: true }).eq("is_active", false),
+          supabase.from("products").select("*", { count: "exact", head: true }).filter("stock", "lte", 5).filter("stock", "gt", 0),
+          supabase.from("products").select("*", { count: "exact", head: true }).eq("stock", 0)
         ]);
 
       setStats([
@@ -424,7 +424,7 @@ const AdminDashboard = () => {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Firestore Veritabanı
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Supabase Veritabanı
                 </span>
                 <span className="text-green-500 text-xs font-semibold">Bağlı</span>
               </div>

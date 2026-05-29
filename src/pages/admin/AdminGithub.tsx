@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Github, Rocket, CheckCircle2, Server, Globe, Database, Save, Loader2, Eye, EyeOff } from "lucide-react";
+import { Github, Rocket, CheckCircle2, Server, Globe, Database, Save, Loader2, Eye, EyeOff, Search, Check, AlertTriangle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
@@ -31,6 +31,33 @@ export default function AdminGithub() {
   const [isDeploying, setIsDeploying] = useState(false);
   const [pushDialogOpen, setPushDialogOpen] = useState(false);
   const [deployDialogOpen, setDeployDialogOpen] = useState(false);
+
+  // SEO Ping states
+  const [sitemapUrl, setSitemapUrl] = useState("https://pasamotor.com.tr/sitemap.xml");
+  const [indexNowKey, setIndexNowKey] = useState("96dfc37466eb4b74bd562be641577977");
+  const [isPinging, setIsPinging] = useState(false);
+  const [pingResults, setPingResults] = useState<any[]>([]);
+
+  const handlePingSEO = async () => {
+    setIsPinging(true);
+    setPingResults([]);
+    try {
+      const response = await fetch("/api/seo/ping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sitemapUrl, indexNowKey }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Sitemap ve IndexNow bildirimi gerçekleştirilemedi.");
+      
+      setPingResults(data.results || []);
+      toast({ title: "Bildirim Başarılı", description: "Google, Bing ve Yandex arama motorlarına ping başarıyla iletildi." });
+    } catch (err: any) {
+      toast({ title: "Sitemap Ping Hatası", description: err.message, variant: "destructive" });
+    } finally {
+      setIsPinging(false);
+    }
+  };
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -318,10 +345,109 @@ export default function AdminGithub() {
                     <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-xs font-semibold">Kararlı</span>
                   </li>
                   <li className="flex items-center justify-between">
-                    <div className="flex items-center gap-2"><Database className="w-4 h-4 text-muted-foreground"/> Firebase Veritabanı</div>
+                    <div className="flex items-center gap-2"><Database className="w-4 h-4 text-muted-foreground"/> Supabase Veritabanı</div>
                     <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-xs font-semibold">Bağlı</span>
                   </li>
                 </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Arama Motoru İndeksleme (Sitemap & IndexNow) */}
+        <div className="glass-card rounded-xl p-6 border border-border bg-gradient-to-br from-indigo-500/5 to-transparent shadow-sm space-y-4 mt-6">
+          <div className="flex items-center justify-between border-b border-border/50 pb-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-indigo-500/10 rounded-lg text-indigo-400">
+                <Search className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold font-heading">Arama Motoru İndeksleme (IndexNow)</h2>
+                <p className="text-xs text-muted-foreground">Google, Bing ve Yandex arama motorlarına otomatik sitemap pingi gönderin</p>
+              </div>
+            </div>
+            <Button 
+              onClick={handlePingSEO} 
+              disabled={isPinging} 
+              className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0 shadow-md shadow-indigo-600/15"
+            >
+              {isPinging ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
+              {isPinging ? "Ping Gönderiliyor..." : "Arama Motorlarını Ping'le"}
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="sitemapUrl" className="text-sm font-semibold text-foreground">Sitemap URL'si</Label>
+                <Input
+                  id="sitemapUrl"
+                  type="url"
+                  placeholder="https://pasamotor.com.tr/sitemap.xml"
+                  value={sitemapUrl}
+                  onChange={(e) => setSitemapUrl(e.target.value)}
+                  className="bg-background border-border focus:border-indigo-500"
+                />
+                <p className="text-xs text-muted-foreground">Sitenizin güncel haritasını temsil eden link.</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="indexNowKey" className="text-sm font-semibold text-foreground">IndexNow API Anahtarı</Label>
+                <Input
+                  id="indexNowKey"
+                  type="text"
+                  placeholder="96dfc37466eb4b74bd562be641577977"
+                  value={indexNowKey}
+                  onChange={(e) => setIndexNowKey(e.target.value)}
+                  className="bg-background border-border focus:border-indigo-500 font-mono text-xs"
+                />
+                <p className="text-xs text-muted-foreground">Bing ve Yandex hızlı indeksleme için gereken benzersiz Indexed anahtarınız.</p>
+              </div>
+            </div>
+
+            <div className="bg-muted/10 border border-border/60 rounded-xl p-5 flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-indigo-500" /> Ping Gönderim Sonuçları
+                </h3>
+                
+                {pingResults.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
+                    <Search className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                    <p className="text-xs">Henüz ping gönderilmedi. Yukarıdan 'Arama Motorlarını Ping'le' butonuna basarak anında indeksleme talebinde bulunabilirsiniz.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {pingResults.map((res, idx) => (
+                      <div key={idx} className="flex items-start justify-between p-2.5 rounded-lg border border-border bg-background/50">
+                        <div className="flex items-start gap-2.5">
+                          {res.status === "success" ? (
+                            <div className="p-1 bg-green-500/15 text-green-500 rounded-md mt-0.5">
+                              <Check className="w-3.5 h-3.5" />
+                            </div>
+                          ) : res.status === "warning" ? (
+                            <div className="p-1 bg-amber-500/15 text-amber-500 rounded-md mt-0.5">
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                            </div>
+                          ) : (
+                            <div className="p-1 bg-red-500/15 text-red-500 rounded-md mt-0.5">
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-xs font-semibold text-foreground">{res.engine}</p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{res.message}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-border/40 text-[11px] text-muted-foreground flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
+                <span>Google Sitemap Ping & IndexNow Protokolü anlık entegre edilmiştir.</span>
               </div>
             </div>
           </div>

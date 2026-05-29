@@ -20,14 +20,20 @@ const YedekParcaDetay = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       if (!slug) return;
-      const { data } = await dbClient
-        .from("products")
-        .select("*")
-        .eq("slug", slug)
-        .eq("is_active", true)
-        .maybeSingle();
-      setProduct(data);
-      setLoading(false);
+      try {
+        const { data } = await dbClient
+          .from("products")
+          .select("*")
+          .eq("slug", slug)
+          .eq("is_active", true)
+          .maybeSingle();
+        setProduct(data);
+      } catch (err) {
+        console.error("Yedek parça fetch error:", err);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProduct();
   }, [slug]);

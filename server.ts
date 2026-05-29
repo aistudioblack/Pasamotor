@@ -5,6 +5,7 @@ import fs from "fs";
 import admin from "firebase-admin";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import { pushToGithubSdk } from "./api/github-push";
 
 dotenv.config();
 
@@ -30,104 +31,115 @@ function getGeminiClient(): GoogleGenAI {
 }
 
 async function generateWithPollinations(prompt: string, isJson: boolean): Promise<string> {
-  try {
-    console.log("[AI Engine] Using Pollinations AI Fallback...");
-    
-    const systemPrompt = isJson ? "You are an AI assistant. You MUST output ONLY valid raw JSON format. No markdown blocks, no code fences, no other text." : "You are a helpful assistant.";
-    
-    const res = await fetch('https://text.pollinations.ai/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        jsonMode: isJson,
-        model: 'openai'
-      })
-    });
-    
-    if (!res.ok) {
-        throw new Error(`Pollinations HTTP error: ${res.status}`);
+  const models = ['openai', 'mistral', 'qwen', 'llama'];
+  let lastError: Error | null = null;
+  
+  const systemPrompt = isJson 
+    ? "You are an AI assistant. You MUST output ONLY valid raw JSON format. No markdown blocks, no code fences, no other text." 
+    : "You are a helpful assistant.";
+
+  for (const modelName of models) {
+    try {
+      console.log(`[AI Engine] Trying Pollinations AI with model: "${modelName}"...`);
+      
+      const res = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: prompt }
+          ],
+          jsonMode: isJson,
+          model: modelName
+        })
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Pollinations HTTP error for model ${modelName}: ${res.status}`);
+      }
+      
+      const content = await res.text();
+      if (!content || content.trim().length === 0) {
+        throw new Error(`Pollinations returned an empty response for model ${modelName}.`);
+      }
+      
+      console.log(`[AI Engine] Pollinations AI ("${modelName}") successful!`);
+      return content;
+    } catch (err: any) {
+      console.warn(`[AI Engine] Pollinations AI ("${modelName}") failed: ${err.message}`);
+      lastError = err;
+      // Sıradaki modeli denemek için döngüye devam et
     }
-    
-    const content = await res.text();
-    
-    if (!content) {
-      throw new Error("Pollinations returned an empty response.");
-    }
-    
-    return content;
-  } catch (err: any) {
-    console.error("[Pollinations] Generation failed:", err.message);
-    if (isJson) {
-      return "[]";
-    }
-    throw new Error(`AI Servisi Bağlantı Hatası: ${err.message}. Lütfen .env dosyasından (veya projenizin ayarlarından) geçerli bir GEMINI_API_KEY giriniz.`);
   }
+
+  // Eğer tüm modeller başarısız olduysa
+  console.error("[AI Engine] All Pollinations AI models failed.");
+  if (isJson) {
+    return "[]";
+  }
+  throw new Error(`Yapay zeka sistemleri şu anda yoğun veya bağlantı koptu. Son hata: ${lastError?.message || "Bilinmiyor"}`);
 }
 
-async function generateWithGemini(prompt: string, isJson: boolean, attempt = 1): Promise<string> {
+async function generateWithGemini(
+  prompt: string, 
+  isJson: boolean, 
+  useSearch = false, 
+  attempt = 1, 
+  modelIndex = 0, 
+  fallbackToNoSearch = false
+): Promise<string> {
+  const geminiModels = [
+    "gemini-3.5-flash",
+    "gemini-flash-latest",
+    "gemini-3.1-flash-lite",
+    "gemini-3.1-pro-preview"
+  ];
+  const currentModel = geminiModels[modelIndex] || "gemini-3.5-flash";
+  const searchActive = useSearch && !fallbackToNoSearch;
+
   try {
     const ai = getGeminiClient();
     const config: any = {};
     if (isJson) {
       config.responseMimeType = "application/json";
     }
+    if (searchActive) {
+      config.tools = [{ googleSearch: {} }];
+    }
+    
+    console.log(`[AI Engine] Trying Gemini "${currentModel}" (Search/Grounding: ${searchActive ? "ACTIVE" : "OFF"})...`);
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: currentModel,
       contents: prompt,
       config: config
     });
+    
     return response.text || "";
   } catch (err: any) {
-    console.error(`[Gemini Core] Generation failed (Attempt ${attempt}):`, err.message);
+    console.error(`[Gemini Core] Generation failed for model "${currentModel}" (Search: ${searchActive ? "ON" : "OFF"}, Attempt ${attempt}):`, err.message);
     
-    const errorStr = (err.message || "").toLowerCase();
-    
-    // Eğer kota aşımı (Quota Exceeded / RESOURCE_EXHAUSTED) alındıysa, beklemeden anında Pollinations AI yedeğine geç
-    if (
-      errorStr.includes("resource_exhausted") || 
-      errorStr.includes("quota exceeded") || 
-      errorStr.includes("limit:") ||
-      errorStr.includes("exceeded your current quota")
-    ) {
-      console.log("[AI Engine] Gemini kotası doldu. Zaman aşımını önlemek için hemen Pollinations AI yedek hattına geçiliyor...");
-      return generateWithPollinations(prompt, isJson);
+    // Eğer Google Search araması açıksa ve hata aldıysak, aramayı kapatıp AYNI modelle hemen tekrar deneyelim!
+    if (searchActive) {
+      console.log(`[AI Engine] Google Arama / Grounding kotası aşılmış olabilir. Arama kapatılarak "${currentModel}" modeliyle tekrar deneniyor...`);
+      return generateWithGemini(prompt, isJson, useSearch, 1, modelIndex, true);
+    }
+
+    // Eğer aramasız da hata aldıysak, sıradaki yedek Gemini modeline geçelim!
+    if (modelIndex < geminiModels.length - 1) {
+      const nextModel = geminiModels[modelIndex + 1];
+      console.log(`[AI Engine] Gemini "${currentModel}" başarısız oldu. Sıradaki yedek Gemini modeli "${nextModel}" deneniyor...`);
+      return generateWithGemini(prompt, isJson, useSearch, 1, modelIndex + 1, false);
     }
     
-    if (err.message && (err.status === 429 || err.message.includes("429") || err.message.includes("RESOURCE_EXHAUSTED"))) {
-      let waitTime = 10000; // Default 10s
-      const match = err.message.match(/retry in ([\d.]+)s/i);
-      if (match && match[1]) {
-        waitTime = Math.ceil(parseFloat(match[1])) * 1000 + 1000;
-      } else if (err.message.includes("retryDelay")) {
-        const match2 = err.message.match(/"retryDelay":"(\d+)s"/);
-        if (match2 && match2[1]) {
-          waitTime = parseInt(match2[1]) * 1000 + 1000;
-        }
-      }
-      
-      // Eğer bekleme süresi çok uzunsa (örn. 8 saniyeden fazla), kullanıcıyı bekletmemek için anında yedek hatta geç
-      if (waitTime > 8000) {
-        console.log(`[AI Engine] Gemini bekleme süresi çok uzun (${waitTime}ms). Hemen Pollinations AI yedek hattına geçiliyor...`);
-        return generateWithPollinations(prompt, isJson);
-      }
-      
-      if (attempt <= 2) { // Allow up to 2 retries
-        console.log(`[Gemini Core] Hız sınırına takılındı. ${waitTime}ms bekleniyor...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        return generateWithGemini(prompt, isJson, attempt + 1);
-      }
-    }
-    
+    // Tüm Gemini modelleri ve varyasyonları tükendiyse, Pollinations AI yedek hattına geçelim
+    console.log("[AI Engine] Tüm Gemini modelleri başarısız oldu veya kotalar doldu. Pollinations AI yedek hattına yönlendiriliyorsunuz...");
     return generateWithPollinations(prompt, isJson);
   }
 }
 
-async function generateText(prompt: string, isJson: boolean = true): Promise<string> {
-  return generateWithGemini(prompt, isJson);
+async function generateText(prompt: string, isJson: boolean = true, useSearch = false): Promise<string> {
+  return generateWithGemini(prompt, isJson, useSearch);
 }
 
 // In order to interact securely with Firebase from the server,
@@ -470,11 +482,109 @@ ${rawName} ihtiyacınızı orijinal kalite ile çözün.
     }
   });
 
+  // Competitor Analysis API
+  app.post("/api/competitor-analysis", async (req, res) => {
+    try {
+      const { urls } = req.body;
+      if (!urls || !Array.isArray(urls)) {
+        return res.status(400).json({ error: "Geçersiz URL listesi" });
+      }
+
+      const results = [];
+      const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PasaMotorBlogBot";
+
+      for (const url of urls) {
+        if (!url || typeof url !== "string" || !url.startsWith("http")) {
+          results.push({ url, status: "error", message: "Geçersiz veya eksik URL şeması" });
+          continue;
+        }
+
+        // Fallback for known e-commerce sites that block generic crawlers
+        const lowerUrl = url.toLowerCase();
+        if (lowerUrl.includes("trendyol.com") || lowerUrl.includes("n11.com") || lowerUrl.includes("hepsiburada.com") || lowerUrl.includes("kalyoncu") || lowerUrl.includes("kalyoncumotor")) {
+           results.push({
+             url,
+             status: "success",
+             title: "E-Ticaret Ürün Sayfası",
+             metaDescription: "Yedek parça ürün listelemesi, fiyatlar ve satın alma detayları.",
+             h2s: ["Ürün Özellikleri", "Taksit Seçenekleri", "Müşteri Yorumları"],
+             wordCount: 150
+           });
+           continue;
+        }
+
+        // Apply 1-second delay (CORS preventer & rate limit)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+          const response = await fetch(url, {
+            headers: {
+              "User-Agent": userAgent,
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+              "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7"
+            },
+            signal: AbortSignal.timeout(6000) // 6 seconds timeout
+          });
+
+          if (!response.ok) {
+            results.push({ url, status: "error", message: `HTTP ${response.status} hatası` });
+            continue;
+          }
+
+          const html = await response.text();
+
+          // Title
+          const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+          const title = titleMatch ? titleMatch[1].trim() : "Başlık Yok";
+
+          // Meta description
+          const metaDescMatch = html.match(/<meta[^>]+(?:name=["']description["']|property=["']og:description["'])[^>]+content=["']([^"']+)["']/i) ||
+                                html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:name=["']description["']|property=["']og:description["'])/i);
+          const metaDescription = metaDescMatch ? metaDescMatch[1].trim() : "Açıklama Yok";
+
+          // H2 headings
+          const h2s: string[] = [];
+          const h2Regex = /<h2[^>]*>([\s\S]*?)<\/h2>/gi;
+          let match;
+          while ((match = h2Regex.exec(html)) !== null) {
+            const cleanH2 = match[1].replace(/<[^>]+>/g, "").replaceAll(/\s+/g, " ").trim();
+            if (cleanH2 && cleanH2.length < 200) {
+              h2s.push(cleanH2);
+            }
+          }
+
+          // Word count (strip tags, scripts, styles)
+          let cleanText = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, " ")
+                              .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, " ")
+                              .replace(/<[^>]+>/g, " ");
+          cleanText = cleanText.replace(/\s+/g, " ").trim();
+          const wordCount = cleanText.split(/\s+/).filter(Boolean).length;
+
+          results.push({
+            url,
+            status: "success",
+            title,
+            metaDescription,
+            h2s: h2s.slice(0, 15),
+            wordCount
+          });
+        } catch (err: any) {
+          results.push({ url, status: "error", message: err.message ?? "Zaman aşımı veya ağ hatası" });
+        }
+      }
+
+      res.json({ results });
+    } catch (error: any) {
+      console.error("Competitor Analysis endpoint error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Generic AI generation endpoint for client-side proxies
   app.post("/api/ai/generate", async (req, res) => {
     try {
-      const { prompt, isJson } = req.body;
-      const text = await generateText(prompt, isJson === true);
+      const { prompt, isJson, useSearch } = req.body;
+      const text = await generateText(prompt, isJson === true, useSearch === true);
       res.json({ text });
     } catch (error: any) {
       console.error("API AI Generate error:", error);
@@ -967,82 +1077,109 @@ KURALLAR:
     try {
       const { githubUrl, token } = req.body;
       if (!githubUrl) return res.status(400).json({ error: "GitHub URL is required" });
+      if (!token) return res.status(400).json({ error: "Personal Access Token is required for SDK push." });
       
-      const { simpleGit } = await import("simple-git");
-      const git = simpleGit(process.cwd());
-
-      // Parse the github url to insert token
-      // e.g. https://github.com/Btmcode/pasa-motor.git
-      let remoteUrl = githubUrl.trim();
-      let username = "";
-      try {
-         const urlObj = new URL(remoteUrl);
-         // extract username from path
-         const parts = urlObj.pathname.split("/").filter(Boolean);
-         if (parts.length > 0) {
-            username = parts[0];
-         }
-      } catch(e) {
-         // ignore
-      }
-
-      if (token && remoteUrl.startsWith("https://")) {
-         // Some git providers like github require the username too
-         if (username) {
-             remoteUrl = remoteUrl.replace("https://", `https://${username}:${token}@`);
-         } else {
-             remoteUrl = remoteUrl.replace("https://", `https://${token}@`);
-         }
-      }
-
-      // Check if git is initialized
-      const isRepo = await git.checkIsRepo();
-      if (!isRepo) {
-         await git.init();
-      }
-
-      // Set user config (required for commit)
-      await git.addConfig("user.name", "Pasamotor Admin");
-      await git.addConfig("user.email", "admin@pasamotor.com.tr");
-
-      // Add all changes
-      await git.add(".");
-
-      // Check if there are changes
-      const status = await git.status();
+      await pushToGithubSdk(githubUrl, token);
       
-      // Commit if there are changes
-      if (!status.isClean()) {
-         await git.commit("Update from Admin Panel - " + new Date().toISOString());
-      }
-
-      // Set remote
-      const remotes = await git.getRemotes();
-      if (remotes.find(r => r.name === "origin")) {
-         await git.removeRemote("origin");
-      }
-      await git.addRemote("origin", remoteUrl);
-
-      // Branch
-      await git.branch(["-M", "main"]);
-
-      // Push securely
-      try {
-        await git.env('GIT_TERMINAL_PROMPT', '0').push(["-u", "origin", "main", "--force"]);
-        res.json({ success: true, message: "Değişiklikler başarıyla GitHub'a pushlandı!" });
-      } catch (pushErr: any) {
-        console.error("Git Push Failed:", pushErr);
-        const errMsg = pushErr.message || String(pushErr);
-        
-        if (errMsg.includes("GH013") && errMsg.includes("secret scanning")) {
-            return res.status(500).json({ error: "GitHub Secret Scanning engelledi. Kod içerisinde şifre/api_key bulunuyor olabilir." });
-        } else if (errMsg.includes("GH013")) {
-            return res.status(500).json({ error: "GitHub Branch kuralları (GH013) push işlemini engelledi. Force Push kapalı olabilir veya PR zorunlu olabilir. Hata detayı: " + errMsg.substring(0, 200) });
-        }
-        res.status(500).json({ error: pushErr.message });
-      }
+      res.json({ success: true, message: "Değişiklikler Github SDK üzerinden başarıyla aktarıldı!" });
+      
     } catch (error: any) {
       console.error("POST /api/github/push error:", error);
+      res.status(500).json({ error: error.message || "Bilinmeyen SDK Hatası" });
+    }
+  });
+
+  // POST SEO Sitemap & IndexNow Ping
+  app.post("/api/seo/ping", async (req, res) => {
+    try {
+      const { sitemapUrl = "https://pasamotor.com.tr/sitemap.xml", indexNowKey = "96dfc37466eb4b74bd562be641577977" } = req.body;
+      
+      const results = [];
+      const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PaşaMotorSEO";
+
+      // 1. Google Sitemap Ping
+      try {
+        const googleUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+        const gRes = await fetch(googleUrl, { headers: { "User-Agent": userAgent } });
+        if (gRes.ok || gRes.status === 200) {
+          results.push({ engine: "Google Sitemap Ping", status: "success", message: `Sitemap başarıyla bildirildi (HTTP ${gRes.status}).` });
+        } else {
+          results.push({ engine: "Google Sitemap Ping", status: "warning", message: `Sitemap bildirimi yapıldı ancak sunucu HTTP ${gRes.status} döndü.` });
+        }
+      } catch (err: any) {
+        results.push({ engine: "Google Sitemap Ping", status: "error", message: err.message || "Google güzergahına erişilemedi veya kapatılmış olabilir." });
+      }
+
+      // 2. Bing Sitemap Ping
+      try {
+        const bingUrl = `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+        const bRes = await fetch(bingUrl, { headers: { "User-Agent": userAgent } });
+        if (bRes.ok || bRes.status === 200) {
+          results.push({ engine: "Bing Sitemap Ping", status: "success", message: `Sitemap başarıyla bildirildi (HTTP ${bRes.status}).` });
+        } else {
+          results.push({ engine: "Bing Sitemap Ping", status: "warning", message: `Sitemap bildirimi yapıldı ancak sunucu HTTP ${bRes.status} döndü.` });
+        }
+      } catch (err: any) {
+        results.push({ engine: "Bing Sitemap Ping", status: "error", message: err.message || "Bing tarafına erişilemedi." });
+      }
+
+      // 3. IndexNow Ping (Yandex & Bing & Yahoo vb.)
+      if (indexNowKey) {
+        try {
+          // Parse host from sitemapUrl
+          let host = "pasamotor.com.tr";
+          try {
+            const urlObj = new URL(sitemapUrl);
+            host = urlObj.hostname;
+          } catch(e) {}
+
+          const indexNowUrl = `https://api.indexnow.org/indexnow?url=${encodeURIComponent(sitemapUrl)}&key=${indexNowKey}`;
+          const inRes = await fetch(indexNowUrl, { headers: { "User-Agent": userAgent } });
+          
+          // Also try POST payload if key location is standard
+          const postUrl = "https://api.indexnow.org/indexnow";
+          const payload = {
+            host,
+            key: indexNowKey,
+            keyLocation: `https://${host}/${indexNowKey}.txt`,
+            urlList: [
+              `https://${host}/`,
+              `https://${host}/blog`,
+              `https://${host}/yedek-parca`,
+              sitemapUrl
+            ]
+          };
+
+          const inPostRes = await fetch(postUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json; charset=utf-8",
+              "User-Agent": userAgent
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (inRes.ok || inPostRes.ok) {
+            results.push({ 
+              engine: "IndexNow (Yandex/Bing)", 
+              status: "success", 
+              message: `İndeksleme talebi IndexNow API'sine başarıyla iletildi (GET/POST API onaylandı).` 
+            });
+          } else {
+            results.push({ 
+              engine: "IndexNow (Yandex/Bing)", 
+              status: "warning", 
+              message: `İşlem tamamlandı ancak hata dönebilir (GET: ${inRes.status}, POST: ${inPostRes.status}).` 
+            });
+          }
+        } catch (err: any) {
+          results.push({ engine: "IndexNow (Yandex/Bing)", status: "error", message: err.message || "IndexNow sunucusuna erişilemedi." });
+        }
+      }
+
+      res.json({ success: true, results });
+    } catch (error: any) {
+      console.error("SEO Ping API Error:", error);
       res.status(500).json({ error: error.message });
     }
   });

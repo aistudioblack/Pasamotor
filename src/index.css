@@ -411,3 +411,104 @@ html {
   outline: none;
   border-color: hsl(var(--primary));
 }
+
+/* ============================================================
+   Kurumsal CTA ve Buton Tasarımları (Paşa Motor Kurumsal Kimlik)
+   ============================================================ */
+.cta-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  margin-top: 36px;
+  margin-bottom: 36px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, rgba(13, 14, 18, 0.98) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  text-align: center;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 768px) {
+  .cta-box {
+    flex-direction: row;
+    text-align: left;
+    gap: 24px;
+  }
+}
+
+.cta-box p, .cta-box h1, .cta-box h2, .cta-box h3 {
+  margin: 0 !important;
+}
+
+.cta-box .btn-primary,
+.cta-box a[class*="btn-primary"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 14px 28px !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  background-color: hsl(var(--primary)) !important; /* Pasamotor Kırmızı */
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25) !important;
+  white-space: nowrap !important;
+}
+
+.cta-box .btn-primary:hover,
+.cta-box a[class*="btn-primary"]:hover {
+  background-color: hsl(0, 85%, 45%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 22px rgba(239, 68, 68, 0.45) !important;
+}
+
+.cta-box .btn-whatsapp,
+.cta-box a[class*="btn-whatsapp"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 14px 28px !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  background-color: #25D366 !important; /* WhatsApp Yeşil */
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25) !important;
+  white-space: nowrap !important;
+}
+
+.cta-box .btn-whatsapp:hover,
+.cta-box a[class*="btn-whatsapp"]:hover {
+  background-color: #1ebd57 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 22px rgba(37, 211, 102, 0.45) !important;
+}
+
+/* Specific overrides to prevent Tailwind Prose from hijacking text-color of button components to red */
+.prose .cta-box a,
+.prose .cta-box a:hover,
+.prose a.btn-primary,
+.prose a.btn-whatsapp,
+.prose a[class*="btn-primary"],
+.prose a[class*="btn-whatsapp"],
+.prose a[class*="bg-indigo-"],
+.prose a[class*="bg-emerald-"],
+.prose a.text-white,
+.prose a[class*="text-white"],
+.cta-box a,
+.cta-box a:hover {
+  color: #ffffff !important;
+  text-decoration: none !important;
+}

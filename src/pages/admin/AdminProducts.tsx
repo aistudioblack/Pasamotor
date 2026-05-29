@@ -32,6 +32,119 @@ const emptyForm = {
 
 const BUCKET = "product-images";
 
+const StockCell = ({ p, onUpdate, toast }: { p: Product, onUpdate: (id: string, stock: number) => void, toast: any }) => {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(p.stock?.toString() || "0");
+
+  const save = async () => {
+    const val = draft.trim();
+    const newStock = val === "" ? 0 : parseInt(val);
+    if (isNaN(newStock) || newStock < 0) {
+       toast({ title: "Geçersiz stok adedi", variant: "destructive" });
+       return;
+    }
+    const { error } = await supabase.from("products").update({ stock: newStock }).eq("id", p.id);
+    if (error) {
+      toast({ title: "Hata", description: error.message, variant: "destructive" });
+    } else {
+      onUpdate(p.id, newStock);
+      setEditing(false);
+      toast({ title: "Stok başarıyla güncellendi" });
+    }
+  };
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-1">
+        <input
+          autoFocus type="number" value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") save();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          className="w-20 px-2 py-1 rounded bg-muted border border-primary text-foreground text-xs font-mono"
+        />
+        <button onClick={save} className="p-1 rounded bg-primary text-primary-foreground">
+          <Check className="w-3.5 h-3.5" />
+        </button>
+        <button onClick={() => setEditing(false)} className="p-1 rounded text-muted-foreground hover:bg-muted">
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => { setEditing(true); setDraft(p.stock?.toString() || "0"); }}
+      className="inline-flex items-center group/btn -mx-2 px-2 py-1 rounded hover:bg-muted text-left transition-colors"
+      title="Hızlı stok güncelle"
+    >
+      <span className={`font-semibold text-xs px-2.5 py-1 rounded-full cursor-pointer transition-all ${
+        (p.stock ?? 0) > 5 ? "bg-green-500/10 text-green-500 group-hover/btn:bg-green-500/20" :
+        (p.stock ?? 0) > 0 ? "bg-amber-500/10 text-amber-500 group-hover/btn:bg-amber-500/20" :
+        "bg-red-500/10 text-red-500 group-hover/btn:bg-red-500/20"
+      }`}>
+        {(p.stock ?? 0) > 0 ? `${p.stock} Adet` : "Tükendi / Düzenle"}
+      </span>
+    </button>
+  );
+};
+
+const PriceCell = ({ p, onUpdate, toast }: { p: Product, onUpdate: (id: string, price: number | null) => void, toast: any }) => {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(p.price?.toString() || "");
+
+  const save = async () => {
+    const val = draft.trim();
+    const newPrice = val === "" ? null : parseFloat(val.replace(",", "."));
+    if (newPrice !== null && (isNaN(newPrice) || newPrice < 0)) {
+       toast({ title: "Geçersiz fiyat", variant: "destructive" });
+       return;
+    }
+    const { error } = await supabase.from("products").update({ price: newPrice }).eq("id", p.id);
+    if (error) {
+      toast({ title: "Hata", description: error.message, variant: "destructive" });
+    } else {
+      onUpdate(p.id, newPrice);
+      setEditing(false);
+    }
+  };
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-1">
+        <input
+          autoFocus type="number" step="0.01" value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") save();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          className="w-24 px-2 py-1 rounded bg-muted border border-primary text-foreground text-sm"
+        />
+        <button onClick={save} className="p-1 rounded bg-primary text-primary-foreground">
+          <Check className="w-3.5 h-3.5" />
+        </button>
+        <button onClick={() => setEditing(false)} className="p-1 rounded text-muted-foreground hover:bg-muted">
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => { setEditing(true); setDraft(p.price?.toString() || ""); }}
+      className="text-left text-foreground hover:text-primary transition-colors px-2 py-1 -mx-2 rounded hover:bg-muted"
+      title="Hızlı düzenle"
+    >
+      {tl(p.price)}
+    </button>
+  );
+};
+
 const AdminProducts = () => {
   const { toast } = useToast();
   const [items, setItems] = useState<Product[]>([]);
@@ -43,14 +156,6 @@ const AdminProducts = () => {
   const [uploading, setUploading] = useState(false);
   const [linkInput, setLinkInput] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
-
-  // Inline price edit
-  const [priceEditId, setPriceEditId] = useState<string | null>(null);
-  const [priceDraft, setPriceDraft] = useState("");
-
-  // Inline stock edit
-  const [stockEditId, setStockEditId] = useState<string | null>(null);
-  const [stockDraft, setStockDraft] = useState("");
 
   // Filtering & bulk
   const [query, setQuery] = useState("");
@@ -495,47 +600,6 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
 
   const remove = async (id: string) => {
     setConfirmModal({ id });
-  };
-
-  // ---------- Inline price edit ----------
-  const startPriceEdit = (p: Product) => {
-    setPriceEditId(p.id);
-    setPriceDraft(p.price?.toString() || "");
-  };
-  const savePriceEdit = async (id: string) => {
-    const val = priceDraft.trim();
-    const newPrice = val === "" ? null : parseFloat(val.replace(",", "."));
-    if (newPrice !== null && (isNaN(newPrice) || newPrice < 0)) {
-       toast({ title: "Geçersiz fiyat", variant: "destructive" });
-       return;
-    }
-    const { error } = await supabase.from("products").update({ price: newPrice }).eq("id", id);
-    if (error) toast({ title: "Hata", description: error.message, variant: "destructive" });
-    else {
-      setItems((prev) => prev.map((p) => (p.id === id ? { ...p, price: newPrice } : p)));
-      setPriceEditId(null);
-    }
-  };
-
-  // ---------- Inline stock edit ----------
-  const startStockEdit = (p: Product) => {
-    setStockEditId(p.id);
-    setStockDraft(p.stock?.toString() || "0");
-  };
-  const saveStockEdit = async (id: string) => {
-    const val = stockDraft.trim();
-    const newStock = val === "" ? 0 : parseInt(val);
-    if (isNaN(newStock) || newStock < 0) {
-       toast({ title: "Geçersiz stok adedi", variant: "destructive" });
-       return;
-    }
-    const { error } = await supabase.from("products").update({ stock: newStock }).eq("id", id);
-    if (error) toast({ title: "Hata", description: error.message, variant: "destructive" });
-    else {
-      setItems((prev) => prev.map((p) => (p.id === id ? { ...p, stock: newStock } : p)));
-      setStockEditId(null);
-      toast({ title: "Stok başarıyla güncellendi" });
-    }
   };
 
   const getFilterQuery = (queryBuilder: any) => {
@@ -1119,68 +1183,18 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
                       <td className="p-3 text-foreground font-medium">{p.title}</td>
                       <td className="p-3 text-muted-foreground">{p.brand}</td>
                       <td className="p-3">
-                        {stockEditId === p.id ? (
-                          <div className="flex items-center gap-1">
-                            <input
-                              autoFocus type="number" value={stockDraft}
-                              onChange={(e) => setStockDraft(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") saveStockEdit(p.id);
-                                if (e.key === "Escape") setStockEditId(null);
-                              }}
-                              className="w-20 px-2 py-1 rounded bg-muted border border-primary text-foreground text-xs font-mono"
-                            />
-                            <button onClick={() => saveStockEdit(p.id)} className="p-1 rounded bg-primary text-primary-foreground">
-                              <Check className="w-3.5 h-3.5" />
-                            </button>
-                            <button onClick={() => setStockEditId(null)} className="p-1 rounded text-muted-foreground hover:bg-muted">
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => startStockEdit(p)}
-                            className="inline-flex items-center group/btn -mx-2 px-2 py-1 rounded hover:bg-muted text-left transition-colors"
-                            title="Hızlı stok güncelle"
-                          >
-                            <span className={`font-semibold text-xs px-2.5 py-1 rounded-full cursor-pointer transition-all ${
-                              (p.stock ?? 0) > 5 ? "bg-green-500/10 text-green-500 group-hover/btn:bg-green-500/20" :
-                              (p.stock ?? 0) > 0 ? "bg-amber-500/10 text-amber-500 group-hover/btn:bg-amber-500/20" :
-                              "bg-red-500/10 text-red-500 group-hover/btn:bg-red-500/20"
-                            }`}>
-                              {(p.stock ?? 0) > 0 ? `${p.stock} Adet` : "Tükendi / Düzenle"}
-                            </span>
-                          </button>
-                        )}
+                        <StockCell 
+                          p={p} 
+                          toast={toast} 
+                          onUpdate={(id, newStock) => setItems(prev => prev.map(item => item.id === id ? { ...item, stock: newStock } : item))} 
+                        />
                       </td>
                       <td className="p-3">
-                        {priceEditId === p.id ? (
-                          <div className="flex items-center gap-1">
-                            <input
-                              autoFocus type="number" step="0.01" value={priceDraft}
-                              onChange={(e) => setPriceDraft(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") savePriceEdit(p.id);
-                                if (e.key === "Escape") setPriceEditId(null);
-                              }}
-                              className="w-24 px-2 py-1 rounded bg-muted border border-primary text-foreground text-sm"
-                            />
-                            <button onClick={() => savePriceEdit(p.id)} className="p-1 rounded bg-primary text-primary-foreground">
-                              <Check className="w-3.5 h-3.5" />
-                            </button>
-                            <button onClick={() => setPriceEditId(null)} className="p-1 rounded text-muted-foreground hover:bg-muted">
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => startPriceEdit(p)}
-                            className="text-left text-foreground hover:text-primary transition-colors px-2 py-1 -mx-2 rounded hover:bg-muted"
-                            title="Hızlı düzenle"
-                          >
-                            {tl(p.price)}
-                          </button>
-                        )}
+                        <PriceCell 
+                          p={p} 
+                          toast={toast} 
+                          onUpdate={(id, newPrice) => setItems(prev => prev.map(item => item.id === id ? { ...item, price: newPrice } : item))} 
+                        />
                       </td>
                       <td className="p-3">
                         <span className={`text-xs px-2 py-1 rounded ${p.is_active ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>

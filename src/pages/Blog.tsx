@@ -143,22 +143,22 @@ const Blog = () => {
       />
 
       {/* Hero */}
-      <section className="relative pt-20 pb-12 md:pt-28 md:pb-16 overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-background to-background" />
+      <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
         <div
-          className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-20 blur-3xl -z-10"
+          className="absolute -top-20 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full opacity-25 blur-[100px] -z-10"
           style={{ background: "radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)" }}
         />
-        <div className="container mx-auto px-4 text-center max-w-3xl">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-5">
-            <BookOpen className="w-3.5 h-3.5" /> Paşa Motor Blog
+        <div className="container mx-auto px-4 text-center max-w-4xl">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6 border border-primary/20 shadow-[0_0_15px_rgba(239,68,68,0.15)]">
+            <BookOpen className="w-4 h-4" /> Paşa Motor Blog
             {backgroundUpdating && (
-              <RefreshCw className="w-3 h-3 animate-spin text-primary" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-primary ml-1" />
             )}
           </span>
-          <h1 className="font-heading font-bold text-4xl md:text-6xl text-foreground mb-5 tracking-tight leading-[1.05]">
+          <h1 className="font-heading font-black text-5xl md:text-7xl text-foreground mb-6 tracking-tight leading-[1.05] drop-shadow-sm">
             Motosiklet bilgisinin{" "}
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-orange-500 animate-pulse-slow">
               kalbi
             </span>
           </h1>

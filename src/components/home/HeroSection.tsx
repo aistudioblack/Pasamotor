@@ -184,6 +184,7 @@ const HeroSection = () => {
                 decoding="sync"
                 {...{ fetchpriority: "high" }}
                 className="relative w-full max-w-md object-contain drop-shadow-2xl select-none pointer-events-none"
+                style={{ mixBlendMode: "screen" }}
                 draggable={false}
               />
             </div>
@@ -193,7 +194,7 @@ const HeroSection = () => {
         {/* Mobile logo */}
         <div className="lg:hidden flex justify-center mt-12 overflow-visible">
           <div ref={mobileLogoRef} className="relative will-change-transform">
-            <img src={logo} alt="Paşa Motor logosu" loading="eager" decoding="sync" {...{ fetchpriority: "high" }} className="h-52 w-auto object-contain drop-shadow-2xl select-none pointer-events-none" draggable={false} />
+            <img src={logo} alt="Paşa Motor logosu" loading="eager" decoding="sync" {...{ fetchpriority: "high" }} className="h-52 w-auto object-contain drop-shadow-2xl select-none pointer-events-none" style={{ mixBlendMode: "screen" }} draggable={false} />
           </div>
         </div>
       </div>

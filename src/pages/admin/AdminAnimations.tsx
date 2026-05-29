@@ -45,6 +45,7 @@ const AnimationCard = ({
             src={logo}
             alt={anim.name}
             className="w-24 h-24 sm:w-28 sm:h-28 object-contain select-none pointer-events-none drop-shadow-lg"
+            style={{ mixBlendMode: "screen" }}
             draggable={false}
           />
         </div>

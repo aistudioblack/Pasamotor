@@ -202,38 +202,42 @@ const BlogDetay = () => {
       </div>
 
       {/* Hero */}
-      <header className="relative pt-16 md:pt-24 pb-10 md:pb-14 overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/[0.03] via-background to-background" />
-        <div className="container mx-auto px-4 max-w-3xl">
-          <Link to="/blog" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors mb-8">
-            <ArrowLeft className="w-4 h-4" /> Blog'a Dön
+      <header className="relative pt-20 md:pt-32 pb-12 md:pb-16 overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
+        <div
+          className="absolute -top-20 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full opacity-25 blur-[100px] -z-10"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)" }}
+        />
+        <div className="container mx-auto px-4 max-w-4xl text-center">
+          <Link to="/blog" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-8 bg-muted/30 px-4 py-2 rounded-full hover:bg-muted/50 border border-transparent hover:border-border">
+            <ArrowLeft className="w-4 h-4" /> Kütüphaneye Dön
           </Link>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-5 flex-wrap">
-            <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">Paşa Motor</span>
-            <span className="inline-flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" /> {formatDate(post.published_at)}
+          <div className="flex items-center justify-center gap-3 text-xs md:text-sm font-medium text-muted-foreground mb-6 flex-wrap">
+            <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 shadow-sm">Paşa Motor Orijinal İçerik</span>
+            <span className="inline-flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-full shadow-sm">
+              <Calendar className="w-4 h-4" /> {formatDate(post.published_at)}
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" /> {minutes} dk okuma
+            <span className="inline-flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-full shadow-sm">
+              <Clock className="w-4 h-4" /> {minutes} dk okuma
             </span>
           </div>
 
-          <h1 className="font-heading font-bold text-3xl md:text-5xl lg:text-6xl text-foreground mb-5 tracking-tight leading-[1.08]">
+          <h1 className="font-heading font-black text-4xl md:text-5xl lg:text-7xl text-foreground mb-8 tracking-tight leading-[1.1] drop-shadow-sm">
             {post.title}
           </h1>
 
           {post.excerpt && (
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6">
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-2xl mx-auto">
               {post.excerpt}
             </p>
           )}
 
           <button
             onClick={share}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card text-foreground text-sm hover:border-primary/50 hover:text-primary transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-border bg-card text-foreground font-semibold text-sm hover:border-primary/50 hover:text-primary shadow-sm hover:shadow-md transition-all active:scale-95"
           >
-            <Share2 className="w-4 h-4" /> Paylaş
+            <Share2 className="w-4 h-4" /> Yazıyı Paylaş
           </button>
         </div>
       </header>
@@ -270,6 +274,9 @@ const BlogDetay = () => {
                 prose-img:rounded-xl prose-img:border prose-img:border-border
                 prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
                 prose-hr:border-border
+                prose-table:w-full prose-table:my-8 prose-table:overflow-hidden prose-table:rounded-xl prose-table:border prose-table:border-border prose-table:shadow-sm
+                prose-thead:bg-muted/50 prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:font-semibold prose-th:text-foreground
+                prose-td:px-4 prose-td:py-3 prose-td:border-t prose-td:border-border prose-tr:hover:bg-muted/30 prose-tr:transition-colors
               "
               dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
             />

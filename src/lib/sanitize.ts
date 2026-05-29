@@ -6,6 +6,8 @@ const SAFE_HOSTS = [
   "images.unsplash.com",
   "plus.unsplash.com",
   "images.ctfassets.net",
+  "wa.me",
+  "api.whatsapp.com",
 ];
 
 const ALLOWED_TAGS = [
@@ -19,7 +21,7 @@ const ALLOWED_TAGS = [
   "span", "div",
 ];
 
-const ALLOWED_ATTR = ["href", "target", "rel", "src", "alt", "title"];
+const ALLOWED_ATTR = ["href", "target", "rel", "src", "alt", "title", "class"];
 
 export const isSafeExternalUrl = (value: string | null | undefined) => {
   if (!value) return false;

@@ -2,7 +2,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { useEffect, useState } from "react";
 import { dbClient } from "@/lib/firebase-client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit2, Trash2, X, Loader2, FileText, Eye, AlertTriangle, RefreshCw, Radar, Upload } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Loader2, FileText, Eye, AlertTriangle, RefreshCw, Upload, Radar } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Tables } from "@/lib/firebase-types";
 import { useRef } from "react";
@@ -18,7 +18,7 @@ const slugify = (text: string) =>
 
 const emptyForm = {
   title: "", slug: "", excerpt: "", content: "", cover_image: "",
-  meta_title: "", meta_description: "", is_published: false, tags: [] as string[]
+  meta_title: "", meta_description: "", is_published: false
 };
 
 const AdminPosts = () => {
@@ -27,20 +27,13 @@ const AdminPosts = () => {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   
-  // AI Blog Draft Generator states
-  const [generatingBlogs, setGeneratingBlogs] = useState(false);
-  const [blogProgress, setBlogProgress] = useState("");
-  const [blogLogStr, setBlogLogStr] = useState("");
-  const cancelBlogGen = useRef(false);
   const [editing, setEditing] = useState<Post | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [selectedTag, setSelectedTag] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const uniqueTags = Array.from(new Set(items.flatMap(p => p.tags || []))).sort();
-  const filteredItems = selectedTag ? items.filter(p => (p.tags || []).includes(selectedTag)) : items;
+  const filteredItems = items;
 
   const load = async () => {
     setLoading(true);
@@ -55,10 +48,21 @@ const AdminPosts = () => {
 
   const openEdit = (p: Post) => {
     setEditing(p);
+    const cleanStr = (val: any) => {
+      if (val === undefined || val === null) return "";
+      const s = String(val).trim();
+      if (s.toLowerCase() === "undefined" || s.toLowerCase() === "null") return "";
+      return s;
+    };
     setForm({
-      title: p.title, slug: p.slug, excerpt: p.excerpt || "", content: p.content || "",
-      cover_image: p.cover_image || "", meta_title: p.meta_title || "",
-      meta_description: p.meta_description || "", is_published: p.is_published, tags: p.tags || []
+      title: cleanStr(p.title),
+      slug: cleanStr(p.slug),
+      excerpt: cleanStr(p.excerpt),
+      content: cleanStr(p.content),
+      cover_image: cleanStr(p.cover_image),
+      meta_title: cleanStr(p.meta_title),
+      meta_description: cleanStr(p.meta_description),
+      is_published: p.is_published
     });
     setOpen(true);
   };
@@ -166,7 +170,6 @@ const AdminPosts = () => {
       meta_description: form.meta_description.trim() || null,
       is_published: form.is_published,
       published_at: form.is_published ? (editing?.published_at || new Date().toISOString()) : null,
-      tags: form.tags || [],
     };
       const wasPublished = editing?.is_published || false;
       const { data: resultData, error } = editing
@@ -210,149 +213,6 @@ const AdminPosts = () => {
     }
   };
 
-  const generate30Blogs = async () => {
-    setGeneratingBlogs(true);
-    setBlogProgress("Akıllı Planlama Yapılıyor...");
-    setBlogLogStr("");
-    cancelBlogGen.current = false;
-
-    try {
-      const { data: products, error: prodError } = await dbClient
-        .from("products")
-        .select("id, title, brand, sku, price, category, slug")
-        .limit(100);
-
-      if (prodError) throw prodError;
-      if (!products || products.length === 0) {
-        throw new Error("Sistemde konu oluşturulabilecek hiçbir ürün bulunamadı. Lütfen önce ürünleri senkronize edin.");
-      }
-
-      toast({
-        title: "Otonom Blog Yazarı Başlatıldı",
-        description: "Ürünlerinizle uyumlu 30 adet ileri SEO uyumlu blog yazısı taslağı üretiliyor..."
-      });
-
-      let successCount = 0;
-      let errorCount = 0;
-
-      for (let i = 0; i < 30; i++) {
-        if (cancelBlogGen.current) {
-          setBlogLogStr(prev => `[Durduruldu] Blog üretim işlemi kullanıcı tarafından durduruldu.\n` + prev);
-          toast({ title: "İşlem Durduruldu", description: "Otonom blog yazımı yarıda kesildi." });
-          break;
-        }
-
-        setBlogProgress(`${i + 1} / 30`);
-        const product = products[i % products.length];
-
-        try {
-          const prompt = `You are a world-class automotive, motorcycle, and ATV spare parts SEO expert and marketing strategist in Turkey.
-Your goal is to write a highly educational, customer-pulling, advanced-SEO blog draft post in Turkish that is tightly integrated with the following catalog product:
-
-Product Name: "${product.title}"
-Brand: "${product.brand || "Motosiklet"}"
-Sku / Stock Code: "${product.sku || ""}"
-Price: "${product.price || ""}"
-Category: "${product.category || "yedek-parca"}"
-Slug: "${product.slug}"
-
-You MUST naturally link to this product. The site URL format for the product is: "/yedek-parca/${product.slug}". Use the anchor text like "Orijinal ${product.brand} ${product.title}" or "Orijinal ${product.brand} yedek parça satışı".
-
-[OUTPUT INSTRUCTION]
-Generate a complete, valid JSON object containing exactly the fields listed below. Do NOT write any explanatory text, markdown formatting, or HTML tags outside of the JSON fields. Just output the raw JSON string.
-
-[JSON SCHEMA]
-{
-  "title": "A highly catchy, rich SEO friendly turkish title including search terms",
-  "excerpt": "A professional article summary (150-240 characters) that is perfectly suited as meta description or search snippet.",
-  "content": "HTML structure formatted text (using only <h2>, <p>, <ul>, <li>, <strong>) of at least 450 words in Turkish. Include an introduction about common motorcycle problems, educational symptoms, maintenance tips, and a natural call-to-action (CTA) with a link to get the original replacement part referencing '/yedek-parca/${product.slug}' with genuine price/stock incentive.",
-  "meta_title": "SEO Meta Title (under 60 chars)",
-  "meta_description": "SEO Meta Description (under 160 chars)",
-  "image_prompt": "Cinematic high-quality photograph of ${product.brand} ${product.title} spare part, extreme detail, motorcycle service banner, shallow depth of field, 8k resolution, photorealistic"
-}
-`;
-
-          const aiRes = await fetch("/api/ai/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt, isJson: true })
-          });
-
-          if (!aiRes.ok) throw new Error(`AI generation failed: HTTP ${aiRes.status}`);
-          const aiJson = await aiRes.json();
-          let blogData: any = {};
-          
-          try {
-            let rawText = (aiJson.text || "").trim();
-            if (rawText.startsWith("```json")) {
-              rawText = rawText.replace(/^```json/, "").replace(/```$/, "").trim();
-            } else if (rawText.startsWith("```")) {
-              rawText = rawText.replace(/^```/, "").replace(/```$/, "").trim();
-            }
-            blogData = JSON.parse(rawText);
-          } catch (e) {
-            console.warn("Raw parse failed, trying direct text extract...", e);
-            throw new Error("Yapay zeka geçerli bir JSON yanıt şeması üretemedi.");
-          }
-
-          if (!blogData.title || !blogData.content) {
-            throw new Error("Yapay zeka çıktısında başlık veya içerik eksik.");
-          }
-
-          let coverUrl = "";
-          try {
-            const imgPrompt = blogData.image_prompt || `${product.brand} ${product.title} spare part motorcycle`;
-            const imgRes = await fetch("/api/ai/generate-image", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt: imgPrompt })
-            });
-            if (imgRes.ok) {
-              const imgData = await imgRes.json();
-              coverUrl = imgData.image || "";
-            }
-          } catch (imgErr) {
-            console.error("Cover image generation failed", imgErr);
-          }
-
-          const slug = `${slugify(blogData.title)}-${Math.floor(Math.random() * 10000)}`;
-
-          const { error: insertError } = await dbClient.from("posts").insert({
-            title: blogData.title.trim(),
-            slug,
-            excerpt: blogData.excerpt ? blogData.excerpt.trim() : "",
-            content: blogData.content,
-            cover_image: coverUrl || "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800",
-            meta_title: blogData.meta_title ? blogData.meta_title.trim() : blogData.title.trim(),
-            meta_description: blogData.meta_description ? blogData.meta_description.trim() : "",
-            is_published: false,
-            tags: [product.brand || "Motosiklet", "Bakım", "Yedek Parça"]
-          });
-
-          if (insertError) throw insertError;
-
-          successCount++;
-          setBlogLogStr(prev => `[ÜRETİLDİ] Yazı #${successCount}: "${blogData.title}" - İlişkili Ürün: "${product.title}" [Draft Kaydedildi]\n` + prev);
-        } catch (itemErr: any) {
-          errorCount++;
-          setBlogLogStr(prev => `[HATA] Yazı #${i + 1} üretilemedi: ${itemErr.message}\n` + prev);
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 4500));
-      }
-
-      toast({
-        title: "Blog Üretimi Tamamlandı",
-        description: `${successCount} blog yazısı taslağı başarıyla oluşturuldu, ${errorCount} hata oluştu.`
-      });
-      load();
-    } catch (err: any) {
-      toast({ title: "Blog Üretim Hatası", description: err.message, variant: "destructive" });
-    } finally {
-      setGeneratingBlogs(false);
-    }
-  };
-
   const uploadCover = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const file = files[0];
@@ -389,82 +249,11 @@ Generate a complete, valid JSON object containing exactly the fields listed belo
             <p className="text-sm text-muted-foreground">Manuel veya AI ile yazı oluşturun</p>
           </div>
           <div className="flex items-center gap-3">
-             {uniqueTags.length > 0 && (
-               <select
-                 value={selectedTag}
-                 onChange={(e) => setSelectedTag(e.target.value)}
-                 className="bg-muted text-foreground border border-border px-3 py-2 rounded-lg text-sm"
-               >
-                 <option value="">Tümü</option>
-                 {uniqueTags.map(t => (
-                   <option key={t} value={t}>{t}</option>
-                 ))}
-               </select>
-             )}
-            {generatingBlogs ? (
-              <button
-                type="button"
-                onClick={() => { cancelBlogGen.current = true; }}
-                className="mr-2 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/25 hover:bg-red-500/35 text-red-200 text-sm font-medium transition-all"
-              >
-                Durdur
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={generate30Blogs}
-                className="mr-2 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm font-medium shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all cursor-pointer"
-              >
-                <Radar className="w-4 h-4" /> 30 SEO Blog Yazısı Üret
-              </button>
-            )}
             <button onClick={openNew} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90">
               <Plus className="w-4 h-4" /> Yeni Yazı
             </button>
           </div>
         </div>
-
-        {/* AI Blog Generation Progress Card */}
-        {generatingBlogs && (
-          <div className="glass-card rounded-xl p-5 mb-6 space-y-4 border border-purple-500/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
-                <span className="text-sm font-bold text-foreground font-sans">Otonom SEO Blog Yazarı Çalışıyor</span>
-              </div>
-              <span className="text-xs font-mono font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded">
-                İlerleme: {blogProgress}
-              </span>
-            </div>
-            
-            <p className="text-xs text-muted-foreground font-medium font-sans">
-              Her bir blog yazısı, sitemizdeki gerçek motor parçalarıyla zenginleştirilir. Ürünün markası, stok kodları, canlı fiyatları kullanılarak doğal çağrı (CTA) bağlantıları kurulur ve özel kapak görselleri üretilir.
-            </p>
-            
-            {blogLogStr && (
-              <div className="font-mono text-[11px] bg-slate-950/90 text-slate-300 rounded-lg p-3 max-h-44 overflow-y-auto divide-y divide-slate-800 border border-slate-800">
-                {blogLogStr.split("\n").filter(Boolean).map((line, idx) => (
-                  <div key={idx} className={`py-1.5 ${line.includes("[ÜRETİLDİ]") ? "text-emerald-400" : line.includes("[HATA]") ? "text-red-400" : "text-yellow-400"}`}>
-                    {line}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        
-        {!generatingBlogs && blogLogStr && (
-          <div className="glass-card rounded-xl p-5 mb-6 space-y-3">
-            <div className="text-sm font-bold text-emerald-400 flex items-center gap-1.5 font-sans">
-              <Check className="w-4 h-4" /> Son Üretim Raporu
-            </div>
-            <div className="font-mono text-[11px] bg-slate-950/90 text-slate-300 rounded-lg p-3 max-h-44 overflow-y-auto divide-y divide-slate-800 border border-slate-800">
-              {blogLogStr.split("\n").filter(Boolean).map((line, idx) => (
-                <div key={idx} className="py-1.5 text-slate-300">{line}</div>
-              ))}
-            </div>
-          </div>
-        )}
 
 
 
@@ -487,13 +276,6 @@ Generate a complete, valid JSON object containing exactly the fields listed belo
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{p.excerpt || p.slug}</p>
-                  {p.tags && p.tags.length > 0 && (
-                    <div className="flex gap-1 mt-1.5 flex-wrap">
-                      {p.tags.map((t, idx) => (
-                        <span key={idx} className="text-[10px] px-1.5 py-0.5 bg-secondary/10 text-secondary-foreground rounded">#{t}</span>
-                      ))}
-                    </div>
-                  )}
                 </div>
                 {p.is_published && (
                   <>
@@ -566,10 +348,6 @@ Generate a complete, valid JSON object containing exactly the fields listed belo
                 )}
               </div>
               <div className="grid grid-cols-1 gap-3">
-                <div>
-                  <label className="text-xs text-muted-foreground">Etiketler (Virgülle ayırın)</label>
-                  <input value={form.tags?.join(", ")} onChange={(e) => setForm({ ...form, tags: e.target.value.split(",").map(t => t.trim()).filter(t => t) })} className="w-full mt-1 px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm" placeholder="Motosiklet, Bakım, Enduro" />
-                </div>
                 <div>
                   <label className="text-xs text-muted-foreground">SEO Başlık</label>
                   <input value={form.meta_title} onChange={(e) => setForm({ ...form, meta_title: e.target.value })} className="w-full mt-1 px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm" />

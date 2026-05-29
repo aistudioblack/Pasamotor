@@ -48,6 +48,8 @@ export default function LegalPage() {
             updated_at: new Date().toISOString()
           }).then(({ error }) => {
             if (error) console.warn("Background auto-seed page failed:", error);
+          }).catch((err) => {
+            console.warn("Background auto-seed page failed silently:", err);
           });
         } else {
           setError(true);

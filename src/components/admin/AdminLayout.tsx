@@ -26,7 +26,8 @@ import {
   Terminal,
   Wrench,
   Server,
-  Github
+  Github,
+  StickyNote
 } from "lucide-react";
 import logo from "@/assets/pasa-motor-logo.webp";
 
@@ -62,7 +63,6 @@ const navGroups = [
     title: "E-Ticaret & Katalog",
     items: [
       { to: "/admin/urunler", label: "Ürünler", icon: Package },
-      { to: "/admin/tedarikciler", label: "Tedarikçi Entegrasyonları", icon: Truck },
       { to: "/admin/markalar", label: "Markalar", icon: Store },
       { to: "/admin/hizmetler", label: "Hizmetler", icon: Wrench },
     ]
@@ -73,9 +73,16 @@ const navGroups = [
       { to: "/admin/mesajlar", label: "Mesajlar", icon: MessageSquare },
       { to: "/admin/faq", label: "Sıkça Sorulan Sorular", icon: HelpCircle },
       { to: "/admin/blog", label: "Blog Yazıları", icon: FileText },
-      { to: "/admin/seo-ajani", label: "SEO Yapay Zeka Ajanı", icon: Sparkles },
       { to: "/admin/galeri", label: "Medya Galerisi", icon: ImageIcon },
       { to: "/admin/sayfalar", label: "Yasal Sayfalar", icon: FileText },
+    ]
+  },
+  {
+    title: "Araçlar",
+    items: [
+      { to: "/admin/tedarikciler", label: "Tedarikçi Entegrasyonları", icon: Truck },
+      { to: "/admin/blog-ajani", label: "🤖 Blog Ajanı", icon: Sparkles },
+      { to: "/admin/notlar", label: "Not Defteri", icon: StickyNote },
     ]
   },
   {
@@ -83,6 +90,7 @@ const navGroups = [
     items: [
       { to: "/admin/ayarlar", label: "Genel Ayarlar", icon: Settings },
       { to: "/admin/api", label: "API Bağlantıları", icon: Server },
+      { to: "/admin/yapay-zeka-test", label: "Yapay Zeka API Testi", icon: Terminal },
       { to: "/admin/github", label: "Yazılım Güncellemeleri", icon: Github },
       { to: "/admin/kullanicilar", label: "Kullanıcı Yönetimi", icon: ShieldAlert },
       { to: "/admin/veritabani", label: "Veritabanı", icon: Database },
@@ -210,6 +218,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               src={logo} 
               alt="Paşa Motor" 
               className="h-10 w-auto transform origin-bottom-right cursor-pointer" 
+              style={{ mixBlendMode: "screen" }}
               whileHover={{ 
                 rotate: [0, -10, 15, -5, 0],
                 scale: 1.1,

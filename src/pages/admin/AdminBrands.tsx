@@ -46,6 +46,9 @@ const AdminBrands = () => {
 
     if (finalBrands.length === 0 || localStorage.getItem("mig_brands_1") !== "true") {
        finalBrands = [
+          { id: "brand_kuba", name: "Kuba", desc: "Türkiye'nin lider motosiklet markalarından biri" },
+          { id: "brand_mondial", name: "Mondial", desc: "Yaygın servis ağı ve uygun fiyatlı modeller" },
+          { id: "brand_rks", name: "RKS", desc: "Performans ve şık tasarımlı motosikletler" },
           { id: "brand_tvs", name: "TVS", desc: "Hindistan'ın lider motosiklet üreticisi" },
           { id: "brand_hero", name: "Hero", desc: "Dünyanın en büyük iki tekerlekli araç üreticisi" },
           { id: "brand_falcon", name: "Falcon", desc: "Güvenilir ve ekonomik motosikletler" },

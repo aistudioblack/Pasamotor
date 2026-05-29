@@ -17,6 +17,9 @@ export function useSEO(pageKey: string, defaultTitle: string, defaultDesc: strin
             description: data.seo_description || defaultDesc,
           });
         }
+      })
+      .catch((err) => {
+        console.warn(`SEO fetch failed for key "${pageKey}", using default values.`, err);
       });
   }, [pageKey, defaultTitle, defaultDesc]);
 

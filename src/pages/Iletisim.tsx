@@ -42,19 +42,24 @@ const Iletisim = () => {
       return;
     }
     setSending(true);
-    const { error } = await dbClient.from("messages").insert({
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      subject: form.subject.trim(),
-      message: form.message.trim(),
-    });
-    setSending(false);
-
-    if (error) {
-      toast({ title: "Hata", description: "Mesaj gönderilemedi. Lütfen tekrar deneyin.", variant: "destructive" });
-    } else {
-      toast({ title: "Mesajınız alındı!", description: "En kısa sürede size dönüş yapacağız." });
-      setForm({ name: "", phone: "", subject: "", message: "" });
+    try {
+      const { error } = await dbClient.from("messages").insert({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        subject: form.subject.trim(),
+        message: form.message.trim(),
+      });
+      if (error) {
+        toast({ title: "Hata", description: "Mesaj gönderilemedi. Lütfen tekrar deneyin.", variant: "destructive" });
+      } else {
+        toast({ title: "Mesajınız alındı!", description: "En kısa sürede size dönüş yapacağız." });
+        setForm({ name: "", phone: "", subject: "", message: "" });
+      }
+    } catch (err) {
+      console.error("Contact form submission error:", err);
+      toast({ title: "Erişim Hatası", description: "Mesaj gönderilirken bağlantı hatası oluştu. Lütfen telefon veya WhatsApp hattımızla iletişime geçin.", variant: "destructive" });
+    } finally {
+      setSending(false);
     }
   };
 

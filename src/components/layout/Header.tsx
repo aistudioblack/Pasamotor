@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Phone } from "lucide-react";
 import logo from "@/assets/pasa-motor-logo.webp";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 
 const navLinks = [
   { label: "Ana Sayfa", path: "/" },
@@ -30,6 +30,7 @@ const Header = () => {
               loading="eager"
               decoding="sync"
               className="h-11 w-auto md:h-14 object-contain drop-shadow-xl"
+              style={{ mixBlendMode: "screen" }}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
@@ -111,33 +112,41 @@ const Header = () => {
       </div>
 
       {/* Mobile menu */}
-      {isOpen && (
-        <div className="lg:hidden glass border-t border-border animate-fade-in">
-          <nav className="container mx-auto px-4 py-4 flex flex-col gap-1" aria-label="Mobil navigasyon">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                  location.pathname === link.path
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="lg:hidden glass border-t border-border overflow-hidden"
+          >
+            <nav className="container mx-auto px-4 py-4 flex flex-col gap-1" aria-label="Mobil navigasyon">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                    location.pathname === link.path
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <a
+                href="tel:+902125868598"
+                className="mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm"
               >
-                {link.label}
-              </Link>
-            ))}
-            <a
-              href="tel:+902125868598"
-              className="mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm"
-            >
-              <Phone className="w-4 h-4" />
-              0212 586 85 98
-            </a>
-          </nav>
-        </div>
-      )}
+                <Phone className="w-4 h-4" />
+                0212 586 85 98
+              </a>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

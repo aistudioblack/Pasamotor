@@ -32,17 +32,22 @@ const Galeri = () => {
   useEffect(() => {
     const fetchImages = async () => {
       setLoading(true);
-      const { data, error } = await dbClient.from("gallery_images").select("*").order("sort_order").order("created_at", { ascending: false });
-      if (error) {
-        toast({ title: "Görseller yüklenemedi", description: error.message, variant: "destructive" });
+      try {
+        const { data, error } = await dbClient.from("gallery_images").select("*").order("sort_order").order("created_at", { ascending: false });
+        if (error) {
+          toast({ title: "Görseller yüklenemedi", description: error.message, variant: "destructive" });
+          setImages(fallbackImages);
+        } else {
+          const pImages = data.map(item => ({
+            src: item.url,
+            title: item.title,
+            category: item.category
+          }));
+          setImages(pImages.length > 0 ? pImages : fallbackImages);
+        }
+      } catch (err) {
+        console.warn("Galeri images load failed, using local fallback images:", err);
         setImages(fallbackImages);
-      } else {
-        const pImages = data.map(item => ({
-          src: item.url,
-          title: item.title,
-          category: item.category
-        }));
-        setImages(pImages.length > 0 ? pImages : fallbackImages);
       }
       setLoading(false);
     };
