@@ -389,10 +389,11 @@ export default function AdminBlogAgent() {
       const realKey = decryptKey(savedKeyEncrypted);
 
       const modelsToTry = [
-        "meta-llama/llama-3.3-70b-instruct:free",
-        "google/gemini-2.5-flash:free",
-        "qwen/qwen-2.5-72b-instruct:free",
-        "deepseek/deepseek-r1:free"
+        "cognitivecomputations/dolphin3.0-r1-mistral-24b:free",
+        "deepseek/deepseek-r1:free",
+        "mistralai/mistral-small-24b-instruct-2501:free",
+        "google/gemini-2.0-flash-lite-preview-02-05:free",
+        "nvidia/llama-3.1-nemotron-70b-instruct:free"
       ];
 
       let orError: Error | null = null;
@@ -472,9 +473,10 @@ export default function AdminBlogAgent() {
       const realKey = decryptKey(savedKey);
 
       const groqModelsToTry = [
-        "openai/gpt-oss-20b",
         "llama-3.3-70b-versatile",
-        "mixtral-8x7b-32768"
+        "llama-3.1-8b-instant",
+        "mixtral-8x7b-32768",
+        "gemma2-9b-it"
       ];
 
       let lastGroqError: Error | null = null;
@@ -611,37 +613,45 @@ export default function AdminBlogAgent() {
 
   const extractJsonFromText = (text: string) => {
     let clean = text.trim();
-    if (clean.startsWith("```json")) {
-      clean = clean.replace(/^```json/, "").replace(/```$/, "").trim();
-    } else if (clean.startsWith("```")) {
-      clean = clean.replace(/^```/, "").replace(/```$/, "").trim();
+    
+    // Yarıda kesilen markdown parse sorunlarını çöz, direkt json objesini/arrayı çek
+    const jsonBlockMatch = clean.match(/```(?:json)?\s*([\s\S]*?)(?:```|$)/);
+    if (jsonBlockMatch) {
+      clean = jsonBlockMatch[1].trim();
     }
 
     try {
       return cleanAndNormalizeObj(JSON.parse(clean));
     } catch (e1) {
       try {
-        const objMatch = text.match(/\{[\s\S]*\}/);
-        const arrMatch = text.match(/\[[\s\S]*\]/);
-        
+        // En dış süslü parenteze veya köşeli paranteze göre JSON bloğu bul
+        const firstCurly = clean.indexOf('{');
+        const lastCurly = clean.lastIndexOf('}');
+        const firstSquare = clean.indexOf('[');
+        const lastSquare = clean.lastIndexOf(']');
+
         let targetText = clean;
-        if (objMatch && arrMatch) {
-          if (text.indexOf(objMatch[0]) < text.indexOf(arrMatch[0])) {
-            targetText = objMatch[0];
-          } else {
-            targetText = arrMatch[0];
-          }
-        } else if (objMatch) {
-          targetText = objMatch[0];
-        } else if (arrMatch) {
-          targetText = arrMatch[0];
+        
+        let firstObj = firstCurly !== -1 ? firstCurly : Infinity;
+        let lastObj = lastCurly !== -1 ? lastCurly : -1;
+        let firstArr = firstSquare !== -1 ? firstSquare : Infinity;
+        let lastArr = lastSquare !== -1 ? lastSquare : -1;
+
+        if (firstObj < firstArr && lastObj !== -1) {
+          targetText = clean.substring(firstObj, lastObj + 1);
+        } else if (firstArr < firstObj && lastArr !== -1) {
+          targetText = clean.substring(firstArr, lastArr + 1);
+        } else if (firstObj !== Infinity) {
+             targetText = clean.substring(firstObj) + "}";
+        } else if (firstArr !== Infinity) {
+             targetText = clean.substring(firstArr) + "]";
         }
 
         const repaired = jsonrepair(targetText);
         return cleanAndNormalizeObj(JSON.parse(repaired));
       } catch (e2) {
         console.error("Geçersiz JSON Raw:", text);
-        throw new Error(`Modelden geçersiz JSON formatı geldi. Model yanıtı yarım bırakmış veya hatalı karakter (örn: kaçış dizisi hatası) üretmiş olabilir. Raw: ${text.substring(0, 300)}...`);
+        throw new Error(`Modelden geçersiz JSON formatı geldi. Model yanıtı yarım bırakmış veya hatalı karakter üretmiş olabilir. Raw: ${clean.substring(0, 150)}...`);
       }
     }
   };

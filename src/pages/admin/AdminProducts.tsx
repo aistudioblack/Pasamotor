@@ -595,6 +595,12 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
       toast({ title: editing ? "Güncellendi" : "Eklendi" });
       setOpen(false);
       load();
+      // Notify IndexNow
+      fetch("/api/seo/notify-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: [`/urunler/${payload.slug}`] })
+      }).catch(console.error);
     }
   };
 

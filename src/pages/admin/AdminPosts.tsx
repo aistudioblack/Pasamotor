@@ -69,8 +69,10 @@ const AdminPosts = () => {
 
   const pingSearchEngines = async (slug: string) => {
     try {
-      await dbClient.functions.invoke("notify-search-engines", {
-        body: { urls: [`/blog/${slug}`, "/blog", "/sitemap.xml"] },
+      await fetch("/api/seo/notify-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: [`/blog/${slug}`] })
       });
     } catch (e) {
       console.warn("notify-search-engines failed:", e);

@@ -1093,93 +1093,101 @@ KURALLAR:
   app.post("/api/seo/ping", async (req, res) => {
     try {
       const { sitemapUrl = "https://pasamotor.com.tr/sitemap.xml", indexNowKey = "96dfc37466eb4b74bd562be641577977" } = req.body;
-      
-      const results = [];
-      const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PaşaMotorSEO";
-
-      // 1. Google Sitemap Ping
-      try {
-        const googleUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
-        const gRes = await fetch(googleUrl, { headers: { "User-Agent": userAgent } });
-        if (gRes.ok || gRes.status === 200) {
-          results.push({ engine: "Google Sitemap Ping", status: "success", message: `Sitemap başarıyla bildirildi (HTTP ${gRes.status}).` });
-        } else {
-          results.push({ engine: "Google Sitemap Ping", status: "warning", message: `Sitemap bildirimi yapıldı ancak sunucu HTTP ${gRes.status} döndü.` });
-        }
-      } catch (err: any) {
-        results.push({ engine: "Google Sitemap Ping", status: "error", message: err.message || "Google güzergahına erişilemedi veya kapatılmış olabilir." });
-      }
-
-      // 2. Bing Sitemap Ping
-      try {
-        const bingUrl = `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
-        const bRes = await fetch(bingUrl, { headers: { "User-Agent": userAgent } });
-        if (bRes.ok || bRes.status === 200) {
-          results.push({ engine: "Bing Sitemap Ping", status: "success", message: `Sitemap başarıyla bildirildi (HTTP ${bRes.status}).` });
-        } else {
-          results.push({ engine: "Bing Sitemap Ping", status: "warning", message: `Sitemap bildirimi yapıldı ancak sunucu HTTP ${bRes.status} döndü.` });
-        }
-      } catch (err: any) {
-        results.push({ engine: "Bing Sitemap Ping", status: "error", message: err.message || "Bing tarafına erişilemedi." });
-      }
-
-      // 3. IndexNow Ping (Yandex & Bing & Yahoo vb.)
-      if (indexNowKey) {
-        try {
-          // Parse host from sitemapUrl
-          let host = "pasamotor.com.tr";
-          try {
-            const urlObj = new URL(sitemapUrl);
-            host = urlObj.hostname;
-          } catch(e) {}
-
-          const indexNowUrl = `https://api.indexnow.org/indexnow?url=${encodeURIComponent(sitemapUrl)}&key=${indexNowKey}`;
-          const inRes = await fetch(indexNowUrl, { headers: { "User-Agent": userAgent } });
-          
-          // Also try POST payload if key location is standard
-          const postUrl = "https://api.indexnow.org/indexnow";
-          const payload = {
-            host,
-            key: indexNowKey,
-            keyLocation: `https://${host}/${indexNowKey}.txt`,
-            urlList: [
-              `https://${host}/`,
-              `https://${host}/blog`,
-              `https://${host}/yedek-parca`,
-              sitemapUrl
-            ]
-          };
-
-          const inPostRes = await fetch(postUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json; charset=utf-8",
-              "User-Agent": userAgent
-            },
-            body: JSON.stringify(payload)
-          });
-
-          if (inRes.ok || inPostRes.ok) {
-            results.push({ 
-              engine: "IndexNow (Yandex/Bing)", 
-              status: "success", 
-              message: `İndeksleme talebi IndexNow API'sine başarıyla iletildi (GET/POST API onaylandı).` 
-            });
-          } else {
-            results.push({ 
-              engine: "IndexNow (Yandex/Bing)", 
-              status: "warning", 
-              message: `İşlem tamamlandı ancak hata dönebilir (GET: ${inRes.status}, POST: ${inPostRes.status}).` 
-            });
-          }
-        } catch (err: any) {
-          results.push({ engine: "IndexNow (Yandex/Bing)", status: "error", message: err.message || "IndexNow sunucusuna erişilemedi." });
-        }
-      }
-
-      res.json({ success: true, results });
+      const status = await pingSitemap(sitemapUrl, indexNowKey);
+      res.json({ success: true, results: status });
     } catch (error: any) {
       console.error("SEO Ping API Error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // GET SEO Sitemap Cron Job Endpoint
+  app.get("/api/seo/cron/sitemap", async (req, res) => {
+    try {
+      const sitemapUrl = "https://pasamotor.com.tr/sitemap.xml";
+      const indexNowKey = "96dfc37466eb4b74bd562be641577977";
+      const status = await pingSitemap(sitemapUrl, indexNowKey);
+      res.json({ success: true, message: "Sitemap cron job ping executed successfully.", results: status });
+    } catch (error: any) {
+      console.error("GET /api/seo/cron/sitemap error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Helper for sitemap notification
+  async function pingSitemap(sitemapUrl: string, indexNowKey: string) {
+    const results = [];
+    const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PaşaMotorSEO";
+
+    try {
+      const googleUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+      const gRes = await fetch(googleUrl, { headers: { "User-Agent": userAgent } });
+      if (gRes.ok || gRes.status === 200) results.push({ engine: "Google Sitemap Ping", status: "success", message: `Sitemap başarıyla bildirildi (HTTP ${gRes.status}).` });
+      else results.push({ engine: "Google Sitemap Ping", status: "warning", message: `Sitemap bildirimi yapıldı ancak sunucu HTTP ${gRes.status} döndü.` });
+    } catch (err: any) { results.push({ engine: "Google Sitemap Ping", status: "error", message: err.message }); }
+
+    try {
+      const bingUrl = `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+      const bRes = await fetch(bingUrl, { headers: { "User-Agent": userAgent } });
+      if (bRes.ok || bRes.status === 200) results.push({ engine: "Bing Sitemap Ping", status: "success", message: `Sitemap başarıyla bildirildi (HTTP ${bRes.status}).` });
+      else results.push({ engine: "Bing Sitemap Ping", status: "warning", message: `Sitemap bildirimi yapıldı ancak sunucu HTTP ${bRes.status} döndü.` });
+    } catch (err: any) { results.push({ engine: "Bing Sitemap Ping", status: "error", message: err.message }); }
+
+    if (indexNowKey) {
+      try {
+        let host = "pasamotor.com.tr";
+        try { host = new URL(sitemapUrl).hostname; } catch(e) {}
+        const postUrl = "https://api.indexnow.org/indexnow";
+        const payload = {
+          host, key: indexNowKey, keyLocation: `https://${host}/${indexNowKey}.txt`,
+          urlList: [`https://${host}/`, `https://${host}/blog`, `https://${host}/yedek-parca`, sitemapUrl]
+        };
+        const inPostRes = await fetch(postUrl, {
+          method: "POST", headers: { "Content-Type": "application/json; charset=utf-8", "User-Agent": userAgent }, body: JSON.stringify(payload)
+        });
+        if (inPostRes.ok) results.push({ engine: "IndexNow (Yandex/Bing)", status: "success", message: `İndeksleme talebi IndexNow API'sine başarıyla iletildi (GET/POST API onaylandı).` });
+        else results.push({ engine: "IndexNow (Yandex/Bing)", status: "warning", message: `İşlem tamamlandı ancak hata dönebilir (POST: ${inPostRes.status}).` });
+      } catch (err: any) { results.push({ engine: "IndexNow (Yandex/Bing)", status: "error", message: err.message }); }
+    }
+    return results;
+  }
+
+  // POST URL Update (For Product or Blog Post) -> IndexNow
+  app.post("/api/seo/notify-url", async (req, res) => {
+    try {
+      const { url } = req.body;
+      if (!url) return res.status(400).json({ error: "URL is required" });
+      
+      let urls = Array.isArray(url) ? url : [url];
+      urls = urls.map(u => {
+        if (!u.startsWith('http')) return `https://pasamotor.com.tr${u.startsWith('/') ? '' : '/'}${u}`;
+        return u;
+      });
+
+      const indexNowKey = "96dfc37466eb4b74bd562be641577977";
+      const host = "pasamotor.com.tr";
+      const payload = {
+        host,
+        key: indexNowKey,
+        keyLocation: `https://${host}/${indexNowKey}.txt`,
+        urlList: urls
+      };
+      
+      const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PaşaMotorSEO";
+      const inPostRes = await fetch("https://api.indexnow.org/indexnow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8", "User-Agent": userAgent },
+        body: JSON.stringify(payload)
+      });
+      
+      if (inPostRes.ok) {
+        res.json({ success: true, message: "URLs başarıyla IndexNow'a bildirildi.", urls });
+      } else {
+        const text = await inPostRes.text();
+        res.status(500).json({ error: `IndexNow API Hatası: HTTP ${inPostRes.status} - ${text}` });
+      }
+    } catch (error: any) {
+      console.error("POST /api/seo/notify-url error:", error);
       res.status(500).json({ error: error.message });
     }
   });
