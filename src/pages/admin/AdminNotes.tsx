@@ -30,8 +30,11 @@ import {
   Database,
   Briefcase,
   Wrench,
-  ChevronDown
+  ChevronDown,
+  PenTool
 } from "lucide-react";
+import { ReactSketchCanvas, type ReactSketchCanvasRef } from "react-sketch-canvas";
+import { useRef } from "react";
 
 interface ChecklistItem {
   id: string;
@@ -47,6 +50,7 @@ interface Note {
   color: string;
   is_pinned: boolean;
   checklist: ChecklistItem[];
+  diagram?: string; // Base64 png/svg data
   created_at: string;
   updated_at: string;
 }
@@ -89,6 +93,9 @@ export default function AdminNotes() {
   const [noteIsPinned, setNoteIsPinned] = useState(false);
   const [noteChecklist, setNoteChecklist] = useState<ChecklistItem[]>([]);
   const [newChecklistItemText, setNewChecklistItemText] = useState("");
+  const [noteDiagram, setNoteDiagram] = useState<string | undefined>(undefined);
+  const [isDiagramOpen, setIsDiagramOpen] = useState(false);
+  const sketchRef = useRef<ReactSketchCanvasRef>(null);
 
   useEffect(() => {
     loadNotes();
@@ -181,9 +188,7 @@ export default function AdminNotes() {
         // Supabase veri tabanındaki tüm kayıtları temizleyip yenilerini beslemeyi ya da tek tek upsert etmeyi deneyelim
         // Bulk upsert/save yapalım
         for (const note of updatedNotes) {
-          const { error } = await dbClient
-            .from("notes")
-            .upsert({
+          const payload = {
               id: note.id,
               title: note.title,
               content: note.content,
@@ -191,9 +196,14 @@ export default function AdminNotes() {
               color: note.color,
               is_pinned: note.is_pinned,
               checklist: note.checklist,
+              diagram: note.diagram,
               created_at: note.created_at,
               updated_at: new Date().toISOString()
-            });
+            };
+            
+          // Ensure we don't try to sync payload with properties not in schema yet
+          // Catch and ignore if fails to insert non-existent column
+          const { error } = await dbClient.from("notes").upsert(payload);
           if (error) console.error("Not bulut eşleme hatası:", error.message);
         }
       } catch (e) {
@@ -212,6 +222,8 @@ export default function AdminNotes() {
     setNoteIsPinned(false);
     setNoteChecklist([]);
     setNewChecklistItemText("");
+    setNoteDiagram(undefined);
+    setIsDiagramOpen(false);
     setIsEditorOpen(true);
   };
 
@@ -224,6 +236,8 @@ export default function AdminNotes() {
     setNoteIsPinned(note.is_pinned || false);
     setNoteChecklist(note.checklist || []);
     setNewChecklistItemText("");
+    setNoteDiagram(note.diagram);
+    setIsDiagramOpen(!!note.diagram);
     setIsEditorOpen(true);
   };
 
@@ -235,6 +249,15 @@ export default function AdminNotes() {
         variant: "destructive"
       });
       return;
+    }
+    
+    let currentDiagram = noteDiagram;
+    if (isDiagramOpen && sketchRef.current) {
+        try {
+            currentDiagram = await sketchRef.current.exportImage("png");
+        } catch (e) {
+            console.error("Diyagram aktarılamadı", e);
+        }
     }
 
     let updatedList: Note[];
@@ -250,6 +273,7 @@ export default function AdminNotes() {
             color: noteColor,
             is_pinned: noteIsPinned,
             checklist: noteChecklist,
+            diagram: currentDiagram,
             updated_at: new Date().toISOString()
           };
         }
@@ -266,6 +290,7 @@ export default function AdminNotes() {
         color: noteColor,
         is_pinned: noteIsPinned,
         checklist: noteChecklist,
+        diagram: currentDiagram,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -680,6 +705,12 @@ export default function AdminNotes() {
                     <p className="text-xs text-slate-300 leading-relaxed font-sans line-clamp-4 whitespace-pre-wrap mb-4">
                       {note.content}
                     </p>
+                    {note.diagram && (
+                      <div className="flex items-center gap-2 mb-4 bg-slate-900/50 p-2 rounded-xl border border-border/40">
+                         <PenTool className="w-4 h-4 text-indigo-400" />
+                         <span className="text-[10px] text-slate-300 font-medium">Bu notta 1 çizim / diyagram var</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Alt Bölüm: Görevler, Tarih vs. */}
@@ -933,8 +964,55 @@ export default function AdminNotes() {
                     )}
                   </div>
                 </div>
-              </div>
 
+                {/* 5. Diyagram Çizimi */}
+                <div className="p-3.5 rounded-xl border border-border bg-slate-950/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">
+                      Diyagram ve Çizim
+                    </label>
+                    <button 
+                      type="button" 
+                      onClick={() => setIsDiagramOpen(!isDiagramOpen)}
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors border border-indigo-500/20"
+                    >
+                      {isDiagramOpen ? "Kapat" : (noteDiagram ? "Çizimi Gör/Düzenle" : "Çizime Başla")}
+                    </button>
+                  </div>
+                  
+                  {isDiagramOpen && (
+                    <div className="space-y-3">
+                        <div className="overflow-hidden border border-border/80 rounded-xl bg-white aspect-[21/9] w-full relative">
+                           <ReactSketchCanvas
+                             ref={sketchRef}
+                             strokeWidth={4}
+                             strokeColor="black"
+                             backgroundImage={noteDiagram} // Existing base64 image if any
+                             preserveBackgroundImageAspectRatio="xMidYMid meet"
+                           />
+                        </div>
+                        <div className="flex items-center gap-2 justify-end">
+                            <button
+                                type="button"
+                                onClick={() => sketchRef.current?.clearCanvas()}
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors"
+                            >
+                                Çizimi Temizle
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => sketchRef.current?.undo()}
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 bg-slate-800 border border-border hover:bg-slate-700 transition-colors flex items-center gap-1"
+                            >
+                                <RotateCcw className="w-3.5 h-3.5" /> Geri Al
+                            </button>
+                        </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+              
               {/* Modal Kaydet Butonları */}
               <div className="px-5 py-4 border-t border-border flex items-center justify-between gap-4 bg-slate-950/20">
                 <div>

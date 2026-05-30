@@ -632,10 +632,10 @@ export default function AdminBlogAgent() {
 
         let targetText = clean;
         
-        let firstObj = firstCurly !== -1 ? firstCurly : Infinity;
-        let lastObj = lastCurly !== -1 ? lastCurly : -1;
-        let firstArr = firstSquare !== -1 ? firstSquare : Infinity;
-        let lastArr = lastSquare !== -1 ? lastSquare : -1;
+        const firstObj = firstCurly !== -1 ? firstCurly : Infinity;
+        const lastObj = lastCurly !== -1 ? lastCurly : -1;
+        const firstArr = firstSquare !== -1 ? firstSquare : Infinity;
+        const lastArr = lastSquare !== -1 ? lastSquare : -1;
 
         if (firstObj < firstArr && lastObj !== -1) {
           targetText = clean.substring(firstObj, lastObj + 1);

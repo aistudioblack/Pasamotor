@@ -128,7 +128,10 @@ const YedekParcaDetay = () => {
                   <img
                     src={product.images[selectedImage]}
                     alt={product.title}
+                    width={800}
+                    height={800}
                     className="max-w-full max-h-full object-contain p-6"
+                    loading="eager"
                   />
                 ) : (
                   <ProductImagePlaceholder brand={product.brand || "PAŞA MOTOR"} />
@@ -144,7 +147,7 @@ const YedekParcaDetay = () => {
                         selectedImage === i ? "border-primary" : "border-transparent"
                       }`}
                     >
-                      <img src={img} alt="" className="max-w-full max-h-full object-contain p-2" />
+                      <img src={img} alt="" width={80} height={80} className="max-w-full max-h-full object-contain p-2" loading="lazy" />
                     </button>
                   ))}
                 </div>

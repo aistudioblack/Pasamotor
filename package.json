@@ -80,6 +80,7 @@
     "react-leaflet": "^4.2.1",
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^6.30.1",
+    "react-sketch-canvas": "^8.0.0",
     "recharts": "^2.15.4",
     "simple-git": "^3.36.0",
     "sonner": "^1.7.4",

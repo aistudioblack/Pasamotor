@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Analytics } from "@vercel/analytics/react";
+import ScrollToTop from "@/components/layout/ScrollToTop";
 import Index from "./pages/Index";
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -88,6 +89,7 @@ const App = () => (
         <Sonner />
         <Analytics />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <ScrollToTop />
           <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>

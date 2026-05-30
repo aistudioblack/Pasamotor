@@ -224,6 +224,8 @@ const Blog = () => {
                         <img
                           src={featured.cover_image}
                           alt={featured.title}
+                          width={1200}
+                          height={800}
                           className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                           loading="eager"
                         />
@@ -278,6 +280,8 @@ const Blog = () => {
                         <img
                           src={post.cover_image}
                           alt={post.title}
+                          width={600}
+                          height={450}
                           className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
                           loading="lazy"
                         />

@@ -249,6 +249,8 @@ const BlogDetay = () => {
             <img
               src={post.cover_image}
               alt={post.title}
+              width={1200}
+              height={675}
               className="w-full h-full object-cover"
             />
           </div>
@@ -327,7 +329,7 @@ const BlogDetay = () => {
                 >
                   <div className="aspect-[16/10] bg-muted overflow-hidden">
                     {r.cover_image ? (
-                      <img src={r.cover_image} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      <img src={r.cover_image} alt={r.title} width={400} height={250} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center"><BookOpen className="w-10 h-10 text-muted-foreground/30" /></div>
                     )}

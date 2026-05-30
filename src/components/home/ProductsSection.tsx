@@ -74,6 +74,8 @@ export default function ProductsSection() {
                     <img
                       src={product.images[0]}
                       alt={product.title}
+                      width={400}
+                      height={400}
                       className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
                       referrerPolicy="no-referrer"

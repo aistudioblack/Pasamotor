@@ -95,6 +95,7 @@ Mevcut ciddi sorunlarımız ve çözümlerimiz:
 - Dönüşüm oranı %0 -> içerik satın alma kararına itmiyor (Müşterinin kafasındaki soru "EVET BENDE BU VAR, SEBEBİ BU PARÇAYMIŞ" demesini sağlayarak satın almasını tetikle!)
 - Otoriter yedek parça mağazası kimliğini (Topical Authority) pekiştir.
 - Sıkça kullanılan birbirine bağlı komponentler arasında iç bağlantıları (Semantik Cluster Linkleme) yap.
+- GOOGLE DİZİN HATASI ('Tarandı - şu anda dizine eklenmiş değil' / Crawled - currently not indexed): Bu hatayı önlemek için; yazının YÜKSEK KALİTELİ, benzersiz (thin content olmayan) ve E-E-A-T (Deneyim, Uzmanlık, Otoriterlik, Güvenilirlik) kurallarına uygun olması şarttır. Robotik tekrarlara düşme, eşsiz atölye tecrübeleri ve profesyonel teknik teşhisler ekle! Makale ASLA kopya veya jenerik hissettirmemelidir.
 
 MAKALE YAZIMINDA UYULMASI ZORUNLU KURALLAR:
 

@@ -101,7 +101,7 @@ const Galeri = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((img, i) => (
                 <div key={i} className="group relative rounded-xl overflow-hidden aspect-video">
-                  <img src={img.src} alt={img.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={img.src} alt={img.title} width={600} height={400} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                     <p className="font-heading font-medium text-foreground">{img.title}</p>
                   </div>

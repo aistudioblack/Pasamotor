@@ -741,6 +741,8 @@ const YedekParca = () => {
                             <img
                               src={p.images[0]}
                               alt={p.title}
+                              width={240}
+                              height={176}
                               referrerPolicy="no-referrer"
                               className="w-full h-full object-contain p-2 transition-transform duration-300"
                               loading="lazy"

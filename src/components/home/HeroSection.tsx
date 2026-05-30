@@ -180,6 +180,8 @@ const HeroSection = () => {
               <img
                 src={logo}
                 alt="Paşa Motor logosu"
+                width={400}
+                height={200}
                 loading="eager"
                 decoding="sync"
                 {...{ fetchpriority: "high" }}
@@ -194,7 +196,18 @@ const HeroSection = () => {
         {/* Mobile logo */}
         <div className="lg:hidden flex justify-center mt-12 overflow-visible">
           <div ref={mobileLogoRef} className="relative will-change-transform">
-            <img src={logo} alt="Paşa Motor logosu" loading="eager" decoding="sync" {...{ fetchpriority: "high" }} className="h-52 w-auto object-contain drop-shadow-2xl select-none pointer-events-none" style={{ mixBlendMode: "screen" }} draggable={false} />
+            <img 
+              src={logo} 
+              alt="Paşa Motor logosu" 
+              width={220}
+              height={110}
+              loading="eager" 
+              decoding="sync" 
+              {...{ fetchpriority: "high" }} 
+              className="h-52 w-auto object-contain drop-shadow-2xl select-none pointer-events-none" 
+              style={{ mixBlendMode: "screen" }} 
+              draggable={false} 
+            />
           </div>
         </div>
       </div>
