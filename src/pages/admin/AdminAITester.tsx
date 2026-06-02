@@ -105,7 +105,7 @@ const AdminAITester = () => {
           setResult({ text: data.choices?.[0]?.message?.content });
         } else if (provider === "puter") {
           // Dinamik Puter.js Yüklemesi
-          if (typeof window.puter === "undefined") {
+          if (typeof (window as any).puter === "undefined") {
             await new Promise((resolve, reject) => {
               const script = document.createElement("script");
               script.src = "https://js.puter.com/v2/";
@@ -114,13 +114,10 @@ const AdminAITester = () => {
               document.head.appendChild(script);
             });
           }
-          // @ts-expect-error: Puter object is loaded dynamically in window
-          if (typeof window.puter === "undefined") {
+          if (typeof (window as any).puter === "undefined") {
             throw new Error("Puter.js engellendi veya yüklenemedi.");
           }
-          // @ts-expect-error: Puter AI chat is dynamic helper
-          const response = await window.puter.ai.chat(prompt);
-          // @ts-expect-error: response object from puter is generic
+          const response = await (window as any).puter.ai.chat(prompt);
           setResult({ text: response.message?.content || response.text || response });
         } else if (provider === "huggingface") {
           if (!apiKey) throw new Error("API Anahtarı gerekli");

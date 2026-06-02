@@ -37,20 +37,24 @@ export default function LegalPage() {
           setPage(fallbackPage);
           
           // Silently auto-seed this page into firestore database so it appears in administration
-          dbClient.from("pages").insert({
-            title: fallbackPage.title,
-            slug: fallbackPage.slug,
-            content: fallbackPage.content,
-            meta_title: fallbackPage.meta_title || "",
-            meta_description: fallbackPage.meta_description || "",
-            is_published: true,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }).then(({ error }) => {
-            if (error) console.warn("Background auto-seed page failed:", error);
-          }).catch((err) => {
-            console.warn("Background auto-seed page failed silently:", err);
-          });
+          const seedPage = async () => {
+            try {
+              const { error } = await dbClient.from("pages").insert({
+                title: fallbackPage.title,
+                slug: fallbackPage.slug,
+                content: fallbackPage.content,
+                meta_title: fallbackPage.meta_title || "",
+                meta_description: fallbackPage.meta_description || "",
+                is_published: true,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
+              if (error) console.warn("Background auto-seed page failed:", error);
+            } catch (err) {
+              console.warn("Background auto-seed page failed silently:", err);
+            }
+          };
+          seedPage();
         } else {
           setError(true);
         }

@@ -26,7 +26,7 @@ export default defineConfig(() => ({
   },
   build: {
     target: "esnext",
-    minify: "esbuild",
+    minify: "esbuild" as const,
     cssCodeSplit: true,
     assetsInlineLimit: 5120, // 5KB altındaki küçük varlıkları inline yap (base64)
     chunkSizeWarningLimit: 1000,

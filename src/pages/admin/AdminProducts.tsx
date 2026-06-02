@@ -178,6 +178,35 @@ const AdminProducts = () => {
   const [optimizingTitles, setOptimizingTitles] = useState(false);
   const [titleProgress, setTitleProgress] = useState("");
   const [titleLogStr, setTitleLogStr] = useState("");
+  const [beautifying, setBeautifying] = useState(false);
+
+  const runBeautifier = async () => {
+    setBeautifying(true);
+    try {
+      const res = await fetch("/api/supplier/beautify-supabase", {
+        method: "POST"
+      });
+      if (!res.ok) throw new Error("API sunucusu yanıt vermedi.");
+      const data = await res.json();
+      if (data.success) {
+        toast({
+          title: "İşlem Başarılı",
+          description: data.message || "Tüm ürünler başarıyla kurumsal standarda uyarlandı."
+        });
+        load();
+      } else {
+        throw new Error(data.error || "Bilinmeyen hata");
+      }
+    } catch (err: any) {
+      toast({
+        title: "Dönüştürme Başarısız",
+        description: err.message,
+        variant: "destructive"
+      });
+    } finally {
+      setBeautifying(false);
+    }
+  };
 
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -1021,6 +1050,16 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
               </div>
               
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={runBeautifier}
+                  disabled={beautifying}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {beautifying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  Kurumsal Sadeleştirme & Görsel Sihirbazı (Anlık)
+                </button>
+
                 {optimizingTitles ? (
                   <button
                     type="button"
@@ -1036,7 +1075,7 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
                     className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    Tüm Bozuk Başlıkları Tespit Et ve Onar
+                    Başlıkları AI ile Optimize Et
                   </button>
                 )}
               </div>

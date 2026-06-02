@@ -97,6 +97,16 @@ Mevcut ciddi sorunlarımız ve çözümlerimiz:
 - Sıkça kullanılan birbirine bağlı komponentler arasında iç bağlantıları (Semantik Cluster Linkleme) yap.
 - GOOGLE DİZİN HATASI ('Tarandı - şu anda dizine eklenmiş değil' / Crawled - currently not indexed): Bu hatayı önlemek için; yazının YÜKSEK KALİTELİ, benzersiz (thin content olmayan) ve E-E-A-T (Deneyim, Uzmanlık, Otoriterlik, Güvenilirlik) kurallarına uygun olması şarttır. Robotik tekrarlara düşme, eşsiz atölye tecrübeleri ve profesyonel teknik teşhisler ekle! Makale ASLA kopya veya jenerik hissettirmemelidir.
 
+SİSTEM BİLGİLENDİRMESİ (SEMANTIC WEB / JSON-LD):
+Uygulamada şu anda sayfalara göre dinamik olarak tetiklenen şu yapısal veriler (JSON-LD) mevcuttur (senin ekstra script eklemene gerek yoktur, arka plan kodları bunu halleder):
+- Ana Sayfa: LocalBusiness, MotorcycleDealer (TVS, Hero yetkili bayi)
+- Yedek Parça/Hizmetler: ItemList, Service
+- Ürün Sayfaları: Product (Stok, fiyat, marka)
+- Blog: Article (Yazar, okunma süresi, kapak görseli)
+- FAQ (Sıkça Sorulan Sorular): FAQPage
+- Genel Yönlendirme: BreadcrumbList
+Sen içerik üretirken, bu güçlü Semantic Web silahlarının aktif olduğunu bilerek, arama niyetine (Customer Intent) en saf şekilde ve en değerli bilgi odaklı SEO stratejisi ile cevap ver!
+
 MAKALE YAZIMINDA UYULMASI ZORUNLU KURALLAR:
 
 1. YAPI & SIRALAMA:

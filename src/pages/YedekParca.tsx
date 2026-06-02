@@ -99,15 +99,36 @@ const YedekParca = () => {
     const step = 1000;
     let hasMoreData = true;
 
-    while (hasMoreData) {
-      const { data, error: fetchError } = await supabase
-        .from("products")
-        .select("id, slug, title, sku, brand, category, price, original_price, stock, description, images, is_active")
-        .eq("category", "yedek-parca")
-        .eq("is_active", true)
-        .range(from, from + step - 1);
+    const fetchWithRetry = async (fromVal: number): Promise<Product[]> => {
+      let retries = 3;
+      let delay = 800;
+      while (retries > 0) {
+        try {
+          const { data, error: fetchError } = await supabase
+            .from("products")
+            .select("*")
+            .eq("category", "yedek-parca")
+            .eq("is_active", true)
+            .range(fromVal, fromVal + step - 1);
 
-      if (fetchError) throw fetchError;
+          if (fetchError) throw fetchError;
+          return (data as any[]) || [];
+        } catch (err: any) {
+          retries--;
+          const errMessage = err?.message || String(err);
+          if (retries === 0) {
+            throw err;
+          }
+          console.warn(`Sessiz arka plan senkronize denemesi başarısız oldu, yeniden deneniyor... Kalan deneme: ${retries}. Hata: ${errMessage}`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2;
+        }
+      }
+      return [];
+    };
+
+    while (hasMoreData) {
+      const data = await fetchWithRetry(from);
 
       if (data && data.length > 0) {
         allData = [...allData, ...data];
@@ -154,6 +175,19 @@ const YedekParca = () => {
       setAllProducts(data);
     } catch (err: any) {
       console.error("Yedek parça yükleme hatası:", err);
+      // Failover to local cache if possible so user has immediate access
+      try {
+        const localCached = sessionStorage.getItem("pasa_motor_yedek_parca_cache");
+        if (localCached) {
+          const fallbackData = JSON.parse(localCached);
+          setAllProducts(fallbackData);
+          cachedProductsList = fallbackData;
+          setError(null);
+          return;
+        }
+      } catch (cacheErr) {
+        console.warn("Önbellekten yedek parça kurtarma başarısız oldu:", cacheErr);
+      }
       setError(err.message || "Ürün listesi yüklenirken bir sorun oluştu.");
     } finally {
       setLoading(false);
@@ -174,8 +208,8 @@ const YedekParca = () => {
       }
 
       setAllProducts(data);
-    } catch (err) {
-      console.error("Silent background sync failed:", err);
+    } catch (err: any) {
+      console.warn("Sessiz arka plan senkronizasyonu geçici bir ağ aksaklığı nedeniyle ertelendi. Mevcut önbellek kullanılmaya devam ediyor:", err?.message || err);
     }
   };
 

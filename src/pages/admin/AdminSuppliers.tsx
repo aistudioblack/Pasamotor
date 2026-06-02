@@ -187,7 +187,7 @@ const AdminSuppliers = () => {
       return;
     }
     setBusyId(supplier.id);
-    let mockProgressInterval: any = null;
+
     const startTime = Date.now();
     let syncSuccess = false;
     let syncErrorStr: string | null = null;
@@ -202,153 +202,134 @@ const AdminSuppliers = () => {
            throw new Error("Kullanıcı kodu veya parola eksik. Ayarlardan kontrol edin.");
         }
 
-        // Setup smooth mock progress bar for the portal fetch stage
-        let currentPercent = 5;
         setSyncProgress({
            id: supplier.id,
            phase: "Portal oturumu açılıyor...",
-           percent: currentPercent
+           percent: 5
         });
 
-        mockProgressInterval = setInterval(() => {
-          currentPercent += Math.floor(Math.random() * 6) + 3; // random step
-          if (currentPercent > 80) currentPercent = 80;
-          
-          let phase = "Veriler portalden çekiliyor...";
-          if (currentPercent < 25) {
-            phase = "Portal oturumu açılıyor...";
-          } else if (currentPercent < 50) {
-            phase = "Mevcut ürün listeleri taranıyor...";
-          } else if (currentPercent < 70) {
-            phase = "Ürün detayları ve resimler ayıklanıyor...";
-          } else {
-            phase = "Son düzenlemeler yapılıyor, hazırlanın...";
-          }
-
-          setSyncProgress({
-             id: supplier.id,
-             phase: phase,
-             percent: currentPercent
-          });
-        }, 3000);
-
-        const res = await fetch("/api/supplier/fcs-sync", {
+        const authRes = await fetch("/api/supplier/fcs-auth", {
            method: "POST",
            headers: { "Content-Type": "application/json" },
            body: JSON.stringify({
               userCode: supplier.user_code,
-              password: supplier.password_encrypted,
-              mode: mode
+              password: supplier.password_encrypted
            })
          });
+         
+        if (!authRes.ok) throw new Error("Portal oturum açma hatası.");
+        const authJson = await authRes.json();
+        if (!authJson.success || !authJson.cookies) throw new Error("Kimlik doğrulama başarısız.");
         
-        if (mockProgressInterval) {
-          clearInterval(mockProgressInterval);
-          mockProgressInterval = null;
+        if (mode === "test_connection" || mode === "test_login") {
+          data = { total: 0, created: 0, updated: 0, skipped: 0, failed: 0 };
+          syncData = data;
+          syncSuccess = true;
+          toast.success("Bağlantı/Login OK");
+          setBusyId(null);
+          setSyncProgress(null);
+          return;
         }
 
-        const contentType = res.headers.get("content-type");
-        if (!res.ok) {
-           let errMsg = "Sunucu hatası.";
-           if (contentType && contentType.includes("application/json")) {
-              const errJson = await res.json();
-              errMsg = errJson.error || errJson.message || errMsg;
-           } else {
-              const txt = await res.text();
-              errMsg = txt.substring(0, 150) || errMsg;
-           }
-           throw new Error(errMsg);
-        }
-
-        if (!contentType || !contentType.includes("application/json")) {
-           const text = await res.text();
-           console.error("Non-JSON Response Detail:", text);
-           throw new Error("Sunucudan geçersiz bir yanıt alındı. API sunucusu düzgün yapılandırılmamış veya Vercel'de yönlendirme hatası var.");
-        }
-
-        const json = await res.json();
+        const cookies = authJson.cookies;
+        const allowedBrands = ["BAJAJ","BANDO","BOSCH AKÜ","BOSCH MOTOSİKLET","DENSO","HONDA","KYB","MAHLE","NGK","SACHS","TECNECO","TRW","TVS","VARTA"];
         
-        if (json.data && json.data.length > 0 && mode !== "test_connection" && mode !== "test_login") {
-           // Fetch existing product slugs to avoid duplicate processing and database load
-           const { data: dbProducts } = await dbClient.from("products").select("slug");
-           const existingSlugs = new Set((dbProducts || []).map(p => p.slug));
+        let totalFetchedCount = 0;
+        let createdCount = 0;
+        let updatedCount = 0;
+        let skippedCount = 0;
+        let failedCount = 0;
 
-           const seenSlugs = new Set<string>();
-           const items = json.data.filter((item: any) => {
-             if (!item.slug) return false;
-             if (seenSlugs.has(item.slug)) {
-               return false;
-             }
-             seenSlugs.add(item.slug);
-             
-             // SKIP existing products to completely prevent re-fetching/re-importing
-             if (existingSlugs.has(item.slug)) {
-               return false;
-             }
-             return true;
-           });
+        const { data: dbProducts } = await dbClient.from("products").select("slug, price, stock");
+        const existingSlugs = new Map((dbProducts || []).map((p: any) => [p.slug, p]));
 
-           if (items.length > 0) {
-              const CHUNK_SIZE = 50;
-              const allowedKeys = [
-                "brand", "category", "title", "slug", "sku", "description", 
-                "content", "price", "original_price", "stock", "meta_title", "meta_description", 
-                "images", "is_active", "is_featured", "created_at"
-              ];
+        for (let bIndex = 0; bIndex < allowedBrands.length; bIndex++) {
+          const brand = allowedBrands[bIndex];
+          let offset = 0;
+          let hasMore = true;
 
-              for (let i = 0; i < items.length; i += CHUNK_SIZE) {
-                 const chunk = items.slice(i, i + CHUNK_SIZE);
-                 
-                 const cleanChunk = chunk.map((item: any) => {
-                   const cleanItem: any = {};
-                   allowedKeys.forEach(key => {
-                     if (item[key] !== undefined) {
-                       cleanItem[key] = item[key];
-                     }
-                   });
-                   return cleanItem;
-                 });
+          while (hasMore) {
+            setSyncProgress({
+               id: supplier.id,
+               phase: `[${brand}] Fiyat & Stok taranıyor... (${offset} / ∞)`,
+               percent: 10 + Math.floor((bIndex / allowedBrands.length) * 80)
+            });
 
-                 const percent = 80 + Math.round((i / items.length) * 20);
-                 setSyncProgress({ 
-                   id: supplier.id, 
-                   phase: `Veritabanına kaydediliyor (${Math.min(i + CHUNK_SIZE, items.length)}/${items.length})...`, 
-                   percent: percent 
-                 });
+            const fetchRes = await fetch("/api/supplier/fcs-fetch", {
+               method: "POST",
+               headers: { "Content-Type": "application/json" },
+               body: JSON.stringify({ cookies, brand, offset })
+            });
 
-                 const { error } = await dbClient.from("products").upsert(cleanChunk, { onConflict: "slug" });
-                 if (error) {
-                    console.error("FCS Upsert Error:", error);
-                    throw new Error("Veritabanına kayıt sırasında hata: " + error.message);
-                 }
-              }
+            if (!fetchRes.ok) {
+               console.error(`Fiyat/Stok Fetch failed for ${brand}`);
+               break;
+            }
+
+            const fetchJson = await fetchRes.json();
+            const items = fetchJson.data || [];
+            if (fetchJson.hasMore !== undefined) {
+               hasMore = fetchJson.hasMore;
+            } else {
+               hasMore = items.length === 24;
+            }
+            offset += 24;
+            
+            if (items.length === 0) break;
+            
+            totalFetchedCount += items.length;
+
+            const toInsert: any[] = [];
+            const toUpdate: any[] = [];
+
+            for (const item of items) {
+              if (!item.slug) continue;
               
-              setSyncProgress({
-                id: supplier.id,
-                phase: "Senkronizasyon tamamlandı!",
-                percent: 100
-              });
-           } else {
-              setSyncProgress({
-                id: supplier.id,
-                phase: "Tüm ürünler zaten güncel! Yeni eklenecek ürün yok.",
-                percent: 100
-              });
-           }
-           await new Promise(resolve => setTimeout(resolve, 1200));
-           setSyncProgress(null);
+              const existing = existingSlugs.get(item.slug);
+              if (existing) {
+                if (mode === "full_import") {
+                  skippedCount++;
+                } else {
+                   if (existing.price !== item.price || existing.stock !== item.stock) {
+                      toUpdate.push({ slug: item.slug, price: item.price, stock: item.stock });
+                   } else {
+                      skippedCount++;
+                   }
+                }
+              } else {
+                if (mode === "full_import") {
+                  toInsert.push(item);
+                } else {
+                  skippedCount++;
+                }
+              }
+            }
+
+            if (toInsert.length > 0) {
+               const { error } = await dbClient.from("products").insert(toInsert);
+               if (error) failedCount += toInsert.length; 
+               else createdCount += toInsert.length;
+            }
+
+            if (toUpdate.length > 0) {
+               for (const up of toUpdate) {
+                 const { error } = await dbClient.from("products").update({ price: up.price, stock: up.stock }).eq('slug', up.slug);
+                 if (error) failedCount++;
+                 else updatedCount++;
+               }
+            }
+          }
         }
+
+        setSyncProgress({
+          id: supplier.id,
+          phase: "Senkronizasyon tamamlandı!",
+          percent: 100
+        });
         
-        const totalFetched = json.total_fetched || (json.data ? json.data.length : 0);
-        
-        data = { 
-          total: totalFetched, 
-          created: (mode === "test_connection" || mode === "test_login") ? 0 : (json.data ? json.data.length : 0), 
-          updated: 0, 
-          skipped: 0, 
-          failed: 0 
-        };
+        data = { total: totalFetchedCount, created: createdCount, updated: updatedCount, skipped: skippedCount, failed: failedCount };
       } else {
+
         const fnName = "sync-supplier";
         const res = await dbClient.functions.invoke(fnName, {
           body: { supplier_id: supplier.id, mode, triggered_by: "manual" },
@@ -366,12 +347,20 @@ const AdminSuppliers = () => {
           ? "Bağlantı/Login OK"
           : `OK - toplam:${r.total} aktarılan:${r.created}`
       );
+      
+      if (syncSuccess && isFcs && (mode === "full_import" || mode === "sync_update")) {
+        const updatePayload: any = { last_sync_status: "success", is_active: true };
+        if (mode === "full_import") updatePayload.last_full_import_at = new Date().toISOString();
+        if (mode === "sync_update") updatePayload.last_sync_at = new Date().toISOString();
+        const { error: supUpdateErr } = await dbClient.from("suppliers").update(updatePayload).eq("id", supplier.id);
+        if (supUpdateErr) console.warn("Failed to update supplier sync timestamps:", supUpdateErr);
+      }
+      
       await load();
     } catch (e: any) {
       syncErrorStr = e.message || "Sync hatası";
       toast.error(syncErrorStr);
     } finally {
-      if (mockProgressInterval) clearInterval(mockProgressInterval);
       setSyncProgress(null);
       setBusyId(null);
 

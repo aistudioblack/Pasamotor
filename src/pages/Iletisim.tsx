@@ -138,12 +138,6 @@ const Iletisim = () => {
                 <MessageCircle className="w-5 h-5" />
                 WhatsApp ile İletişime Geçin
               </a>
-
-              <div className="h-[450px] sm:h-[500px] w-full relative overflow-hidden rounded-[24px] border border-white/10 shadow-2xl bg-muted">
-                <Suspense fallback={<div className="w-full h-full flex items-center justify-center">Harita Yükleniyor...</div>}>
-                  <InteractiveMap />
-                </Suspense>
-              </div>
             </div>
 
             <div className="glass-card rounded-xl p-6 md:p-8 h-fit">
@@ -206,6 +200,14 @@ const Iletisim = () => {
                   {sending ? "Gönderiliyor..." : "Gönder"}
                 </button>
               </form>
+            </div>
+          </div>
+
+          <div className="max-w-5xl mx-auto mt-12 w-full">
+            <div id="harita" className="h-[400px] sm:h-[480px] w-full relative overflow-hidden rounded-[24px] border border-white/10 shadow-2xl bg-muted scroll-mt-24">
+              <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">Harita Yükleniyor...</div>}>
+                <InteractiveMap />
+              </Suspense>
             </div>
           </div>
         </div>

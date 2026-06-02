@@ -5,22 +5,25 @@ export function useSEO(pageKey: string, defaultTitle: string, defaultDesc: strin
   const [seo, setSeo] = useState({ title: defaultTitle, description: defaultDesc });
 
   useEffect(() => {
-    dbClient
-      .from("site_content")
-      .select("seo_title, seo_description")
-      .eq("page_key", pageKey)
-      .maybeSingle()
-      .then(({ data }) => {
+    const fetchSeo = async () => {
+      try {
+        const { data } = await dbClient
+          .from("site_content")
+          .select("seo_title, seo_description")
+          .eq("page_key", pageKey)
+          .maybeSingle();
+
         if (data) {
           setSeo({
             title: data.seo_title || defaultTitle,
             description: data.seo_description || defaultDesc,
           });
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.warn(`SEO fetch failed for key "${pageKey}", using default values.`, err);
-      });
+      }
+    };
+    fetchSeo();
   }, [pageKey, defaultTitle, defaultDesc]);
 
   return seo;

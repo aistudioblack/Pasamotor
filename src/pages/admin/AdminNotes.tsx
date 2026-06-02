@@ -33,7 +33,7 @@ import {
   ChevronDown,
   PenTool
 } from "lucide-react";
-import { ReactSketchCanvas, type ReactSketchCanvasRef } from "react-sketch-canvas";
+import DrawingCanvasModal from "@/components/admin/DrawingCanvasModal";
 import { useRef } from "react";
 
 interface ChecklistItem {
@@ -94,8 +94,8 @@ export default function AdminNotes() {
   const [noteChecklist, setNoteChecklist] = useState<ChecklistItem[]>([]);
   const [newChecklistItemText, setNewChecklistItemText] = useState("");
   const [noteDiagram, setNoteDiagram] = useState<string | undefined>(undefined);
-  const [isDiagramOpen, setIsDiagramOpen] = useState(false);
-  const sketchRef = useRef<ReactSketchCanvasRef>(null);
+  const [isDrawingModalOpen, setIsDrawingModalOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     loadNotes();
@@ -223,7 +223,7 @@ export default function AdminNotes() {
     setNoteChecklist([]);
     setNewChecklistItemText("");
     setNoteDiagram(undefined);
-    setIsDiagramOpen(false);
+    setIsDrawingModalOpen(false);
     setIsEditorOpen(true);
   };
 
@@ -237,7 +237,7 @@ export default function AdminNotes() {
     setNoteChecklist(note.checklist || []);
     setNewChecklistItemText("");
     setNoteDiagram(note.diagram);
-    setIsDiagramOpen(!!note.diagram);
+    setIsDrawingModalOpen(false);
     setIsEditorOpen(true);
   };
 
@@ -251,14 +251,7 @@ export default function AdminNotes() {
       return;
     }
     
-    let currentDiagram = noteDiagram;
-    if (isDiagramOpen && sketchRef.current) {
-        try {
-            currentDiagram = await sketchRef.current.exportImage("png");
-        } catch (e) {
-            console.error("Diyagram aktarılamadı", e);
-        }
-    }
+    const currentDiagram = noteDiagram;
 
     let updatedList: Note[];
     if (activeNote) {
@@ -302,11 +295,11 @@ export default function AdminNotes() {
     setIsEditorOpen(false);
   };
 
-  const handleDeleteNote = async (id: string) => {
-    if (!window.confirm("Bu notu tamamen silmek istediğinizden emin misiniz?")) {
-      return;
-    }
+  const handleDeleteNoteClick = (id: string) => {
+    setDeleteConfirmId(id);
+  };
 
+  const executeDeleteNote = async (id: string) => {
     const updated = notes.filter((n) => n.id !== id);
     await saveNotesToSync(updated);
 
@@ -319,6 +312,7 @@ export default function AdminNotes() {
     }
 
     toast({ title: "Not Silindi", description: "Not başarıyla sistemden kaldırıldı." });
+    setDeleteConfirmId(null);
     if (activeNote?.id === id) {
       setIsEditorOpen(false);
     }
@@ -688,7 +682,7 @@ export default function AdminNotes() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteNote(note.id);
+                            handleDeleteNoteClick(note.id);
                           }}
                           className="p-1 rounded-lg text-slate-600 hover:text-rose-400 hover:bg-slate-800/80 transition-all cursor-pointer opacity-0 group-hover:opacity-100"
                         >
@@ -778,8 +772,8 @@ export default function AdminNotes() {
 
         {/* Not Editör / Detay Modalı */}
         {isEditorOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-2xl bg-slate-900 border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in font-sans">
+            <div className="w-full max-w-2xl max-h-[90vh] bg-slate-900 border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300">
               {/* Modal Başlık Bölümü */}
               <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-4 bg-slate-950/20">
                 <div className="flex items-center gap-2">
@@ -790,7 +784,6 @@ export default function AdminNotes() {
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  {/* Sabitleme Butonu */}
                   <button
                     type="button"
                     onClick={() => setNoteIsPinned(!noteIsPinned)}
@@ -814,212 +807,247 @@ export default function AdminNotes() {
               </div>
 
               {/* Modal İçerik / Form */}
-              <div className="p-5 space-y-4 overflow-y-auto flex-1 font-sans">
-                {/* 1. Başlık girişi */}
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Not Başlığı
-                  </label>
-                  <input
-                    type="text"
-                    value={noteTitle}
-                    onChange={(e) => setNoteTitle(e.target.value)}
-                    placeholder="Anahtar arıza kodu, kargo durumu, müşteri notu vb..."
-                    className="w-full px-4 py-2 bg-slate-950 border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-indigo-500/50 transition-all font-sans font-bold placeholder:font-normal"
-                  />
-                </div>
-
-                {/* 2. Kategori Seçimi & Renk Seçimi */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-5 overflow-y-auto flex-1 font-sans space-y-4">
+                
+                {/* Sol Taraf: Metin ve Ayarlar */}
+                <div className="space-y-4">
+                  {/* 1. Başlık girişi */}
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                      Kategori
+                      Not Başlığı
                     </label>
-                    <select
-                      value={noteCategory}
-                      onChange={(e) => setNoteCategory(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-950 border border-border rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500/50 transition-all font-sans"
-                    >
-                      {NOTE_CATEGORIES.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.label}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="text"
+                      value={noteTitle}
+                      onChange={(e) => setNoteTitle(e.target.value)}
+                      placeholder="Anahtar arıza kodu, kargo durumu, müşteri notu vb..."
+                      className="w-full px-4 py-2 bg-slate-950 border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-indigo-500/50 transition-all font-sans font-bold placeholder:font-normal"
+                    />
                   </div>
 
+                  {/* 2. Kategori Seçimi & Renk Seçimi */}
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                        Kategori
+                      </label>
+                      <select
+                        value={noteCategory}
+                        onChange={(e) => setNoteCategory(e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-950 border border-border rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500/50 transition-all font-sans"
+                      >
+                        {NOTE_CATEGORIES.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                        Kart Teması / Rengi
+                      </label>
+                      <div className="flex items-center gap-1.5 py-1">
+                        {NOTE_COLORS.map((col) => (
+                          <button
+                            key={col.value}
+                            type="button"
+                            onClick={() => setNoteColor(col.value)}
+                            title={col.name}
+                            className={`w-6 h-6 rounded-full border border-slate-950 cursor-pointer transition-transform relative ${
+                              col.value === "slate" ? "bg-slate-800" :
+                              col.value === "amber" ? "bg-amber-600" :
+                              col.value === "blue" ? "bg-blue-600" :
+                              col.value === "green" ? "bg-emerald-600" :
+                              col.value === "purple" ? "bg-purple-600" : "bg-rose-600"
+                            } ${
+                              noteColor === col.value 
+                                ? "scale-125 ring-2 ring-indigo-500" 
+                                : "hover:scale-115"
+                            }`}
+                          >
+                            {noteColor === col.value && (
+                              <Check className="w-3.5 h-3.5 text-white absolute inset-0 m-auto" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Not İçeriği */}
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                      Kart Teması / Rengi
+                      Detaylı Açıklama
                     </label>
-                    <div className="flex items-center gap-1.5 py-1">
-                      {NOTE_COLORS.map((col) => (
-                        <button
-                          key={col.value}
-                          type="button"
-                          onClick={() => setNoteColor(col.value)}
-                          title={col.name}
-                          className={`w-6 h-6 rounded-full border border-slate-950 cursor-pointer transition-transform relative ${
-                            col.value === "slate" ? "bg-slate-800" :
-                            col.value === "amber" ? "bg-amber-600" :
-                            col.value === "blue" ? "bg-blue-600" :
-                            col.value === "green" ? "bg-emerald-600" :
-                            col.value === "purple" ? "bg-purple-600" : "bg-rose-600"
-                          } ${
-                            noteColor === col.value 
-                              ? "scale-125 ring-2 ring-indigo-500" 
-                              : "hover:scale-115"
-                          }`}
-                        >
-                          {noteColor === col.value && (
-                            <Check className="w-3.5 h-3.5 text-white absolute inset-0 m-auto" />
-                          )}
-                        </button>
-                      ))}
+                    <textarea
+                      rows={5}
+                      value={noteContent}
+                      onChange={(e) => setNoteContent(e.target.value)}
+                      placeholder="Detaylı notlarınızı, telefon numaralarını veya sorun inceleme adımlarını buraya yazabilirsiniz..."
+                      className="w-full px-4 py-3 bg-slate-950 border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-indigo-500/50 transition-all font-sans leading-relaxed"
+                    />
+                  </div>
+
+                  {/* 4. Yapılacaklar Listesi (Alt Görev Süzgeci) */}
+                  <div className="p-3.5 rounded-xl border border-border bg-slate-950/30 space-y-3">
+                    <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">
+                      Alt Görev Listesi (Checklist)
+                    </label>
+
+                    {/* Görev Ekleme Kutusu */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newChecklistItemText}
+                        onChange={(e) => setNewChecklistItemText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddChecklistItem();
+                          }
+                        }}
+                        placeholder="Yeni görev/adım..."
+                        className="flex-1 px-3 py-1.5 bg-slate-950 border border-border rounded-lg text-xs text-foreground focus:outline-none focus:border-indigo-500/50 transition-all font-sans"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddChecklistItem}
+                        className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs select-none cursor-pointer shrink-0"
+                      >
+                        Ekle
+                      </button>
+                    </div>
+
+                    {/* Görevler Listesi */}
+                    <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
+                      {noteChecklist.length === 0 ? (
+                        <span className="text-[11px] text-muted-foreground italic font-sans block py-1.5">
+                          Henüz bu nota eklenmiş hiçbir görev yok.
+                        </span>
+                      ) : (
+                        noteChecklist.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center justify-between gap-2 p-1 px-2 rounded-lg bg-slate-900 border border-border/40 group/item"
+                          >
+                            <div
+                              onClick={() => handleToggleCheckItem(item.id)}
+                              className="flex items-center gap-2 cursor-pointer flex-1 overflow-hidden"
+                            >
+                              {item.done ? (
+                                <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" />
+                              ) : (
+                                <Square className="w-4 h-4 text-slate-500 shrink-0" />
+                              )}
+                              <span className={`text-[11px] font-medium leading-normal truncate ${
+                                item.done ? "line-through text-slate-500" : "text-slate-300"
+                              }`}>
+                                {item.text}
+                              </span>
+                            </div>
+                            
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCheckItem(item.id)}
+                              className="text-slate-500 hover:text-rose-400 transition-colors p-1 shrink-0"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* 3. Not İçeriği */}
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Detaylı Açıklama
-                  </label>
-                  <textarea
-                    rows={5}
-                    value={noteContent}
-                    onChange={(e) => setNoteContent(e.target.value)}
-                    placeholder="Detaylı notlarınızı, telefon numaralarını veya sorun inceleme adımlarını buraya yazabilirsiniz..."
-                    className="w-full px-4 py-3 bg-slate-950 border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-indigo-500/50 transition-all font-sans leading-relaxed"
-                  />
-                </div>
-
-                {/* 4. Yapılacaklar Listesi (Alt Görev Süzgeci) */}
-                <div className="p-3.5 rounded-xl border border-border bg-slate-950/30 space-y-3">
-                  <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">
-                    Alt Görev Listesi (Checklist)
-                  </label>
-
-                  {/* Görev Ekleme Kutusu */}
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newChecklistItemText}
-                      onChange={(e) => setNewChecklistItemText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddChecklistItem();
-                        }
-                      }}
-                      placeholder="Yeni bir görev veya adıma dönüştürün..."
-                      className="flex-1 px-3 py-1.5 bg-slate-950 border border-border rounded-lg text-xs text-foreground focus:outline-none focus:border-indigo-500/50 transition-all font-sans"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddChecklistItem}
-                      className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs select-none cursor-pointer"
-                    >
-                      Ekle
-                    </button>
+                {/* 5. Gelişmiş Atölye Çizim Alanı */}
+                <div className="rounded-xl border border-border bg-slate-950/20 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <PenTool className="w-4 h-4 text-indigo-400" />
+                      <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">
+                        Gelişmiş Diyagram & Şema Atölyesi
+                      </label>
+                    </div>
+                    {noteDiagram && (
+                      <span className="text-[9px] font-black tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md uppercase font-mono">
+                        Çizim Ekli
+                      </span>
+                    )}
                   </div>
 
-                  {/* Görevler Listesi */}
-                  <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
-                    {noteChecklist.length === 0 ? (
-                      <span className="text-[11px] text-muted-foreground italic font-sans block py-1.5">
-                        Henüz bu nota eklenmiş hiçbir görev yok.
-                      </span>
-                    ) : (
-                      noteChecklist.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex items-center justify-between gap-2 p-1 px-2 rounded-lg bg-slate-900 border border-border/40 group/item"
-                        >
-                          <div
-                            onClick={() => handleToggleCheckItem(item.id)}
-                            className="flex items-center gap-2 cursor-pointer flex-1"
-                          >
-                            {item.done ? (
-                              <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" />
-                            ) : (
-                              <Square className="w-4 h-4 text-slate-500 shrink-0" />
-                            )}
-                            <span className={`text-[11px] font-medium leading-normal ${
-                              item.done ? "line-through text-slate-500" : "text-slate-300"
-                            }`}>
-                              {item.text}
-                            </span>
-                          </div>
-                          
+                  {noteDiagram ? (
+                    <div className="space-y-3">
+                      {/* Çizim Önizleme Kartı */}
+                      <div className="relative group/drawing overflow-hidden rounded-xl border border-slate-800 bg-slate-950 aspect-[21/9] flex items-center justify-center p-2">
+                        <img 
+                          src={noteDiagram} 
+                          alt="Diyagram Önizleme" 
+                          className="max-h-full max-w-full object-contain filter group-hover/drawing:scale-[1.01] transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-slate-950/65 opacity-0 group-hover/drawing:opacity-100 transition-opacity flex items-center justify-center gap-2">
                           <button
                             type="button"
-                            onClick={() => handleRemoveCheckItem(item.id)}
-                            className="text-slate-500 hover:text-rose-400 transition-colors p-1"
+                            onClick={() => setIsDrawingModalOpen(true)}
+                            className="p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow-lg flex items-center gap-1 cursor-pointer"
+                          >
+                            <PenTool className="w-3.5 h-3.5" /> Çizimi Düzenle
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if(confirm("Bu çizimi nottan kaldırmak istiyor musunuz?")) {
+                                setNoteDiagram(undefined);
+                                toast({
+                                  title: "Çizim Kaldırıldı",
+                                  description: "Notun içerisindeki çizim silindi."
+                                });
+                              }
+                            }}
+                            className="p-2 bg-rose-650 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition-all shadow-lg cursor-pointer"
+                            title="Çizimi Kaldır"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* 5. Diyagram Çizimi */}
-                <div className="p-3.5 rounded-xl border border-border bg-slate-950/30 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">
-                      Diyagram ve Çizim
-                    </label>
-                    <button 
-                      type="button" 
-                      onClick={() => setIsDiagramOpen(!isDiagramOpen)}
-                      className="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors border border-indigo-500/20"
-                    >
-                      {isDiagramOpen ? "Kapat" : (noteDiagram ? "Çizimi Gör/Düzenle" : "Çizime Başla")}
-                    </button>
-                  </div>
-                  
-                  {isDiagramOpen && (
-                    <div className="space-y-3">
-                        <div className="overflow-hidden border border-border/80 rounded-xl bg-white aspect-[21/9] w-full relative">
-                           <ReactSketchCanvas
-                             ref={sketchRef}
-                             strokeWidth={4}
-                             strokeColor="black"
-                             backgroundImage={noteDiagram} // Existing base64 image if any
-                             preserveBackgroundImageAspectRatio="xMidYMid meet"
-                           />
-                        </div>
-                        <div className="flex items-center gap-2 justify-end">
-                            <button
-                                type="button"
-                                onClick={() => sketchRef.current?.clearCanvas()}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors"
-                            >
-                                Çizimi Temizle
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => sketchRef.current?.undo()}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 bg-slate-800 border border-border hover:bg-slate-700 transition-colors flex items-center gap-1"
-                            >
-                                <RotateCcw className="w-3.5 h-3.5" /> Geri Al
-                            </button>
-                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-400 text-center leading-normal">
+                        Diyagram üzerinde her zaman değişiklik yapabilir veya dosyaya çıkarabilirsiniz.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 px-4 border border-dashed border-border rounded-xl bg-slate-950/40 space-y-3">
+                      <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-500">
+                        <PenTool className="w-5 h-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <h5 className="text-xs font-bold text-slate-300">Yeni Diyagram / Çizim Ekle</h5>
+                        <p className="text-[10px] text-slate-400 max-w-[280px] mx-auto leading-normal">
+                          Motosiklet bileşenlerini çizmek, servis şemalarını çizmek veya parça uyumluluk haritası hazırlamak için tuvali açın!
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsDrawingModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl cursor-pointer transition-colors shadow-lg shadow-indigo-600/10"
+                      >
+                        <PenTool className="w-3.5 h-3.5" /> Gelişmiş Tuvali Aç
+                      </button>
                     </div>
                   )}
                 </div>
 
               </div>
-              
+
               {/* Modal Kaydet Butonları */}
               <div className="px-5 py-4 border-t border-border flex items-center justify-between gap-4 bg-slate-950/20">
                 <div>
                   {activeNote && (
                     <button
                       type="button"
-                      onClick={() => handleDeleteNote(activeNote.id)}
+                      onClick={() => handleDeleteNoteClick(activeNote.id)}
                       className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-bold text-xs cursor-pointer transition-colors font-sans"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -1050,6 +1078,46 @@ export default function AdminNotes() {
             </div>
           </div>
         )}
+
+        <DrawingCanvasModal
+          isOpen={isDrawingModalOpen}
+          onClose={() => setIsDrawingModalOpen(false)}
+          onSave={(base64Image) => {
+            setNoteDiagram(base64Image);
+          }}
+          initialDrawing={noteDiagram}
+          noteTitle={noteTitle || "Diyagram"}
+        />
+
+        {/* Silme Onay Modalı */}
+        {deleteConfirmId && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+             <div className="w-full max-w-sm bg-slate-900 border border-rose-500/20 rounded-2xl shadow-2xl p-6 text-center space-y-4">
+                <div className="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-500/20">
+                   <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground">Notu Sil</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                   Bu not tamamen silinecek. Geri alınamaz. Onaylıyor musunuz?
+                </p>
+                <div className="flex gap-3 justify-center pt-4">
+                  <button 
+                    onClick={() => setDeleteConfirmId(null)} 
+                    className="px-4 py-2 rounded-xl text-slate-300 bg-slate-800 hover:bg-slate-700 border border-border transition-colors font-semibold text-xs"
+                  >
+                     İptal
+                  </button>
+                  <button 
+                    onClick={() => executeDeleteNote(deleteConfirmId)} 
+                    className="px-4 py-2 rounded-xl text-white bg-rose-600 hover:bg-rose-500 transition-colors font-semibold text-xs flex items-center gap-2"
+                  >
+                     <Trash2 className="w-4 h-4" /> Evet, Sil
+                  </button>
+                </div>
+             </div>
+          </div>
+        )}
+
       </div>
     </AdminLayout>
   );

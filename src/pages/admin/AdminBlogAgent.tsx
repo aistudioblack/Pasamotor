@@ -346,7 +346,7 @@ export default function AdminBlogAgent() {
             if (!response.ok) {
               const errText = await response.text();
               let errObj = { message: errText };
-              try { errObj = JSON.parse(errText).error || errObj; } catch (e) {}
+              try { errObj = JSON.parse(errText).error || errObj; } catch (e) { /* ignore parse error */ }
               throw new Error(`[HTTP ${response.status}] ${errObj.message || errText}`);
             }
 
@@ -432,7 +432,7 @@ export default function AdminBlogAgent() {
             if (!response.ok) {
               const errText = await response.text();
               let errObj = { message: errText };
-              try { errObj = JSON.parse(errText).error || errObj; } catch (e) {}
+              try { errObj = JSON.parse(errText).error || errObj; } catch (e) { /* ignore parse error */ }
               throw new Error(`[HTTP ${response.status}] ${errObj.message || errText}`);
             }
 

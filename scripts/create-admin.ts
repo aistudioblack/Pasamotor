@@ -26,7 +26,7 @@ async function setupUser(email: string, roleParam: string, passwordOverride?: st
 
   // Fetch the user
   const { data: userList } = await supabase.auth.admin.listUsers();
-  const userToUse = userList?.users.find(u => u.email === email);
+  const userToUse = userList?.users.find((u: any) => u.email === email);
 
   if (!userToUse) {
     console.error(`User ${email} not found after creation attempt.`);

@@ -16,6 +16,7 @@ class SupabaseQueryBuilder {
   private filters: any[] = [];
   private orderOpts: any = null;
   private limitOpts: number | null = null;
+  private rangeOpts: { from: number; to: number } | null = null;
   private isInsert: boolean = false;
   private isUpdate: boolean = false;
   private isDelete: boolean = false;
@@ -81,6 +82,11 @@ class SupabaseQueryBuilder {
 
   limit(count: number) {
     this.limitOpts = count;
+    return this;
+  }
+
+  range(from: number, to: number) {
+    this.rangeOpts = { from, to };
     return this;
   }
 
@@ -191,6 +197,12 @@ class SupabaseQueryBuilder {
       // Apply limits
       if (this.limitOpts) {
         docs = docs.slice(0, this.limitOpts);
+      }
+
+      // Apply range slicing
+      if (this.rangeOpts) {
+        const { from, to } = this.rangeOpts;
+        docs = docs.slice(from, to + 1);
       }
 
       if (this.isSingle) {

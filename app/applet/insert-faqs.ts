@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, doc, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
-import config from './firebase-applet-config.json' assert { type: "json" };
+import config from '../../firebase-applet-config.json' assert { type: "json" };
 const app = initializeApp(config);
 const db = getFirestore(app);
 

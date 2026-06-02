@@ -6,6 +6,7 @@ import admin from "firebase-admin";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import { pushToGithubSdk } from "./api/github-push";
+import { beautifyProduct } from "./src/lib/beautify-product";
 
 dotenv.config();
 
@@ -176,25 +177,18 @@ app.use(express.urlencoded({ limit: "1gb", extended: true }));
   // Paşa Motor API Endpoints
   // ==========================================
 
-  app.post("/api/supplier/fcs-sync", async (req, res) => {
+    app.post("/api/supplier/fcs-auth", async (req, res) => {
     try {
-      const { userCode, password, mode } = req.body; // e.g. P048, paşa1234, test_connection
-      
-      const customerCode = userCode;
-
-      // Robust cookie parser helper to support older Node.js versions or custom fetch implementations in serverless environments like Vercel
-      const getSetCookieSafe = (headers: Headers): string[] => {
+      const { userCode, password } = req.body;
+      const getSetCookieSafe = (headers: Headers) => {
         if (typeof (headers as any).getSetCookie === "function") {
           try {
             const list = (headers as any).getSetCookie();
             if (list && list.length > 0) return list;
-          } catch (e) {
-            console.warn("Native getSetCookie failed, falling back...", e);
-          }
+          } catch (e) {}
         }
         const raw = headers.get("set-cookie");
         if (!raw) return [];
-        // Split with care regarding cookie expiry dates (which contain commas)
         const parts = raw.split(",");
         const results: string[] = [];
         let current = "";
@@ -213,178 +207,59 @@ app.use(express.urlencoded({ limit: "1gb", extended: true }));
         return results;
       };
 
-      // 1. Initial GET to fetch Session Cookie 
       const getReq = await fetch("https://siparis.fcs.com.tr/Login");
       const cookiesHeader = getSetCookieSafe(getReq.headers);
       const sessionCookie = cookiesHeader ? cookiesHeader.map(c => c.split(';')[0]).join('; ') : '';
 
-      // 2. Login POST to get Auth Cookies
       const loginRes = await fetch("https://siparis.fcs.com.tr/Login/Index", {
         method: "POST",
-        headers: {
-            "Content-Type": "Application/json;charset=utf-8",
-            "Cookie": sessionCookie,
-            "X-Requested-With": "XMLHttpRequest"
-        },
-        body: JSON.stringify({
-            "CustomerCode": customerCode,
-            "UserCode": userCode,
-            "Password": password,
-            "LanguageId": 1,
-            "Captcha": "", "NewPassword": "", "NewPasswordRepeat": "", "ChangePassword": false
-        }),
+        headers: { "Content-Type": "Application/json;charset=utf-8", "Cookie": sessionCookie, "X-Requested-With": "XMLHttpRequest" },
+        body: JSON.stringify({ "CustomerCode": userCode, "UserCode": userCode, "Password": password, "LanguageId": 1, "Captcha": "", "NewPassword": "", "NewPasswordRepeat": "", "ChangePassword": false }),
       });
-      
       if (!loginRes.ok) throw new Error("FCS Login Request Failed: " + loginRes.status);
       
       const loginCookies = getSetCookieSafe(loginRes.headers).map(c => c.split(';')[0]);
       let allCookies = [sessionCookie, ...loginCookies].join('; ');
       
-      // 3. GET /Home to initialize remaining tokens (.ASPXAUTH)
-      const homeRes = await fetch("https://siparis.fcs.com.tr/Home", {
-        headers: {
-            "Cookie": allCookies,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        },
-      });
+      const homeRes = await fetch("https://siparis.fcs.com.tr/Home", { headers: { "Cookie": allCookies, "Accept": "text/html" } });
       const homeCookies = getSetCookieSafe(homeRes.headers).map(c => c.split(';')[0]);
       allCookies = [allCookies, ...homeCookies].join('; ');
 
-      // Eğer sadece bağlantı/giriş testi yapılıyorsa burada işlemi sonlandırıp başarılı dönüyoruz
-      if (mode === "test_connection" || mode === "test_login") {
-         return res.json({ 
-           success: true, 
-           message: "FCS Portal bağlantı ve oturum açma testi başarıyla gerçekleştirildi.", 
-           data: [], 
-           count: 0, 
-           total_fetched: 0 
-         });
-      }
+      return res.json({ success: true, cookies: allCookies });
+    } catch (error: any) { return res.status(500).json({ error: error.message }); }
+  });
 
-      // 4. Hit Search API and fetch products grade by grade / brand by brand with pagination offset
-      const allowedBrands = ["BAJAJ","BANDO","BOSCH AKÜ","BOSCH MOTOSİKLET","DENSO","HONDA","KYB","MAHLE","NGK","SACHS","TECNECO","TRW","TVS","VARTA"];
+  app.post("/api/supplier/fcs-fetch", async (req, res) => {
+    try {
+      const { cookies, brand, offset } = req.body;
+      const searchRes = await fetch("https://siparis.fcs.com.tr/Search/SearchProduct", {
+        method: "POST",
+        headers: { "Content-Type": "application/json;charset=UTF-8", "Cookie": cookies, "X-Requested-With": "XMLHttpRequest" },
+        body: JSON.stringify({ "dataCount": offset, "manufacturer": brand, "orderby": "4", "productGroup1": "MOTOSİKLET", "productGroup2": "", "productGroup3": null, "vehicleBrand": "", "vehicleModel": null, "t9Text": "", "campaign": false, "newArrival": false, "newProduct": false, "comparsionProduct": false, "onQuantity": false, "onWay": false, "directSearch": false })
+      });
+      if (!searchRes.ok) throw new Error("Search failed for " + brand);
       
-      const allFetchedProducts: any[] = [];
-
-      for (const brand of allowedBrands) {
-        let offset = 0;
-        let hasMore = true;
-
-        while (hasMore) {
-          const searchRes = await fetch("https://siparis.fcs.com.tr/Search/SearchProduct", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json;charset=UTF-8",
-                "Cookie": allCookies,
-                "X-Requested-With": "XMLHttpRequest",
-                "Accept": "application/json, text/plain, */*"
-            },
-            body: JSON.stringify({
-                "dataCount": offset,
-                "manufacturer": brand,
-                "vehicleBrand": "",
-                "vehicleModel": null,
-                "productGroup1": "MOTOSİKLET",
-                "productGroup2": "",
-                "productGroup3": null,
-                "t9Text": "",
-                "campaign": false,
-                "newArrival": false,
-                "newProduct": false,
-                "comparsionProduct": false,
-                "onQuantity": false,
-                "onWay": false,
-                "directSearch": false,
-                "orderby": "4"
-            })
-          });
-
-          if (!searchRes.ok) {
-             console.error(`FCS Sync failed on ${brand} offset ${offset}`);
-             break;
-          }
-
-          const pageData = await searchRes.json() as any;
-          const pageProducts = pageData?.ProductList || [];
-          const totalDataCount = pageData?.TotalDataCount || 0;
-
-          if (pageProducts.length === 0) {
-             hasMore = false;
-             break;
-          }
-
-          allFetchedProducts.push(...pageProducts);
-
-          // Standard B2B pagination stops when offset + batch size is equal or greater than total count or we get fewer than 24 elements
-          if (offset + pageProducts.length >= totalDataCount || pageProducts.length < 24) {
-             hasMore = false;
-          } else {
-             offset += 24;
-          }
-        }
-      }
-
-      // Deduplicate products using their unique Code
-      const uniqueProductsMap = new Map<string, any>();
-      for (const p of allFetchedProducts) {
-        if (p && p.Code) {
-          uniqueProductsMap.set(p.Code, p);
-        }
-      }
-      const products = Array.from(uniqueProductsMap.values());
-
-      const mappedProducts = products.map((p: any) => {
-        // Extract basic data
+      const pageData = await searchRes.json() as any;
+      const pageProducts = pageData?.ProductList || [];
+      const totalDataCount = pageData?.TotalDataCount || 0;
+      
+      const mappedProducts = pageProducts.map((p: any) => {
         const manufacturer = p.Manufacturer || "Marka Yok";
         const oemCode = p.ManufacturerCode || "";
         const rawName = p.Name || "";
-        
-        // 1. Clean up product Name. For example: "(C7HSA) GENEL SCOOTER/ MOTORSİKLET ATEŞLEME BUJİSİ 4629 ..."
-        // We will build a clean name like "NGK C7HSA 4629 Ateşleme Bujisi"
-        let cleanName = `${manufacturer} ${oemCode} ${rawName}`;
-        cleanName = cleanName.replace(/\s+/g, ' ').trim();
+        const beauty = beautifyProduct(manufacturer, oemCode, rawName);
+        const cleanName = beauty.title;
 
-        // 2. Slug
-        const slugBase = cleanName
-          .toLowerCase()
-          .replace(/ı/g, "i").replace(/ğ/g, "g").replace(/ü/g, "u")
-          .replace(/ş/g, "s").replace(/ö/g, "o").replace(/ç/g, "c")
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
-
+        const slugBase = cleanName.toLowerCase().replace(/ı/g, "i").replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s").replace(/ö/g, "o").replace(/ç/g, "c").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
         const slug = `${slugBase}-${p.Code ? p.Code.toString().toLowerCase().replace(/[^a-z0-9]+/g, "") : Math.floor(Math.random() * 1000)}`;
 
-        // 3. SEC / Meta
         const seoTitle = `${cleanName} | Motosiklet ve ATV Uyumlu | Orijinal ${manufacturer}`.substring(0, 160);
         const metaDesc = `Orijinal ${manufacturer} marka ${oemCode} kodlu ${rawName}. Motosiklet ve ATV'ler ile uyumludur. Yüksek performans sağlar.`.substring(0, 250);
 
-        // 4. Premium HTML Content
-        const htmlContent = `
-<div style="line-height:1.8; font-size:15px;">
-<h1 style="margin-bottom:25px;">${cleanName}</h1>
-<p style="margin-bottom:25px;">
-<strong>✔ Orijinal ${manufacturer} kalite • ✔ Dayanıklı Yapı • ✔ Tam Uyum</strong>
-</p>
-<p style="margin-bottom:25px;">
-${manufacturer} marka, <strong>${oemCode}</strong> kodlu bu yedek parça, yüksek performans ve uzun ömür sağlamak için özel olarak üretilmiştir. Motosikletinizde orijinal parça kalitesini hissedin. 
-${rawName} ihtiyacınızı orijinal kalite ile çözün.
-</p>
-<h2 style="margin-top:40px; margin-bottom:15px;">🔧 Ürün Özellikleri</h2>
-<ul style="margin-bottom:35px; padding-left:20px;">
-<li style="margin-bottom:10px;">Orijinal <strong>${manufacturer}</strong> üretimi</li>
-<li style="margin-bottom:10px;">Üretici Kodu: <strong>${oemCode}</strong></li>
-<li style="margin-bottom:10px;">Yüksek dayanıklılık and performans</li>
-<li style="margin-bottom:10px;">Kolay montaj</li>
-</ul>
-<h2 style="margin-top:40px; margin-bottom:15px;">📦 Paket İçeriği</h2>
-<ul style="margin-bottom:30px; padding-left:20px;">
-<li>1 Adet ${cleanName}</li>
-</ul>
-<hr style="margin:40px 0;">
-<p style="text-align:center;">
-<strong>🚚 Hızlı Kargo • 🔒 Güvenli Alışveriş • 🛠️ Orijinal ${manufacturer} Ürünü</strong>
-</p>
-</div>`;
+        const compatibilityHtml = beauty.compatibilityList ? `<h2 style="margin-top:40px; margin-bottom:15px;">🏍️ Uyumlu Motosiklet Modelleri</h2><p style="margin-bottom:25px; line-height: 1.8;">${beauty.compatibilityList}</p>` : "";
+        const htmlContent = `<div style="line-height:1.8; font-size:15px;"><h1 style="margin-bottom:25px;">${cleanName}</h1><p style="margin-bottom:25px;"><strong>✔ Orijinal ${manufacturer} kalite • ✔ Dayanıklı Yapı • ✔ Tam Uyum</strong></p><p style="margin-bottom:25px;">${manufacturer} marka, <strong>${oemCode}</strong> kodlu bu yedek parça, yüksek performans ve uzun ömür sağlamak için özel olarak üretilmiştir. Motosikletinizde orijinal parça kalitesini hissedin. ${rawName} ihtiyacınızı orijinal kalite ile çözün.</p><h2 style="margin-top:40px; margin-bottom:15px;">🔧 Ürün Özellikleri</h2><ul style="margin-bottom:35px; padding-left:20px;"><li style="margin-bottom:10px;">Orijinal <strong>${manufacturer}</strong> üretimi</li><li style="margin-bottom:10px;">Üretici Kodu: <strong>${oemCode}</strong></li><li style="margin-bottom:10px;">Yüksek dayanıklılık ve performans</li><li style="margin-bottom:10px;">Kolay montaj</li></ul>${compatibilityHtml}<h2 style="margin-top:40px; margin-bottom:15px;">📦 Paket İçeriği</h2><ul style="margin-bottom:30px; padding-left:20px;"><li>1 Adet ${cleanName}</li></ul><hr style="margin:40px 0;"><p style="text-align:center;"><strong>🚚 Hızlı Kargo • 🔒 Güvenli Alışveriş • 🛠️ Orijinal ${manufacturer} Ürünü</strong></p></div>`;
+        
+        const productImages = p.PicturePath ? [p.PicturePath] : [beauty.fallbackImage];
 
         return {
           id: p.Code.replace(/\//g, "-"),
@@ -395,7 +270,7 @@ ${rawName} ihtiyacınızı orijinal kalite ile çözün.
           price: p.PriceNetWithVatCustomer?.ValueFinal || 0,
           original_price: p.PriceListWithVatCustomer?.ValueFinal || 0,
           stock: p.AvailabilityText === "Var" ? 10 : 0,
-          images: p.PicturePath ? [p.PicturePath] : [],
+          images: productImages,
           category: "yedek-parca",
           description: metaDesc,
           content: htmlContent,
@@ -406,9 +281,126 @@ ${rawName} ihtiyacınızı orijinal kalite ile çözün.
         };
       });
 
-      res.json({ success: true, count: mappedProducts.length, data: mappedProducts, total_fetched: allFetchedProducts.length, filtered_count: mappedProducts.length });
+      res.json({ success: true, count: mappedProducts.length, data: mappedProducts, totalDataCount: totalDataCount });
+    } catch (error: any) { res.status(500).json({ error: error.message }); }
+  });
+
+  app.post("/api/supplier/beautify-supabase", async (req, res) => {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const sbUrl = process.env.VITE_SUPABASE_URL || '';
+      const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+      
+      if (!sbUrl || !sbKey) {
+        return res.status(500).json({ error: "Supabase config missing for product beautification" });
+      }
+
+      const supabase = createClient(sbUrl, sbKey);
+      
+      // Fetch all products from Supabase
+      const { data: dbProducts, error: fetchErr } = await supabase
+        .from("products")
+        .select("*");
+      
+      if (fetchErr) throw fetchErr;
+      if (!dbProducts || dbProducts.length === 0) {
+        return res.json({ success: true, message: "Temizlenecek ürün bulunamadı.", updated: 0 });
+      }
+
+      let updatedCount = 0;
+      
+      // Process and update each product
+      for (const p of dbProducts) {
+        const manufacturer = p.brand || "PAŞA MOTOR";
+        const oemCode = p.sku || "";
+        const rawName = p.title || "";
+        
+        // Skip if already very clean or formatted
+        if (p.title && (p.title.includes("Uyumlu)") || p.title.length < 35)) {
+          if (!p.images || p.images.length === 0 || p.images[0]?.includes("gorsel-hazirlaniyor") || p.images[0]?.includes("placeholder")) {
+            const beauty = beautifyProduct(manufacturer, oemCode, rawName);
+            const { error: updErr } = await supabase
+              .from("products")
+              .update({ images: [beauty.fallbackImage] })
+              .eq("id", p.id);
+            if (!updErr) updatedCount++;
+          }
+          continue;
+        }
+
+        const beauty = beautifyProduct(manufacturer, oemCode, rawName);
+        const cleanName = beauty.title;
+
+        // Generate clean SEO structures
+        const slugBase = cleanName
+          .toLowerCase()
+          .replace(/ı/g, "i").replace(/ğ/g, "g").replace(/ü/g, "u")
+          .replace(/ş/g, "s").replace(/ö/g, "o").replace(/ç/g, "c")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+
+        const slug = `${slugBase}-${p.sku ? p.sku.toString().toLowerCase().replace(/[^a-z0-9]+/g, "") : Math.floor(Math.random() * 1000)}`;
+        const seoTitle = `${cleanName} | Motosiklet Uyumlu | Orijinal ${manufacturer}`.substring(0, 160);
+        const metaDesc = `Orijinal ${manufacturer} marka ${oemCode} kodlu parça. Motosikletinizle %100 uyumludur ve yüksek performans sağlar.`.substring(0, 250);
+
+        const compatibilityHtml = beauty.compatibilityList ? `
+<h2 style="margin-top:40px; margin-bottom:15px;">🏍️ Uyumlu Motosiklet Modelleri</h2>
+<p style="margin-bottom:25px; line-height: 1.8;">
+${beauty.compatibilityList}
+</p>` : "";
+
+        const htmlContent = `
+<div style="line-height:1.8; font-size:15px;">
+<h1 style="margin-bottom:25px;">${cleanName}</h1>
+<p style="margin-bottom:25px;">
+<strong>✔ Orijinal ${manufacturer} kalite • ✔ Dayanıklı Yapı • ✔ Tam Uyum</strong>
+</p>
+<p style="margin-bottom:25px;">
+${manufacturer} marka, <strong>${oemCode}</strong> kodlu bu yedek parça, yüksek performans ve uzun ömür sağlamak için özel olarak üretilmiştir. Motosikletinizinde orijinal parça kalitesini hissedin.
+</p>
+<h2 style="margin-top:40px; margin-bottom:15px;">🔧 Ürün Özellikleri</h2>
+<ul style="margin-bottom:35px; padding-left:20px;">
+<li style="margin-bottom:10px;">Orijinal <strong>${manufacturer}</strong> üretimi</li>
+<li style="margin-bottom:10px;">Üretici Kodu: <strong>${oemCode}</strong></li>
+<li style="margin-bottom:10px;">Yüksek dayanıklılık ve performans</li>
+<li style="margin-bottom:10px;">Kolay montaj</li>
+</ul>
+${compatibilityHtml}
+<h2 style="margin-top:40px; margin-bottom:15px;">📦 Paket İçeriği</h2>
+<ul style="margin-bottom:30px; padding-left:20px;">
+<li>1 Adet ${cleanName}</li>
+</ul>
+<hr style="margin:40px 0;">
+<p style="text-align:center;">
+<strong>🚚 Hızlı Kargo • 🔒 Güvenli Alışveriş • 🛠️ Orijinal ${manufacturer} Ürünü</strong>
+</p>
+</div>`;
+
+        const productImages = (p.images && p.images.length > 0 && !p.images[0]?.includes("gorsel-hazirlaniyor") && !p.images[0]?.includes("placeholder")) 
+          ? p.images 
+          : [beauty.fallbackImage];
+
+        const { error: updErr } = await supabase
+          .from("products")
+          .update({
+            title: cleanName,
+            slug: slug,
+            images: productImages,
+            description: metaDesc,
+            content: htmlContent,
+            meta_title: seoTitle,
+            meta_description: metaDesc
+          })
+          .eq("id", p.id);
+
+        if (!updErr) {
+          updatedCount++;
+        }
+      }
+
+      res.json({ success: true, message: `${updatedCount} adet yedek parça ürünü kurumsal formata dönüştürüldü ve görselleri tanımlandı!`, updated: updatedCount });
     } catch (error: any) {
-      console.error("FCS Sync Error:", error);
+      console.error("Supabase beautification error:", error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -1136,7 +1128,7 @@ KURALLAR:
     if (indexNowKey) {
       try {
         let host = "pasamotor.com.tr";
-        try { host = new URL(sitemapUrl).hostname; } catch(e) {}
+        try { host = new URL(sitemapUrl).hostname; } catch(e) { /* fallback to default host */ }
         const postUrl = "https://api.indexnow.org/indexnow";
         const payload = {
           host, key: indexNowKey, keyLocation: `https://${host}/${indexNowKey}.txt`,
