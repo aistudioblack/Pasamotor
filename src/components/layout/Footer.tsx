@@ -38,7 +38,7 @@ const Footer = () => {
 
             {/* Açıklama */}
             <p className="text-muted-foreground text-xs leading-relaxed">
-              Orijinal <strong className="text-foreground font-semibold">pasamotor.com.tr</strong> resmî platformumuzdur. İstanbul Fatih'te TVS, Kuba, Mondial, RKS, Hero, Falcon ve Işıldar yetkili teknik servis ve orijinal yedek parça tedarik noktası.
+              Orijinal <strong className="text-foreground font-semibold">pasamotor.com.tr</strong> resmî platformumuzdur. İstanbul Fatih'te TVS, Hero, Falcon ve Işıldar yetkili teknik servis ve orijinal yedek parça tedarik noktası.
             </p>
 
             {/* Yetkili Marka Etiketleri */}

@@ -88,7 +88,7 @@ Yalnızca ve yalnızca JSON belgesi döndür. Başka hiçbir şey yazma.
     const slug = slugify(title);
     
     return `Sen Paşa Motor'un (pasamotor.com.tr) kıdemli Senior SEO & CRO (E-Ticaret Dönüşüm) içerik ajanısın.
-Paşa Motor; Türkiye'nin Kuba, Mondial, RKS, TVS yetkili servisi ve motosiklet yedek parça merkezidir.
+Paşa Motor; Türkiye'nin TVS, Hero, Falcon, Işıldar yetkili servisi ve motosiklet yedek parça merkezidir.
 
 Mevcut ciddi sorunlarımız ve çözümlerimiz:
 - Ortalama oturum süresi 30 saniye -> kullanıcı güven duymadan çıkıyor (Uzun, doyurucu ve teknik makale ile güvence vererek çöz)

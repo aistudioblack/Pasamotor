@@ -95,6 +95,7 @@ const navGroups = [
       { to: "/admin/kullanicilar", label: "Kullanıcı Yönetimi", icon: ShieldAlert },
       { to: "/admin/veritabani", label: "Veritabanı", icon: Database },
       { to: "/admin/animasyonlar", label: "Arayüz Animasyonları", icon: Sparkles },
+      { to: "/admin/changelog", label: "Change Log", icon: Activity },
     ]
   }
 ];

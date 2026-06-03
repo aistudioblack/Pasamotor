@@ -156,7 +156,7 @@ export default function InteractiveMap() {
           balloonContent: `
             <div style="font-family: sans-serif; padding: 12px 6px; width: 220px; line-height: 1.5;">
               <h4 style="margin: 0 0 4px 0; color: #dc2626; font-size: 14px; font-weight: bold;">Paşa Motor</h4>
-              <p style="margin: 0 0 8px 0; font-size: 11px; color: #475569;">Kuba, Mondial, RKS, TVS Yetkili Servisi & Orijinal Parça Merkezi</p>
+              <p style="margin: 0 0 8px 0; font-size: 11px; color: #475569;">TVS, Hero, Falcon, Işıldar Yetkili Servisi & Orijinal Parça Merkezi</p>
               <div style="font-size: 10px; color: #64748b; font-weight: 500; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
                 📍 Kızılelma Cad. No:66/A Kocamustafapaşa / Fatih
               </div>

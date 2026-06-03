@@ -179,7 +179,7 @@ app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
     app.post("/api/supplier/fcs-auth", async (req, res) => {
     try {
-      const { userCode, password } = req.body;
+      const { userCode, password } = req.body || {};
       const getSetCookieSafe = (headers: Headers) => {
         if (typeof (headers as any).getSetCookie === "function") {
           try {
@@ -226,12 +226,15 @@ app.use(express.urlencoded({ limit: "1gb", extended: true }));
       allCookies = [allCookies, ...homeCookies].join('; ');
 
       return res.json({ success: true, cookies: allCookies });
-    } catch (error: any) { return res.status(500).json({ error: error.message }); }
+    } catch (error: any) { 
+      console.error("FCS Auth error:", error);
+      return res.status(500).json({ error: error.message }); 
+    }
   });
 
   app.post("/api/supplier/fcs-fetch", async (req, res) => {
     try {
-      const { cookies, brand, offset } = req.body;
+      const { cookies, brand, offset } = req.body || {};
       const searchRes = await fetch("https://siparis.fcs.com.tr/Search/SearchProduct", {
         method: "POST",
         headers: { "Content-Type": "application/json;charset=UTF-8", "Cookie": cookies, "X-Requested-With": "XMLHttpRequest" },
@@ -1084,7 +1087,7 @@ KURALLAR:
   // POST SEO Sitemap & IndexNow Ping
   app.post("/api/seo/ping", async (req, res) => {
     try {
-      const { sitemapUrl = "https://pasamotor.com.tr/sitemap.xml", indexNowKey = "96dfc37466eb4b74bd562be641577977" } = req.body;
+      const { sitemapUrl = "https://pasamotor.com.tr/sitemap.xml", indexNowKey = "96dfc37466eb4b74bd562be641577977" } = req.body || {};
       const status = await pingSitemap(sitemapUrl, indexNowKey);
       res.json({ success: true, results: status });
     } catch (error: any) {
@@ -1214,7 +1217,7 @@ KURALLAR:
       let html = fs.readFileSync(targetPath, "utf8");
 
       const title = customTitle || "Paşa Motor | Yedek Parça & Yetkili Servis";
-      const desc = customDesc || "İstanbul'un en güvenilir motosiklet yedek parça merkezi ve Kuba, Mondial, RKS, TVS yetkili servisi.";
+      const desc = customDesc || "İstanbul'un en güvenilir motosiklet yedek parça merkezi ve TVS, Hero, Falcon, Işıldar yetkili servisi.";
       const image = customImage || "https://pasamotor.com.tr/src/assets/pasa-motor-logo.webp";
       const canonical = canonicalUrl || `https://pasamotor.com.tr${req.originalUrl}`;
 

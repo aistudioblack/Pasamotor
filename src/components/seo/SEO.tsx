@@ -24,7 +24,7 @@ export const localBusinessSchema = () => ({
   "url": SITE,
   "logo": `${SITE}/favicon.png`,
   "image": `${SITE}/favicon.png`,
-  "description": "Türkiye'nin en gelişmiş motosiklet yetkili servis ve yedek parça platformu. Kuba, Mondial, RKS resmi partneri.",
+  "description": "Türkiye'nin en gelişmiş motosiklet yetkili servis ve yedek parça platformu. TVS, Hero, Falcon, Işıldar resmi partneri.",
   "telephone": "+90 500 000 00 00",
   "address": {
     "@type": "PostalAddress",

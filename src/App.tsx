@@ -65,6 +65,7 @@ const AdminSuppliers = lazy(() => import("./pages/admin/AdminSuppliers.tsx"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers.tsx"));
 const AdminAPI = lazy(() => import("./pages/admin/AdminAPI.tsx"));
 const AdminAITester = lazy(() => import("./pages/admin/AdminAITester.tsx"));
+const AdminChangelog = lazy(() => import("./pages/admin/AdminChangelog.tsx"));
 const AdminBlogAgent = lazy(() => import("./pages/admin/AdminBlogAgent.tsx"));
 const AdminNotes = lazy(() => import("./pages/admin/AdminNotes.tsx"));
 const AdminGithub = lazy(() => import("./pages/admin/AdminGithub.tsx"));
@@ -121,6 +122,7 @@ const App = () => (
                 <Route path="/admin/kullanicilar" element={<AdminUsers />} />
                 <Route path="/admin/api" element={<AdminAPI />} />
                 <Route path="/admin/yapay-zeka-test" element={<AdminAITester />} />
+                <Route path="/admin/changelog" element={<AdminChangelog />} />
                 <Route path="/admin/github" element={<AdminGithub />} />
                 <Route path="/admin/veritabani" element={<AdminDatabase />} />
                 <Route path="*" element={<NotFound />} />
