@@ -45,10 +45,24 @@ export async function convertToWebP(file: File | Blob, quality: number = 0.8): P
 }
 
 /**
- * Processes a file name to ensure it has the .webp extension
+ * Processes a file name to ensure it has the .webp extension and is URL/storage safe without spaces or special characters
  */
 export function getWebPFileName(originalName: string): string {
   const dotIndex = originalName.lastIndexOf('.');
-  if (dotIndex === -1) return `${originalName}.webp`;
-  return `${originalName.substring(0, dotIndex)}.webp`;
+  const baseName = dotIndex === -1 ? originalName : originalName.substring(0, dotIndex);
+  
+  // Sanitize baseName (replace Turkish chars, spaces and special characters)
+  const cleanName = baseName
+    .toLowerCase()
+    .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/[^a-z0-9_-]/g, '-') // Replace spaces and other special chars with hyphens
+    .replace(/-+/g, '-') // collapse consecutive hyphens
+    .replace(/(^-|-$)/g, ''); // trim starting/trailing hyphens
+
+  return `${cleanName}.webp`;
 }

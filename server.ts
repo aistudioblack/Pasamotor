@@ -7,8 +7,40 @@ import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import { pushToGithubSdk } from "./api/github-push";
 import { beautifyProduct } from "./src/lib/beautify-product";
+import { createClient } from "@supabase/supabase-js";
 
 dotenv.config();
+
+let supabaseServerInstance: any = null;
+function getSupabase() {
+  const sbUrl = process.env.VITE_SUPABASE_URL || '';
+  const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+  if (!sbUrl || !sbKey) {
+    return null;
+  }
+  if (!supabaseServerInstance) {
+    supabaseServerInstance = createClient(sbUrl, sbKey);
+  }
+  return supabaseServerInstance;
+}
+
+let supabaseAdminInstance: any = null;
+function getSupabaseAdmin() {
+  const sbUrl = process.env.VITE_SUPABASE_URL || '';
+  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  if (!sbUrl || !sbKey) {
+    return null;
+  }
+  if (!supabaseAdminInstance) {
+    supabaseAdminInstance = createClient(sbUrl, sbKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+  }
+  return supabaseAdminInstance;
+}
 
 let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI {
@@ -207,21 +239,47 @@ app.use(express.urlencoded({ limit: "1gb", extended: true }));
         return results;
       };
 
-      const getReq = await fetch("https://siparis.fcs.com.tr/Login");
+      const browserUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+      const getReq = await fetch("https://siparis.fcs.com.tr/Login", {
+        headers: { "User-Agent": browserUA }
+      });
       const cookiesHeader = getSetCookieSafe(getReq.headers);
       const sessionCookie = cookiesHeader ? cookiesHeader.map(c => c.split(';')[0]).join('; ') : '';
 
       const loginRes = await fetch("https://siparis.fcs.com.tr/Login/Index", {
         method: "POST",
-        headers: { "Content-Type": "Application/json;charset=utf-8", "Cookie": sessionCookie, "X-Requested-With": "XMLHttpRequest" },
+        headers: { 
+          "Content-Type": "application/json;charset=utf-8", 
+          "Cookie": sessionCookie, 
+          "X-Requested-With": "XMLHttpRequest",
+          "User-Agent": browserUA
+        },
         body: JSON.stringify({ "CustomerCode": userCode, "UserCode": userCode, "Password": password, "LanguageId": 1, "Captcha": "", "NewPassword": "", "NewPasswordRepeat": "", "ChangePassword": false }),
       });
       if (!loginRes.ok) throw new Error("FCS Login Request Failed: " + loginRes.status);
       
+      let loginData: any = null;
+      try {
+        const text = await loginRes.clone().text();
+        if (text && text.trim().startsWith("{")) {
+          loginData = JSON.parse(text);
+        }
+      } catch (e) {}
+
+      if (loginData && loginData.Redirect === false) {
+        throw new Error(loginData.Message || "FCS Portal girişi başarısız (Kullanıcı adı, şifre hatalı veya Captcha koruması engellendi).");
+      }
+      
       const loginCookies = getSetCookieSafe(loginRes.headers).map(c => c.split(';')[0]);
       let allCookies = [sessionCookie, ...loginCookies].join('; ');
       
-      const homeRes = await fetch("https://siparis.fcs.com.tr/Home", { headers: { "Cookie": allCookies, "Accept": "text/html" } });
+      const homeRes = await fetch("https://siparis.fcs.com.tr/Home", { 
+        headers: { 
+          "Cookie": allCookies, 
+          "Accept": "text/html",
+          "User-Agent": browserUA
+        } 
+      });
       const homeCookies = getSetCookieSafe(homeRes.headers).map(c => c.split(';')[0]);
       allCookies = [allCookies, ...homeCookies].join('; ');
 
@@ -235,9 +293,15 @@ app.use(express.urlencoded({ limit: "1gb", extended: true }));
   app.post("/api/supplier/fcs-fetch", async (req, res) => {
     try {
       const { cookies, brand, offset } = req.body || {};
+      const browserUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
       const searchRes = await fetch("https://siparis.fcs.com.tr/Search/SearchProduct", {
         method: "POST",
-        headers: { "Content-Type": "application/json;charset=UTF-8", "Cookie": cookies, "X-Requested-With": "XMLHttpRequest" },
+        headers: { 
+          "Content-Type": "application/json;charset=UTF-8", 
+          "Cookie": cookies, 
+          "X-Requested-With": "XMLHttpRequest",
+          "User-Agent": browserUA
+        },
         body: JSON.stringify({ "dataCount": offset, "manufacturer": brand, "orderby": "4", "productGroup1": "MOTOSİKLET", "productGroup2": "", "productGroup3": null, "vehicleBrand": "", "vehicleModel": null, "t9Text": "", "campaign": false, "newArrival": false, "newProduct": false, "comparsionProduct": false, "onQuantity": false, "onWay": false, "directSearch": false })
       });
       if (!searchRes.ok) throw new Error("Search failed for " + brand);
@@ -290,15 +354,10 @@ app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
   app.post("/api/supplier/beautify-supabase", async (req, res) => {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const sbUrl = process.env.VITE_SUPABASE_URL || '';
-      const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
-      
-      if (!sbUrl || !sbKey) {
+      const supabase = getSupabase();
+      if (!supabase) {
         return res.status(500).json({ error: "Supabase config missing for product beautification" });
       }
-
-      const supabase = createClient(sbUrl, sbKey);
       
       // Fetch all products from Supabase
       const { data: dbProducts, error: fetchErr } = await supabase
@@ -450,21 +509,59 @@ ${compatibilityHtml}
     res.json({ status: "ok", message: "Paşa Motor API (Firebase Backend) is running" });
   });
 
+  // Admin password change endpoint
+  app.post("/api/admin/change-password", async (req, res) => {
+    try {
+      const { userId, newPassword } = req.body || {};
+      if (!userId || !newPassword) {
+        return res.status(400).json({ error: "Kullanıcı ID ve yeni şifre gereklidir." });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: "Şifre en az 6 karakter olmalıdır." });
+      }
+
+      // Initialize the admin client to modify user auth credentials
+      const adminClient = getSupabaseAdmin();
+      if (!adminClient) {
+        return res.status(500).json({ error: "Supabase yöneticisi yapılandırılamadı. VITE_SUPABASE_URL veya SUPABASE_SERVICE_ROLE_KEY eksik." });
+      }
+
+      // First let's check if the target is the Super Admin via the database users table
+      const { data: dbUser, error: userError } = await adminClient.from('users').select('*').eq('id', userId).single();
+      if (userError || !dbUser) {
+        return res.status(404).json({ error: "Kullanıcı veritabanında bulunamadı." });
+      }
+
+      if (dbUser.email === "ahmetcafoglu@hotmail.com") {
+        return res.status(403).json({ error: "Süper Admin (ahmetcafoglu@hotmail.com) güvenliği nedeniyle şifresi bu yöntemle değiştirilemez!" });
+      }
+
+      // Update the user password in Supabase Auth
+      const { error: authError } = await adminClient.auth.admin.updateUserById(userId, {
+        password: newPassword
+      });
+
+      if (authError) {
+        throw authError;
+      }
+
+      return res.json({ success: true, message: "Kullanıcı şifresi başarıyla güncellendi!" });
+    } catch (error: any) {
+      console.error("Password change endpoint error:", error);
+      return res.status(500).json({ error: error.message || "Şifre değiştirilirken sunucu hatası oluştu." });
+    }
+  });
+
   // Keep-alive endpoint for Supabase
   // Users can set up a cron job (pinging every 5-10 minutes) pointing to this endpoint
   app.get("/api/keep-alive", async (req, res) => {
     try {
-      // Import the standard supabase client 
-      // We will perform a simple SELECT limit 1 to wake up / keep awake the DB
-      const { createClient } = await import("@supabase/supabase-js");
-      const sbUrl = process.env.VITE_SUPABASE_URL || '';
-      const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
-      
-      if (!sbUrl || !sbKey) {
+      // Perform a simple SELECT limit 1 to wake up / keep awake the DB
+      const supabase = getSupabase();
+      if (!supabase) {
         return res.status(500).json({ status: "error", message: "Supabase config missing for keep-alive" });
       }
-
-      const supabase = createClient(sbUrl, sbKey);
       
       const { data, error } = await supabase.from("products").select("id").limit(1);
       
@@ -1124,7 +1221,7 @@ KURALLAR:
   // Helper for sitemap notification
   async function pingSitemap(sitemapUrl: string, indexNowKey: string) {
     const results = [];
-    const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PaşaMotorSEO";
+    const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PasaMotorSEO";
 
     try {
       const googleUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
@@ -1180,7 +1277,7 @@ KURALLAR:
         urlList: urls
       };
       
-      const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PaşaMotorSEO";
+      const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PasaMotorSEO";
       const inPostRes = await fetch("https://api.indexnow.org/indexnow", {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8", "User-Agent": userAgent },
@@ -1205,12 +1302,23 @@ KURALLAR:
 
   async function serveSEOInjectedHtml(req: any, res: any, customTitle?: string, customDesc?: string, customImage?: string, canonicalUrl?: string) {
     try {
-      const distPath = path.join(process.cwd(), "dist");
-      const filePath = path.join(distPath, "index.html");
-      const devFilePath = path.join(process.cwd(), "index.html");
-      const targetPath = fs.existsSync(filePath) ? filePath : devFilePath;
+      const pathsToTry = [
+        path.join(__dirname, "index.html"),
+        path.join(__dirname, "../index.html"),
+        path.join(__dirname, "../dist/index.html"),
+        path.join(process.cwd(), "dist", "index.html"),
+        path.join(process.cwd(), "index.html"),
+      ];
+      let targetPath = "";
+      for (const p of pathsToTry) {
+        if (p && fs.existsSync(p)) {
+          targetPath = p;
+          break;
+        }
+      }
       
-      if (!fs.existsSync(targetPath)) {
+      if (!targetPath) {
+        console.error("SEO/Vite Ingress: index.html not found inside paths:", pathsToTry);
         return res.status(404).send("index.html not found");
       }
 
@@ -1277,11 +1385,8 @@ KURALLAR:
       ];
 
       try {
-        const { createClient } = await import("@supabase/supabase-js");
-        const sbUrl = process.env.VITE_SUPABASE_URL || '';
-        const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
-        if (sbUrl && sbKey) {
-          const supabase = createClient(sbUrl, sbKey);
+        const supabase = getSupabase();
+        if (supabase) {
           let offset = 0;
           let hasMore = true;
           while (hasMore) {
@@ -1358,13 +1463,9 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
     app.get("/yedek-parca/:slug", async (req, res) => {
       try {
         const slug = req.params.slug;
-        
-        const { createClient } = await import("@supabase/supabase-js");
-        const sbUrl = process.env.VITE_SUPABASE_URL || '';
-        const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
-        if (!sbUrl || !sbKey) return serveSEOInjectedHtml(req, res);
+        const supabase = getSupabase();
+        if (!supabase) return serveSEOInjectedHtml(req, res);
 
-        const supabase = createClient(sbUrl, sbKey);
         const { data: products, error } = await supabase.from("products").select("*").eq("slug", slug).limit(1);
         
         if (error || !products || products.length === 0) return serveSEOInjectedHtml(req, res);
@@ -1384,12 +1485,9 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
     app.get("/blog/:slug", async (req, res) => {
       try {
         const slug = req.params.slug;
-        const { createClient } = await import("@supabase/supabase-js");
-        const sbUrl = process.env.VITE_SUPABASE_URL || '';
-        const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
-        if (!sbUrl || !sbKey) return serveSEOInjectedHtml(req, res);
+        const supabase = getSupabase();
+        if (!supabase) return serveSEOInjectedHtml(req, res);
 
-        const supabase = createClient(sbUrl, sbKey);
         const { data: posts, error } = await supabase.from("posts").select("*").eq("slug", slug).eq("is_published", true).limit(1);
         
         if (error || !posts || posts.length === 0) return serveSEOInjectedHtml(req, res);
@@ -1491,11 +1589,12 @@ if (!process.env.VERCEL) {
     }
 
     // Keep-alive loop to prevent Supabase from pausing (runs internal every 10 min)
-    if (process.env.VITE_SUPABASE_URL && process.env.VITE_SUPABASE_ANON_KEY) {
+    const activeSupabase = getSupabase();
+    if (activeSupabase) {
       setInterval(async () => {
          try {
-           const { createClient } = await import("@supabase/supabase-js");
-           const supabase = createClient(process.env.VITE_SUPABASE_URL as string, process.env.VITE_SUPABASE_ANON_KEY as string);
+           const supabase = getSupabase();
+           if (!supabase) return;
            const { error } = await supabase.from("products").select("id").limit(1);
            if (error) console.error("Internal Supabase Keep-Alive Ping Failed:", error.message);
            else console.log("Internal Supabase Keep-Alive Ping Successful (Keeps DB awake).");
