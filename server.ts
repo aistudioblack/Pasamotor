@@ -1106,6 +1106,18 @@ KURALLAR:
     }
   });
 
+  // GET Auto Sync Suppliers Cron Job Endpoint
+  app.get("/api/supplier/cron/sync", async (req, res) => {
+    try {
+      const { runAutoSync } = await import("./src/lib/syncEngine");
+      await runAutoSync();
+      res.json({ success: true, message: "Supplier auto-sync executed successfully." });
+    } catch (error: any) {
+      console.error("GET /api/supplier/cron/sync error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Helper for sitemap notification
   async function pingSitemap(sitemapUrl: string, indexNowKey: string) {
     const results = [];
@@ -1261,40 +1273,57 @@ KURALLAR:
         { loc: "https://pasamotor.com.tr/galeri", changefreq: "weekly", priority: "0.7" },
       ];
 
-      if (db) {
-        // Fetch dynamic products from Firestore
-        try {
-          const prodSnap = await db.collection("products").get();
-          prodSnap.forEach(doc => {
-            const data = doc.data();
-            if (data.slug) {
-              urls.push({
-                loc: `https://pasamotor.com.tr/yedek-parca/${data.slug}`,
-                changefreq: "weekly",
-                priority: "0.8"
+      try {
+        const { createClient } = await import("@supabase/supabase-js");
+        const sbUrl = process.env.VITE_SUPABASE_URL || '';
+        const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+        if (sbUrl && sbKey) {
+          const supabase = createClient(sbUrl, sbKey);
+          let offset = 0;
+          let hasMore = true;
+          while (hasMore) {
+            const { data: dbProducts, error } = await supabase.from("products").select("slug").range(offset, offset + 999);
+            if (error || !dbProducts || dbProducts.length === 0) {
+              hasMore = false;
+            } else {
+              dbProducts.forEach((data: any) => {
+                if (data.slug) {
+                  urls.push({
+                    loc: `https://pasamotor.com.tr/yedek-parca/${data.slug}`,
+                    changefreq: "weekly",
+                    priority: "0.8"
+                  });
+                }
               });
+              if (dbProducts.length < 1000) hasMore = false;
+              offset += 1000;
             }
-          });
-        } catch (e) {
-          console.error("Sitemap dynamic products load error:", e);
-        }
-
-        // Fetch dynamic blog posts from Firestore
-        try {
-          const postSnap = await db.collection("posts").get();
-          postSnap.forEach(doc => {
-            const data = doc.data();
-            if (data.slug) {
-              urls.push({
-                loc: `https://pasamotor.com.tr/blog/${data.slug}`,
-                changefreq: "weekly",
-                priority: "0.8"
+          }
+          
+          // Fetch dynamic blog posts from Supabase
+          offset = 0;
+          hasMore = true;
+          while (hasMore) {
+            const { data: dbPosts, error } = await supabase.from("posts").select("slug").eq("is_published", true).range(offset, offset + 999);
+            if (error || !dbPosts || dbPosts.length === 0) {
+              hasMore = false;
+            } else {
+              dbPosts.forEach((data: any) => {
+                if (data.slug) {
+                  urls.push({
+                    loc: `https://pasamotor.com.tr/blog/${data.slug}`,
+                    changefreq: "weekly",
+                    priority: "0.8"
+                  });
+                }
               });
+              if (dbPosts.length < 1000) hasMore = false;
+              offset += 1000;
             }
-          });
-        } catch (e) {
-          console.error("Sitemap dynamic posts load error:", e);
+          }
         }
+      } catch (e) {
+        console.error("Sitemap dynamic load error:", e);
       }
 
       const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -1326,12 +1355,18 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
     app.get("/yedek-parca/:slug", async (req, res) => {
       try {
         const slug = req.params.slug;
-        if (!db) return serveSEOInjectedHtml(req, res);
-
-        const snap = await db.collection("products").where("slug", "==", slug).limit(1).get();
-        if (snap.empty) return serveSEOInjectedHtml(req, res);
         
-        const p = snap.docs[0].data();
+        const { createClient } = await import("@supabase/supabase-js");
+        const sbUrl = process.env.VITE_SUPABASE_URL || '';
+        const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+        if (!sbUrl || !sbKey) return serveSEOInjectedHtml(req, res);
+
+        const supabase = createClient(sbUrl, sbKey);
+        const { data: products, error } = await supabase.from("products").select("*").eq("slug", slug).limit(1);
+        
+        if (error || !products || products.length === 0) return serveSEOInjectedHtml(req, res);
+        
+        const p = products[0];
         const title = p.meta_title || `${p.title} | Orijinal ${p.brand || 'Yedek Parça'} - Paşa Motor`;
         const desc = p.meta_description || p.description || `${p.title} yedek parçası, en uygun fiyatlarla Paşa Motor'da size sunuluyor. Orijinal ürün güvencesiyle sipariş verin.`;
         const image = (p.images && p.images[0]) || undefined;
@@ -1346,12 +1381,17 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
     app.get("/blog/:slug", async (req, res) => {
       try {
         const slug = req.params.slug;
-        if (!db) return serveSEOInjectedHtml(req, res);
+        const { createClient } = await import("@supabase/supabase-js");
+        const sbUrl = process.env.VITE_SUPABASE_URL || '';
+        const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+        if (!sbUrl || !sbKey) return serveSEOInjectedHtml(req, res);
 
-        const snap = await db.collection("posts").where("slug", "==", slug).limit(1).get();
-        if (snap.empty) return serveSEOInjectedHtml(req, res);
+        const supabase = createClient(sbUrl, sbKey);
+        const { data: posts, error } = await supabase.from("posts").select("*").eq("slug", slug).eq("is_published", true).limit(1);
         
-        const p = snap.docs[0].data();
+        if (error || !posts || posts.length === 0) return serveSEOInjectedHtml(req, res);
+        
+        const p = posts[0];
         const title = p.meta_title || `${p.title} | Paşa Motor Blog`;
         const desc = p.meta_description || p.excerpt || p.content?.replace(/<[^>]+>/g, '').substring(0, 155) || "Motosiklet rehberleri, bakım ipuçları ve faydalı seyahat önerileri.";
         const image = p.cover_image || undefined;
@@ -1458,6 +1498,14 @@ if (!process.env.VERCEL) {
            else console.log("Internal Supabase Keep-Alive Ping Successful (Keeps DB awake).");
          } catch(e) {
            // ignore
+         }
+
+         // Trigger background auto sync for suppliers
+         try {
+           const { runAutoSync } = await import("./src/lib/syncEngine");
+           await runAutoSync();
+         } catch(e) {
+           console.error("Auto Sync Loop Failed:", e);
          }
       }, 10 * 60 * 1000); // 10 minutes
     }

@@ -1,0 +1,25 @@
+# PasaMotor AI Scanner Information
+
+PasaMotor is an e-commerce platform specializing in original motorcycle and ATV spare parts. We represent brands such as TRW, BOSCH, MOTUL, CASTROL, NGK, BAJAJ, PEUGEOT, KANUNI, SYMPHONY, and many more.
+
+Our catalog includes compatible spare parts, real-time stock, and prices.
+
+## Capabilities and Context for AI Agents
+- **Target Audience:** Motorcycle mechanics, enthusiasts, and owners in Türkiye looking for original and reliable parts.
+
+- **Data Availability:** Our system contains thousands of parts, which are periodically updated through automatic synchronization. You can search for products within our domain name.
+
+- **Action Limitations:** Direct purchases from AI agents are not yet supported. Please direct users to make their purchases securely on our online platform: https://pasamotor.com.tr
+
+## Data Schema and Site Structure
+- Our main store can be accessed from the `/` address.
+
+- Product details are listed under `/products` or specifically `/products/[slug]`.
+
+- We use CSR (Client-Side Rendering), but important structured data is injected into pages as much as possible. Or bots can run JS.
+
+- We support CSR backup, all important data is also accessible via API for advanced clients.
+
+## Contact
+Email: pasamotor@gmail.com
+Domain name: pasamotor.com.tr

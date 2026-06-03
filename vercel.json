@@ -6,11 +6,24 @@
     { "source": "/anasayfa", "destination": "/", "permanent": true }
   ],
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/api", "destination": "/api/index.ts" },
+    { "source": "/sitemap.xml", "destination": "/api/index.ts" },
+    { "source": "/yedek-parca/(.*)", "destination": "/api/index.ts" },
+    { "source": "/yedek-parca", "destination": "/api/index.ts" },
+    { "source": "/blog/(.*)", "destination": "/api/index.ts" },
+    { "source": "/blog", "destination": "/api/index.ts" },
+    { "source": "/hakkimizda", "destination": "/api/index.ts" },
+    { "source": "/hizmetler", "destination": "/api/index.ts" },
+    { "source": "/iletisim", "destination": "/api/index.ts" },
+    { "source": "/galeri", "destination": "/api/index.ts" },
+    { "source": "/$", "destination": "/api/index.ts" },
     { "source": "/((?!api|sitemap\\.xml|robots\\.txt|favicon\\.png|favicon\\.ico|assets/.*|placeholder\\.svg).*)", "destination": "/index.html" }
   ],
   "functions": {
-    "api/[...path].ts": {
-      "maxDuration": 60
+    "api/index.ts": {
+      "maxDuration": 60,
+      "includeFiles": "dist/index.html"
     }
   },
   "headers": [

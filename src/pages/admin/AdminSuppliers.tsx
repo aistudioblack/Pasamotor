@@ -240,8 +240,20 @@ const AdminSuppliers = () => {
         let skippedCount = 0;
         let failedCount = 0;
 
-        const { data: dbProducts } = await dbClient.from("products").select("slug, price, stock");
-        const existingSlugs = new Map((dbProducts || []).map((p: any) => [p.slug, p]));
+        const allDbProducts: any[] = [];
+        let pOffset = 0;
+        let pHasMore = true;
+        while (pHasMore) {
+          const { data: pData, error: pErr } = await dbClient.from("products").select("sku, slug, price, stock").range(pOffset, pOffset + 999);
+          if (pErr) break;
+          if (pData && pData.length > 0) {
+            allDbProducts.push(...pData);
+            pOffset += pData.length;
+          } else {
+            pHasMore = false;
+          }
+        }
+        const existingSkus = new Map((allDbProducts).filter((p: any) => p.sku).map((p: any) => [p.sku, p]));
 
         for (let bIndex = 0; bIndex < allowedBrands.length; bIndex++) {
           const brand = allowedBrands[bIndex];
@@ -281,20 +293,27 @@ const AdminSuppliers = () => {
 
             const toInsert: any[] = [];
             const toUpdate: any[] = [];
+            const marginMult = 1 + ((supplier.margin_percent || 0) / 100);
 
-            for (const item of items) {
-              if (!item.slug) continue;
+            for (let item of items) {
+              if (!item.sku) continue;
               
-              const existing = existingSlugs.get(item.slug);
+              const basePrice = item.price || 0;
+              const newPrice = Number((basePrice * marginMult).toFixed(2));
+              item = { ...item, price: newPrice };
+              
+              const existing = existingSkus.get(item.sku);
               if (existing) {
-                if (mode === "full_import") {
-                  skippedCount++;
+                // Fiyat ya da stok değiştiyse her halükarda güncelle
+                // Numara (float) karşılaştırmasında JS çok ufak toleranslar sorun çıkarabilir diye mutlak fark
+                const priceDiff = Math.abs((existing.price || 0) - newPrice);
+                const priceChanged = priceDiff > 0.01;
+                const stockChanged = existing.stock !== item.stock;
+
+                if (priceChanged || stockChanged) {
+                  toUpdate.push({ sku: item.sku, price: newPrice, stock: item.stock });
                 } else {
-                   if (existing.price !== item.price || existing.stock !== item.stock) {
-                      toUpdate.push({ slug: item.slug, price: item.price, stock: item.stock });
-                   } else {
-                      skippedCount++;
-                   }
+                  skippedCount++;
                 }
               } else {
                 if (mode === "full_import") {
@@ -312,10 +331,18 @@ const AdminSuppliers = () => {
             }
 
             if (toUpdate.length > 0) {
-               for (const up of toUpdate) {
-                 const { error } = await dbClient.from("products").update({ price: up.price, stock: up.stock }).eq('slug', up.slug);
-                 if (error) failedCount++;
-                 else updatedCount++;
+               for (let i = 0; i < toUpdate.length; i += 10) {
+                 const chunk = toUpdate.slice(i, i + 10);
+                 const promises = chunk.map(up => 
+                    dbClient.from("products")
+                      .update({ price: up.price, stock: up.stock })
+                      .eq('sku', up.sku)
+                 );
+                 const results = await Promise.all(promises);
+                 for (const res of results) {
+                   if (res.error) failedCount++;
+                   else updatedCount++;
+                 }
                }
             }
           }
@@ -345,7 +372,7 @@ const AdminSuppliers = () => {
       toast.success(
         mode === "test_connection" || mode === "test_login"
           ? "Bağlantı/Login OK"
-          : `OK - toplam:${r.total} aktarılan:${r.created}`
+          : `OK - Tplm: ${r.total} | Yeni: ${r.created} | Güncel: ${r.updated} | Atlanan: ${r.skipped} | Hata: ${r.failed}`
       );
       
       if (syncSuccess && isFcs && (mode === "full_import" || mode === "sync_update")) {
