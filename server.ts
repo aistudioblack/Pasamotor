@@ -5,11 +5,24 @@ import fs from "fs";
 import admin from "firebase-admin";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import { fileURLToPath } from "url";
 import { pushToGithubSdk } from "./api/github-push";
 import { beautifyProduct } from "./src/lib/beautify-product";
 import { createClient } from "@supabase/supabase-js";
 
 dotenv.config();
+
+// Get safe directory name for ESM & CJS compatibility
+const getDirname = () => {
+  try {
+    return __dirname;
+  } catch (e) {
+    if (typeof import.meta !== "undefined" && import.meta.url) {
+      return path.dirname(fileURLToPath(import.meta.url));
+    }
+    return process.cwd();
+  }
+};
 
 let supabaseServerInstance: any = null;
 function getSupabase() {
@@ -1303,9 +1316,9 @@ KURALLAR:
   async function serveSEOInjectedHtml(req: any, res: any, customTitle?: string, customDesc?: string, customImage?: string, canonicalUrl?: string) {
     try {
       const pathsToTry = [
-        path.join(__dirname, "index.html"),
-        path.join(__dirname, "../index.html"),
-        path.join(__dirname, "../dist/index.html"),
+        path.join(getDirname(), "index.html"),
+        path.join(getDirname(), "../index.html"),
+        path.join(getDirname(), "../dist/index.html"),
         path.join(process.cwd(), "dist", "index.html"),
         path.join(process.cwd(), "index.html"),
       ];

@@ -7,6 +7,15 @@ import AdminLayout from "@/components/admin/AdminLayout";
 
 const changelogData = [
   {
+    version: "v2.5.2 - Kritik Serverless Düzelten Hata Giderme Fazı",
+    date: "2026-06-03",
+    icon: Activity,
+    items: [
+      { type: "fix", text: "ESM (ES Modül) çalıştırma ortamlarında __dirname tanımsızlığı nedeniyle sunucunun çökmesine ve 500 hatası üretmesine sebep olan sorun giderildi (getDirname fallback entegre edildi)." },
+      { type: "improvement", text: "Senior Manager denetimi altında kod tabanında stabilite analizi tamamlandı ve Change Log güncel iş yapış standardı devreye alındı." }
+    ]
+  },
+  {
     version: "v2.5.1 - Yönetici Şifre Güncelleme Fazı",
     date: "2026-06-03",
     icon: Server,
