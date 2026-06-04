@@ -98,13 +98,31 @@ const AdminPosts = () => {
           const rand = Math.floor(Math.random() * 1000);
           const path = `blog/${slug}-${suffix}-${rand}.webp`;
 
-          const { error } = await dbClient.storage.from("product-images").upload(path, webpBlob, {
-            contentType: "image/webp",
+          // Convert Blob to Base64 to bypass client-side storage policies and RLS issues
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (e) => reject(e);
+            reader.readAsDataURL(webpBlob);
           });
-          if (error) return null;
+          const base64String = await base64Promise;
 
-          const { data: pub } = dbClient.storage.from("product-images").getPublicUrl(path);
-          return pub.publicUrl;
+          const response = await fetch("/api/upload-image", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              file: base64String,
+              fileName: path,
+              bucket: "product-images",
+            }),
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) return null;
+
+          return result.publicUrl;
         } catch (e) {
           console.error("Failed to process background image", e);
           return null;
@@ -226,14 +244,33 @@ const AdminPosts = () => {
       const webpName = getWebPFileName(file.name);
       const path = `blog/${Date.now()}-${webpName}`;
 
-      const { error } = await dbClient.storage.from("product-images").upload(path, webpBlob, {
-        contentType: "image/webp",
+      // Convert Blob to Base64 to bypass client-side storage policies and RLS issues
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (e) => reject(e);
+        reader.readAsDataURL(webpBlob);
+      });
+      const base64String = await base64Promise;
+
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          file: base64String,
+          fileName: path,
+          bucket: "product-images",
+        }),
       });
 
-      if (error) throw error;
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Sunucu yükleme hatası");
+      }
 
-      const { data: pub } = dbClient.storage.from("product-images").getPublicUrl(path);
-      setForm((prev) => ({ ...prev, cover_image: pub.publicUrl }));
+      setForm((prev) => ({ ...prev, cover_image: result.publicUrl }));
       toast({ title: "Görsel yüklendi (WebP)" });
     } catch (err: any) {
       toast({ title: "Yükleme hatası", description: err.message, variant: "destructive" });

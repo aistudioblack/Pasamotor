@@ -7,10 +7,43 @@ import AdminLayout from "@/components/admin/AdminLayout";
 
 const changelogData = [
   {
+    version: "v3.1.5 - Secure Image Storage Bridge & RLS Bypass",
+    date: "2026-06-04",
+    icon: Server,
+    items: [
+      { type: "feature", text: "Farklı tarayıcılarda (Edge, Safari vb.) yaşanan görsel yükleme ve Supabase yetkilendirme (RLS) hatalarını aşmak için sunucu taraflı güvenli görsel köprüsü (/api/upload-image) geliştirildi." },
+      { type: "feature", text: "Supabase tarafında gerekli olan 'product-images' depolama alanının (Bucket) eksik olması durumunda sunucu üzerinden otomatik olarak oluşturulup kamuya (Public) açık hale gelmesini sağlayan akıllı otomasyon eklendi." },
+      { type: "improvement", text: "Ürünler, blog yazıları ve galeri panellerindeki doğrudan istemci-tabanlı Supabase API çağrıları, Base64 dönüştürücü aracılığıyla bu yeni bütünleşik sunucu köprüsüne taşındı." }
+    ]
+  },
+  {
+    version: "v3.1.0 - Genişletilmiş Marka ve RapidoX Destek Entegrasyonu",
+    date: "2026-06-04",
+    icon: Boxes,
+    items: [
+      { type: "feature", text: "Yönetici manuel yeni ürün ekleme pencerelerindeki ve ürün filtrelerindeki marka seçenekleri genişletildi." },
+      { type: "feature", text: "RapidoX markası sisteme, yedek parça arama sayfasına ve marka filtre paneline entegre edildi." },
+      { type: "improvement", text: "Yapay zeka asistanının otomatik isim güzelleştirme standardına (Beautify Engine) RapidoX marka kuralı dahil edildi." }
+    ]
+  },
+  {
+    version: "v3.0.0 - Kapsamlı SEO Optimizasyonu ve Genişletilmiş SSR",
+    date: "2026-06-04",
+    icon: Target,
+    items: [
+      { type: "feature", text: "React uygulamasının Googlebot tarafından indekslenebilmesi için Express server üzerinden dinamik SSR, SEO Injection ve Prerendering sistemi kuruldu." },
+      { type: "feature", text: "JSON-LD formatında; LocalBusiness (AutoRepair), Service ve FAQPage barındıran kapsamlı Schema Markup (Structured Data) meta-etiket olarak entegre edildi." },
+      { type: "feature", text: "Marka bazlı /kuba-motor-yetkili-servis, /rks-motor-yetkili-servis, /mondial-motor-yetkili-servis hizmet sayfaları yüksek kaliteli (600+ kelimelik) SEO içeriği ve statik routing ile oluşturuldu." },
+      { type: "feature", text: "Tüm kritik route'ları içeren ve otomatik oluşturulan dinamik sitemap.xml ve robots.txt entegrasyonları tamamlandı." },
+      { type: "improvement", text: "Open Graph (og:title, og:description vb.) etiketleri server tarafında dinamik hale getirilerek sosyal medya paylaşımlarında zengin önizleme iyileştirildi." }
+    ]
+  },
+  {
     version: "v2.5.2 - Kritik Serverless Düzelten Hata Giderme Fazı",
     date: "2026-06-03",
     icon: Activity,
     items: [
+      { type: "fix", text: "Octokit ESM/CJS çakışmasından kaynaklanan 'ERR_REQUIRE_ESM' sunucu hatası (esbuild statik analizini atlatmak için 'new Function' hilesi kullanılarak) çözüldü." },
       { type: "fix", text: "ESM (ES Modül) çalıştırma ortamlarında __dirname tanımsızlığı nedeniyle sunucunun çökmesine ve 500 hatası üretmesine sebep olan sorun giderildi (getDirname fallback entegre edildi)." },
       { type: "fix", text: "Vercel Serverless Function ortamında (CJS) import.meta.url kullanımından kaynaklanan SyntaxError parsing hatası kırılarak 500 FUNCTION_INVOCATION_FAILED problemi kalıcı olarak çözüldü." },
       { type: "improvement", text: "Senior Manager denetimi altında kod tabanında stabilite analizi tamamlandı ve Change Log güncel iş yapış standardı devreye alındı." }

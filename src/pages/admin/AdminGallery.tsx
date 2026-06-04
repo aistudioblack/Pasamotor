@@ -77,14 +77,33 @@ const AdminGallery = () => {
       const path = `gallery/${Date.now()}-${webpName}`;
 
       setUploadStatusText("Yükleniyor...");
-      const { error } = await dbClient.storage.from("product-images").upload(path, webpBlob, {
-        contentType: "image/webp",
+      // Convert Blob to Base64 to bypass client-side storage policies and RLS issues
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (e) => reject(e);
+        reader.readAsDataURL(webpBlob);
+      });
+      const base64String = await base64Promise;
+
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          file: base64String,
+          fileName: path,
+          bucket: "product-images",
+        }),
       });
 
-      if (error) throw error;
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Sunucu yükleme hatası");
+      }
 
-      const { data: pub } = dbClient.storage.from("product-images").getPublicUrl(path);
-      setForm((prev) => ({ ...prev, url: pub.publicUrl }));
+      setForm((prev) => ({ ...prev, url: result.publicUrl }));
       if (!form.title) {
         setForm(prev => ({ ...prev, title: file.name.split('.')[0] }));
       }

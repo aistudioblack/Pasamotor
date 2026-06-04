@@ -69,14 +69,14 @@ export default function ProductsSection() {
                   isOriginal ? "hover:border-emerald-500/40 border-emerald-500/10" : "hover:border-primary/40"
                 }`}
               >
-                <div className="relative aspect-square overflow-hidden bg-muted p-4">
+                <div className="relative aspect-square overflow-hidden bg-white flex items-center justify-center p-4 border-b border-border">
                   {product.images && product.images[0] ? (
                     <img
                       src={product.images[0]}
                       alt={product.title}
                       width={400}
                       height={400}
-                      className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
+                      className="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
                       referrerPolicy="no-referrer"
                     />

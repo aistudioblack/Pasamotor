@@ -288,7 +288,7 @@ const AdminProducts = () => {
 
   const filtered = items;
 
-  const allBrands = ["TVS", "Hero", "Falcon", "Işıldar", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO"];
+  const allBrands = ["TVS", "Hero", "Falcon", "Işıldar", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"];
 
   const autoFixAllBrokenTitles = async () => {
     setOptimizingTitles(true);
@@ -622,6 +622,10 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
       toast({ title: "Hata", description: error.message, variant: "destructive" });
     } else {
       toast({ title: editing ? "Güncellendi" : "Eklendi" });
+      try {
+        sessionStorage.removeItem("pasamotor_yedek_parca_cache");
+        sessionStorage.removeItem("pasamotor_yedek_parca_sync");
+      } catch (e) { /* fallback if session storage is disabled */ }
       setOpen(false);
       load();
       // Notify IndexNow
@@ -864,19 +868,35 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
         const webpName = getWebPFileName(f.name);
         const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${webpName}`;
         
-        const { error } = await supabase.storage.from(BUCKET).upload(path, webpBlob, {
-          contentType: "image/webp",
-          upsert: false,
+        // Convert Blob to Base64 to bypass client-side storage policies and RLS issues
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (e) => reject(e);
+          reader.readAsDataURL(webpBlob);
+        });
+        const base64String = await base64Promise;
+
+        const response = await fetch("/api/upload-image", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: base64String,
+            fileName: path,
+            bucket: BUCKET,
+          }),
         });
 
-        if (error) {
-          toast({ title: `Yüklenemedi: ${f.name}`, description: error.message, variant: "destructive" });
-          continue;
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || "Sunucu yükleme hatası");
         }
-        const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
-        uploaded.push(pub.publicUrl);
+
+        uploaded.push(result.publicUrl);
       } catch (err: any) {
-        toast({ title: `Hata: ${f.name}`, description: err.message || "WebP dönüşümü başarısız", variant: "destructive" });
+        toast({ title: `Hata: ${f.name}`, description: err.message || "Görsel yüklenirken bir sorun oluştu", variant: "destructive" });
       }
     }
     setForm((prev) => ({ ...prev, images: [...prev.images, ...uploaded] }));
@@ -1305,10 +1325,9 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-muted-foreground">Marka *</label>
-                  <input list="brand-options" required value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} className="w-full mt-1 px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm" placeholder="Seçiniz veya yazınız..." />
-                  <datalist id="brand-options">
-                    {allBrands.map((b) => <option key={b} value={b} />)}
-                  </datalist>
+                  <select required value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} className="w-full mt-1 px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm">
+                    {allBrands.map((b) => <option key={b} value={b}>{b}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground">Kategori *</label>

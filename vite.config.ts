@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 
 // https://vitejs.dev/config/
-export default defineConfig(() => ({
+export default defineConfig(({ command, isSsrBuild }) => ({
   server: {
     host: "0.0.0.0",
     port: 3000,
@@ -27,11 +27,14 @@ export default defineConfig(() => ({
   build: {
     target: "esnext",
     minify: "esbuild" as const,
-    cssCodeSplit: true,
-    assetsInlineLimit: 5120, // 5KB altındaki küçük varlıkları inline yap (base64)
-    chunkSizeWarningLimit: 1000,
-    sourcemap: false,
-    rollupOptions: {
+    outDir: isSsrBuild ? "dist/server" : "dist/client",
+    ssr: isSsrBuild,
+    rollupOptions: isSsrBuild ? {
+      input: "./src/entry-server.tsx",
+      output: {
+        format: "cjs"
+      }
+    } : {
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
@@ -39,6 +42,10 @@ export default defineConfig(() => ({
           'firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
         }
       }
-    }
+    },
+    cssCodeSplit: true,
+    assetsInlineLimit: 5120, // 5KB altındaki küçük varlıkları inline yap (base64)
+    chunkSizeWarningLimit: 1000,
+    sourcemap: false,
   }
 }));

@@ -52,7 +52,11 @@ const AdminBrands = () => {
           { id: "brand_tvs", name: "TVS", desc: "Hindistan'ın lider motosiklet üreticisi" },
           { id: "brand_hero", name: "Hero", desc: "Dünyanın en büyük iki tekerlekli araç üreticisi" },
           { id: "brand_falcon", name: "Falcon", desc: "Güvenilir ve ekonomik motosikletler" },
-          { id: "brand_isildar", name: "Işıldar", desc: "Kaliteli Türk motosiklet markası" }
+          { id: "brand_isildar", name: "Işıldar", desc: "Kaliteli Türk motosiklet markası" },
+          { id: "brand_rapidox", name: "RapidoX", desc: "Orijinal ve yüksek kaliteli yedek parçalar sunan lider marka" },
+          { id: "brand_honda", name: "Honda", desc: "Dünyaca ünlü yüksek kaliteli Japon motosiklet üreticisi" },
+          { id: "brand_bajaj", name: "Bajaj", desc: "Dayanıklı ve ekonomik Hintli motosiklet üreticisi" },
+          { id: "brand_yamaha", name: "Yamaha", desc: "Yüksek performanslı efsanevi Japon motosiklet markası" }
        ];
        if (currentId) {
          await dbClient.from("site_content").update({ sections: finalBrands, title: "Brands" }).eq("id", currentId);

@@ -1,55 +1,16 @@
 {
+  "outputDirectory": "dist/client",
+  "buildCommand": "npm run build",
   "trailingSlash": false,
-  "redirects": [
-    { "source": "/index.html", "destination": "/", "permanent": true },
-    { "source": "/home", "destination": "/", "permanent": true },
-    { "source": "/anasayfa", "destination": "/", "permanent": true }
-  ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.ts" },
-    { "source": "/api", "destination": "/api/index.ts" },
-    { "source": "/sitemap.xml", "destination": "/api/index.ts" },
-    { "source": "/yedek-parca/(.*)", "destination": "/api/index.ts" },
-    { "source": "/yedek-parca", "destination": "/api/index.ts" },
-    { "source": "/blog/(.*)", "destination": "/api/index.ts" },
-    { "source": "/blog", "destination": "/api/index.ts" },
-    { "source": "/hakkimizda", "destination": "/api/index.ts" },
-    { "source": "/hizmetler", "destination": "/api/index.ts" },
-    { "source": "/iletisim", "destination": "/api/index.ts" },
-    { "source": "/galeri", "destination": "/api/index.ts" },
-    { "source": "/$", "destination": "/api/index.ts" },
-    { "source": "/((?!api|sitemap\\.xml|robots\\.txt|favicon\\.png|favicon\\.ico|assets/.*|placeholder\\.svg).*)", "destination": "/index.html" }
+    { "source": "/api/:path*", "destination": "/api" },
+    { "source": "/sitemap.xml", "destination": "/api" },
+    { "source": "/robots.txt", "destination": "/api" }
   ],
-  "functions": {
-    "api/index.ts": {
-      "maxDuration": 60,
-      "includeFiles": "dist/index.html"
-    }
-  },
   "headers": [
     {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(self)" },
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" }
-      ]
-    },
-    {
-      "source": "/sitemap.xml",
-      "headers": [
-        { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=3600" }
-      ]
-    },
-    {
-      "source": "/robots.txt",
-      "headers": [
-        { "key": "Content-Type", "value": "text/plain; charset=utf-8" },
-        { "key": "Cache-Control", "value": "public, max-age=86400" }
-      ]
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ]
 }

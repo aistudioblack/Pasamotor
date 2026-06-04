@@ -35,17 +35,19 @@ let lastSyncTime: number | null = null;
 
 // Initialize cache from sessionStorage if available to persist between page refreshes and route swaps
 try {
-  const localCached = sessionStorage.getItem("pasa_motor_yedek_parca_cache");
-  const localTime = sessionStorage.getItem("pasa_motor_yedek_parca_time");
-  if (localCached && localTime) {
-    cachedProductsList = JSON.parse(localCached);
-    lastSyncTime = parseInt(localTime, 10);
+  if (typeof window !== "undefined") {
+    const localCached = sessionStorage.getItem("pasa_motor_yedek_parca_cache");
+    const localTime = sessionStorage.getItem("pasa_motor_yedek_parca_time");
+    if (localCached && localTime) {
+      cachedProductsList = JSON.parse(localCached);
+      lastSyncTime = parseInt(localTime, 10);
+    }
   }
 } catch (e) {
   console.warn("Session storage read failed:", e);
 }
 
-const BRANDS_LIST = ["Tümü", "TVS", "Hero", "Falcon", "Işıldar", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO"] as const;
+const BRANDS_LIST = ["Tümü", "TVS", "Hero", "Falcon", "Işıldar", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"] as const;
 
 const CATEGORIES_LIST = [
   { slug: "tumu", name: "Tüm Kategoriler" },
@@ -107,7 +109,7 @@ const YedekParca = () => {
           const { data, error: fetchError } = await supabase
             .from("products")
             .select("*")
-            .eq("category", "yedek-parca")
+            .in("category", ["yedek-parca", "aksesuar"])
             .eq("is_active", true)
             .range(fromVal, fromVal + step - 1);
 
@@ -259,7 +261,7 @@ const YedekParca = () => {
             case "fren-sistemi":
               return titleL.includes("balata") || titleL.includes("disk") || titleL.includes("fren") || titleL.includes("debriyaj") || titleL.includes("tel") || titleL.includes("manet");
             case "kaporta-aksesuar":
-              return titleL.includes("çamurluk") || titleL.includes("grenaj") || titleL.includes("ayna") || titleL.includes("sele") || titleL.includes("kilit") || titleL.includes("çanta") || titleL.includes("sehpa");
+              return p.category === "aksesuar" || titleL.includes("çamurluk") || titleL.includes("grenaj") || titleL.includes("ayna") || titleL.includes("sele") || titleL.includes("kilit") || titleL.includes("çanta") || titleL.includes("sehpa") || titleL.includes("eldiven") || titleL.includes("kask");
             case "sarf-malzeme":
               return titleL.includes("yağ") || titleL.includes("filtre") || titleL.includes("bando") || titleL.includes("kayış") || titleL.includes("zincir") || titleL.includes("sprey");
             default:
@@ -307,7 +309,7 @@ const YedekParca = () => {
           case "fren-sistemi":
             return titleL.includes("balata") || titleL.includes("disk") || titleL.includes("fren") || titleL.includes("debriyaj") || titleL.includes("tel") || titleL.includes("manet");
           case "kaporta-aksesuar":
-            return titleL.includes("çamurluk") || titleL.includes("grenaj") || titleL.includes("ayna") || titleL.includes("sele") || titleL.includes("kilit") || titleL.includes("çanta") || titleL.includes("sehpa");
+            return p.category === "aksesuar" || titleL.includes("çamurluk") || titleL.includes("grenaj") || titleL.includes("ayna") || titleL.includes("sele") || titleL.includes("kilit") || titleL.includes("çanta") || titleL.includes("sehpa") || titleL.includes("eldiven") || titleL.includes("kask");
           case "sarf-malzeme":
             return titleL.includes("yağ") || titleL.includes("filtre") || titleL.includes("bando") || titleL.includes("kayış") || titleL.includes("zincir") || titleL.includes("sprey");
           default:
@@ -768,8 +770,8 @@ const YedekParca = () => {
                         {/* Ürün Görseli */}
                         <div className={`relative overflow-hidden rounded-xl shrink-0 ${
                           viewMode === "list" 
-                            ? "w-full sm:w-40 h-36 bg-[#161a26] flex items-center justify-center border border-white/[0.03]" 
-                            : "w-full h-44 mb-3 bg-[#161a26] flex items-center justify-center border border-white/[0.03]"
+                            ? "w-full sm:w-40 h-36 bg-white flex items-center justify-center border border-border" 
+                            : "w-full h-44 mb-3 bg-white flex items-center justify-center border border-border"
                         }`}>
                           {p.images && p.images.length > 0 ? (
                             <img
@@ -778,7 +780,7 @@ const YedekParca = () => {
                               width={240}
                               height={176}
                               referrerPolicy="no-referrer"
-                              className="w-full h-full object-contain p-2 transition-transform duration-300"
+                              className="max-w-full max-h-full w-auto h-auto object-contain p-4 transition-transform duration-500 hover:scale-110 mix-blend-multiply"
                               loading="lazy"
                             />
                           ) : (

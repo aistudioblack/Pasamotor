@@ -51,6 +51,9 @@ const YedekParcaDetay = lazy(() => import("./pages/YedekParcaDetay.tsx"));
 const Blog = lazy(() => import("./pages/Blog.tsx"));
 const BlogDetay = lazy(() => import("./pages/BlogDetay.tsx"));
 const LegalPage = lazy(() => import("./pages/LegalPage.tsx"));
+const KubaServis = lazy(() => import("./pages/seo/KubaServis.tsx"));
+const RksServis = lazy(() => import("./pages/seo/RksServis.tsx"));
+const MondialServis = lazy(() => import("./pages/seo/MondialServis.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin.tsx"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.tsx"));
@@ -104,6 +107,9 @@ const App = () => (
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogDetay />} />
                 <Route path="/sayfa/:slug" element={<LegalPage />} />
+                <Route path="/kuba-motor-yetkili-servis" element={<KubaServis />} />
+                <Route path="/rks-motor-yetkili-servis" element={<RksServis />} />
+                <Route path="/mondial-motor-yetkili-servis" element={<MondialServis />} />
                 <Route path="/admin/giris" element={<AdminLogin />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/urunler" element={<AdminProducts />} />
