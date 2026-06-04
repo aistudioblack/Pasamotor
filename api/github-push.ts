@@ -1,4 +1,3 @@
-import { Octokit } from "@octokit/rest";
 import { glob } from "glob";
 import fs from "fs";
 import path from "path";
@@ -19,6 +18,7 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     throw new Error("URL'den depo sahibi veya adı çıkarılamadı.");
   }
 
+  const { Octokit } = await new Function('return import("@octokit/rest")')();
   const octokit = new Octokit({ auth: token });
   
   // Test authentication
