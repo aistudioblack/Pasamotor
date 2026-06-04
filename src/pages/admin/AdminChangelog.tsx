@@ -12,6 +12,7 @@ const changelogData = [
     icon: Activity,
     items: [
       { type: "fix", text: "ESM (ES Modül) çalıştırma ortamlarında __dirname tanımsızlığı nedeniyle sunucunun çökmesine ve 500 hatası üretmesine sebep olan sorun giderildi (getDirname fallback entegre edildi)." },
+      { type: "fix", text: "Vercel Serverless Function ortamında (CJS) import.meta.url kullanımından kaynaklanan SyntaxError parsing hatası kırılarak 500 FUNCTION_INVOCATION_FAILED problemi kalıcı olarak çözüldü." },
       { type: "improvement", text: "Senior Manager denetimi altında kod tabanında stabilite analizi tamamlandı ve Change Log güncel iş yapış standardı devreye alındı." }
     ]
   },

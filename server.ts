@@ -5,7 +5,6 @@ import fs from "fs";
 import admin from "firebase-admin";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { fileURLToPath } from "url";
 import { pushToGithubSdk } from "./api/github-push";
 import { beautifyProduct } from "./src/lib/beautify-product";
 import { createClient } from "@supabase/supabase-js";
@@ -14,14 +13,10 @@ dotenv.config();
 
 // Get safe directory name for ESM & CJS compatibility
 const getDirname = () => {
-  try {
+  if (typeof __dirname !== "undefined") {
     return __dirname;
-  } catch (e) {
-    if (typeof import.meta !== "undefined" && import.meta.url) {
-      return path.dirname(fileURLToPath(import.meta.url));
-    }
-    return process.cwd();
   }
+  return process.cwd();
 };
 
 let supabaseServerInstance: any = null;
@@ -1584,7 +1579,9 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
   // ==========================================
 
 // Vite middleware & listen (Only in non-Vercel environment)
-if (!process.env.VERCEL) {
+const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.RENDER || process.env.NETLIFY);
+
+if (!isServerless) {
   (async () => {
     if (process.env.NODE_ENV !== "production") {
       const { createServer: createViteServer } = await import("vite");
