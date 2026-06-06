@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import {
   Accordion,
   AccordionContent,
@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/accordion";
 import JsonLd from "@/components/seo/JsonLd";
 import { HelpCircle } from "lucide-react";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 
 type FAQ = Tables<"faqs">;
 

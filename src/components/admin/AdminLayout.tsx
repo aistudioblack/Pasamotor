@@ -1,6 +1,6 @@
 import { useEffect, useState, ReactNode } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import type { User } from "@supabase/supabase-js";
 import { motion } from "motion/react";
 import {

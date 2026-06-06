@@ -1,4 +1,4 @@
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 
 type Post = Tables<"posts">;
 

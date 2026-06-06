@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Edit2, Trash2, X } from "lucide-react";
 import * as LucideIcons from "lucide-react";

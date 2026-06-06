@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import logo from "@/assets/pasa-motor-logo.webp";
 import heroBg from "@/assets/hero-bg.webp";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { DEFAULT_ANIMATION_ID, getAnimationById } from "@/lib/logoAnimations";
 
 const HeroSection = () => {

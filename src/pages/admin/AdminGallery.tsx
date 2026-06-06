@@ -1,9 +1,9 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useEffect, useState } from "react";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Loader2, Image as ImageIcon, X, Upload } from "lucide-react";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 import { useRef } from "react";
 import { convertToWebP, getWebPFileName } from "@/lib/imageOptimization";
 
@@ -140,7 +140,7 @@ const AdminGallery = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {items.map((img) => (
               <div key={img.id} className="glass-card rounded-xl overflow-hidden group relative">
-                <img src={img.url} alt={img.title} className="w-full h-40 object-cover" />
+                <img src={img.url} alt={img.title} className="w-full h-40 object-cover"  loading="lazy" decoding="async" />
                 <div className="p-3">
                   <p className="text-sm text-foreground truncate">{img.title}</p>
                   <p className="text-xs text-muted-foreground">{img.category}</p>

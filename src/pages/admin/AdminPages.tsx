@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { Plus, Trash2, Edit2, FileText, Loader2, Save, FileCheck, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 
 type Page = Tables<"pages">;
 

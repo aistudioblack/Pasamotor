@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { useToast } from "@/hooks/use-toast";
 import { KeyRound, Loader2, Sparkles, Eye, EyeOff } from "lucide-react";
 
@@ -29,7 +29,7 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(false);
 
   // AI ve Arama Sağlayıcısı Ayarları
-  const [aiProvider, setAiProvider] = useState<"system" | "together" | "openrouter" | "groq" | "gemini" | "huggingface">("system");
+  const [aiProvider, setAiProvider] = useState<"system" | "together" | "openrouter" | "groq" | "gemini" | "huggingface" | "qwen">("system");
   const [orApiKey, setOrApiKey] = useState("");
   const [showOrApiKey, setShowOrApiKey] = useState(false);
   const [tgApiKey, setTgApiKey] = useState("");
@@ -40,6 +40,8 @@ const AdminSettings = () => {
   const [showGeminiApiKey, setShowGeminiApiKey] = useState(false);
   const [hfApiKey, setHfApiKey] = useState("");
   const [showHfApiKey, setShowHfApiKey] = useState(false);
+  const [qwenApiKey, setQwenApiKey] = useState("");
+  const [showQwenApiKey, setShowQwenApiKey] = useState(false);
 
   useEffect(() => {
     const savedProvider = localStorage.getItem("ai_provider") as any;
@@ -71,6 +73,15 @@ const AdminSettings = () => {
     
     const savedHf = localStorage.getItem("hf_api_key");
     if (savedHf) setHfApiKey(decryptKey(savedHf));
+
+    const savedQwen = localStorage.getItem("qwen_api_key");
+    if (savedQwen) {
+      setQwenApiKey(decryptKey(savedQwen));
+    } else {
+      const defaultQwenKey = "d35e835b481f48a6ac2ddae182fe4acef71585c0d4ad474bad70de557fceeebe";
+      setQwenApiKey(defaultQwenKey);
+      localStorage.setItem("qwen_api_key", encryptKey(defaultQwenKey));
+    }
 
     const savedTg = localStorage.getItem("tg_api_key");
     if (savedTg) {
@@ -112,6 +123,12 @@ const AdminSettings = () => {
         localStorage.removeItem("hf_api_key");
       } else {
         localStorage.setItem("hf_api_key", encryptKey(hfApiKey.trim()));
+      }
+
+      if (!qwenApiKey.trim()) {
+        localStorage.removeItem("qwen_api_key");
+      } else {
+        localStorage.setItem("qwen_api_key", encryptKey(qwenApiKey.trim()));
       }
 
       if (!tgApiKey.trim()) {
@@ -266,6 +283,7 @@ const AdminSettings = () => {
                 <option value="system">Yerleşik Sistem Yapay Zekası (Google Gemini - Ücretsiz, Hızlı & Kota Sınırı Yok)</option>
                 <option value="groq">Groq AI (Maksimum Hız - API Key Gerekir)</option>
                 <option value="gemini">Google Gemini Yönlendirmeli (Kendi API Anahtarınız - API Key Gerekir)</option>
+                <option value="qwen">Qwen AI Sunucusu (Özel - API Key Gerekir)</option>
                 <option value="openrouter">OpenRouter AI (Alternatif Sağlayıcı - API Key Gerekir)</option>
                 <option value="huggingface">Hugging Face AI (Alternatif Sağlayıcı - API Key Gerekir)</option>
                 <option value="together">Together AI (Yedek Sağlayıcı - API Key Gerekir)</option>
@@ -376,6 +394,29 @@ const AdminSettings = () => {
                 <div className="flex justify-between items-center text-[10px] text-muted-foreground mt-1.5">
                   <p>Ücretsiz veya Pro anahtarınız.</p>
                   <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">API Key Al &rarr;</a>
+                </div>
+              </div>
+            ) : aiProvider === "qwen" ? (
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">Qwen API Key</label>
+                <div className="relative">
+                  <input
+                    type={showQwenApiKey ? "text" : "password"}
+                    placeholder="Erişim anahtarınız..."
+                    value={qwenApiKey}
+                    onChange={(e) => setQwenApiKey(e.target.value)}
+                    className="w-full pl-4 pr-10 py-2.5 rounded-lg bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-purple-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowQwenApiKey(!showQwenApiKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showQwenApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-muted-foreground mt-1.5">
+                  <p>Qwen.privateinstance.com (Varsayılandır)</p>
                 </div>
               </div>
             ) : (

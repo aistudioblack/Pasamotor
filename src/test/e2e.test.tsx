@@ -4,7 +4,7 @@ import App from "@/App";
 import { HelmetProvider } from "react-helmet-async";
 
 // dbClient mock
-vi.mock("@/lib/firebase-client", () => {
+vi.mock("@/lib/db-client", () => {
   const mockChain: any = {
     eq: vi.fn().mockReturnThis(),
     neq: vi.fn().mockReturnThis(),

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 
 export function useSEO(pageKey: string, defaultTitle: string, defaultDesc: string) {
   const [seo, setSeo] = useState({ title: defaultTitle, description: defaultDesc });

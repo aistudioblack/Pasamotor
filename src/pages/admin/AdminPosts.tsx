@@ -1,10 +1,10 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useEffect, useState } from "react";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit2, Trash2, X, Loader2, FileText, Eye, AlertTriangle, RefreshCw, Upload, Radar } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 import { useRef } from "react";
 import { convertToWebP, getWebPFileName } from "@/lib/imageOptimization";
 
@@ -138,7 +138,7 @@ const AdminPosts = () => {
       }
 
       if (contentHtml) {
-        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        const imgRegex = /<img[^ loading="lazy" decoding="async">]+src="([^">]+)"/g;
         let match;
         const replacements: { old: string; new: string }[] = [];
         let index = 1;

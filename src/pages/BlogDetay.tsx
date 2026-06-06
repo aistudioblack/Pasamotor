@@ -1,7 +1,7 @@
 import Layout from "@/components/layout/Layout";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { 
   ArrowLeft, Calendar, BookOpen, Clock, Share2, ArrowRight, MessageCircle, Phone,
   CheckCircle2, User, Award, List, Heart, Sparkles, AlertCircle, Bookmark, Copy
@@ -9,7 +9,7 @@ import {
 import JsonLd from "@/components/seo/JsonLd";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import { useToast } from "@/hooks/use-toast";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 import { getCachedPostBySlug, addPostToCache, getCachedPosts } from "@/lib/blog-cache";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -110,7 +110,7 @@ const BlogDetay = () => {
   const processedContent = useMemo(() => {
     if (!post?.content) return "";
     
-    let contentStr = post.content;
+    const contentStr = post.content;
     const h2Regex = /<h2([^>]*)>(.*?)<\/h2>/gi;
     
     return contentStr.replace(h2Regex, (match, attrs, text) => {

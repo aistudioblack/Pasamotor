@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Lock, Mail, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/pasa-motor-logo.webp";
@@ -49,7 +49,7 @@ const AdminLogin = () => {
 
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={logo} alt="Paşa Motor" className="w-24 h-auto mx-auto mb-4" style={{ mixBlendMode: "screen" }} />
+          <img src={logo} alt="Paşa Motor" className="w-24 h-auto mx-auto mb-4" style={{ mixBlendMode: "screen" }}  loading="lazy" decoding="async" />
           <h1 className="font-heading font-bold text-2xl text-foreground">Yönetim Paneli</h1>
           <p className="text-sm text-muted-foreground mt-1">Paşa Motor admin girişi</p>
         </div>

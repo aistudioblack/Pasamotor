@@ -22,7 +22,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
 import ProductImagePlaceholder from "@/components/ui/ProductImagePlaceholder";

@@ -2,7 +2,7 @@ import { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Terminal, Database, Send, Image as ImageIcon, MessageSquare, Code, Loader2, KeyRound, Clock, AlertCircle, CheckCircle2 } from "lucide-react";
 
-type Provider = "gemini" | "pollinations" | "huggingface" | "openrouter" | "puter" | "groq";
+type Provider = "gemini" | "pollinations" | "huggingface" | "openrouter" | "puter" | "groq" | "qwen";
 type ApiType = "text" | "image";
 
 const GEMINI_MODELS = [
@@ -157,6 +157,26 @@ const AdminAITester = () => {
           const data = await response.json();
           if (data.error) throw new Error(data.error.message || "Groq Hatası");
           setResult({ text: data.choices?.[0]?.message?.content });
+        } else if (provider === "qwen") {
+          if (!apiKey) throw new Error("API Anahtarı gerekli");
+          
+          const endpointModel = targetModel || "qwen-turbo";
+          
+          const response = await fetch(`https://qwen.privateinstance.com/v1/chat/completions`, {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({ 
+              model: endpointModel,
+              messages: [{ role: "user", content: prompt }] 
+            })
+          });
+          
+          const data = await response.json();
+          if (data.error) throw new Error(data.error.message || "Qwen Hatası");
+          setResult({ text: data.choices?.[0]?.message?.content });
         }
       } else if (apiType === "image") {
         if (provider === "pollinations") {
@@ -183,6 +203,26 @@ const AdminAITester = () => {
           const blob = await response.blob();
           const imageUrl = URL.createObjectURL(blob);
           setResult({ imageUrl });
+        } else if (provider === "qwen") {
+          if (!apiKey) throw new Error("API Anahtarı gerekli (Qwen)");
+          
+          const endpointModel = targetModel || "qwen-vl-max";
+          
+          const response = await fetch(`https://qwen.privateinstance.com/v1/images/generations`, {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({ 
+              model: endpointModel,
+              prompt: prompt 
+            })
+          });
+          
+          const data = await response.json();
+          if (data.error) throw new Error(data.error.message || "Qwen Görsel Hatası");
+          setResult({ imageUrl: data.data?.[0]?.url });
         }
       }
     } catch (err: any) {
@@ -247,6 +287,7 @@ const AdminAITester = () => {
                        <option value="openrouter">OpenRouter (API Key Gerekli / Ücretsiz Modeller)</option>
                        <option value="groq">Groq (Maksimum Hız / Ücretsiz Katman)</option>
                        <option value="huggingface">Hugging Face (API Key Gerekli)</option>
+                       <option value="qwen">Qwen (Özel Sunucu)</option>
                        <option value="puter">Puter.js (All-in-One / Ücretsiz)</option>
                      </>
                   )}
@@ -254,6 +295,7 @@ const AdminAITester = () => {
                      <>
                        <option value="pollinations">Pollinations.ai (Ücretsiz / Keysiz)</option>
                        <option value="huggingface">Hugging Face (API Key Gerekli)</option>
+                       <option value="qwen">Qwen (Özel Sunucu)</option>
                      </>
                   )}
                 </select>
@@ -298,6 +340,7 @@ const AdminAITester = () => {
                     {provider === "openrouter" && <a href="https://openrouter.ai/settings/keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">API Key Al &rarr;</a>}
                     {provider === "groq" && <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">API Key Al &rarr;</a>}
                     {provider === "huggingface" && <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">API Key Al &rarr;</a>}
+                    {provider === "qwen" && <span className="text-primary">Qwen.privateinstance.com</span>}
                   </div>
                 </div>
               )}

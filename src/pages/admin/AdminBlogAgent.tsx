@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import {
@@ -51,7 +51,7 @@ const humanRefineContent = (html: string): string => {
   ];
   
   for (const filler of fillers) {
-    const regex = new RegExp(`(<p>|\\s)*${filler}[^<]*?(<\/p>|\\s)`, "gi");
+    const regex = new RegExp(`(<p>|\\s)*${filler}[^<]*?(</p>|\\s)`, "gi");
     refined = refined.replace(regex, " ");
   }
 
@@ -262,7 +262,7 @@ export default function AdminBlogAgent() {
 
   // ================= AŞAMA 5 - GÖRSEL STRATEJİSİ VE ÜRETİMİ =================
   const [coverPrompt, setCoverPrompt] = useState("");
-  const [coverStyle, setCoverStyle] = useState("cinematic");
+  const [coverStyle, setCoverStyle] = useState("3d");
   const [generatedCoverUrl, setGeneratedCoverUrl] = useState("");
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
@@ -306,6 +306,8 @@ export default function AdminBlogAgent() {
     setLogs((prev) => [{ time, msg, type }, ...prev]);
   };
 
+  const systemInstruction = `Sen dünyanın en iyi motosiklet uzmanı editörü, SEO uzmanı ve yapay zeka içerik üreticisisin. Mükemmel Türkçe kullanırsın, motosiklet mekaniği, yedek parçalar ve arızalar konusunda devasa bir bilgi birikimine sahipsin. Önceki konuşmaları ve ürettiğin içerikleri hatırlar, asla birbirinin aynısı cümleler kurmaz veya benzer makaleler üretmezsin. Her yeni makale eskisinden farklı, detaylı, teknik doğrulukta ve organik olmalıdır.`;
+
   // OpenRouter & Together AI & Yerleşik Sunucu Destekli Servis Çağrıcısı (Hata Toleranslı Çoklu Hat Entegrasyonu)
   const callOpenRouter = async (promptText: string, isJson: boolean = false) => {
     const provider = localStorage.getItem("ai_provider") || "system";
@@ -319,7 +321,7 @@ export default function AdminBlogAgent() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          prompt: promptText,
+          prompt: `SİSTEM TALİMATI: ${systemInstruction}\n\nKULLANICI TALEBİ: ${promptText}`,
           isJson: isJson,
           useSearch: true // SEO ajanında güncel arama trendleri ve grounding için arama desteği!
         })
@@ -362,7 +364,10 @@ export default function AdminBlogAgent() {
       for (const currentModel of togetherModels) {
         const body: any = {
           model: currentModel,
-          messages: [{ role: "user", content: promptText }],
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: promptText }
+          ],
           max_tokens: 5000
         };
 
@@ -446,7 +451,10 @@ export default function AdminBlogAgent() {
       for (const currentModel of modelsToTry) {
         const body: any = {
           model: currentModel,
-          messages: [{ role: "user", content: promptText }],
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: promptText }
+          ],
           max_tokens: 5000
         };
 
@@ -530,7 +538,10 @@ export default function AdminBlogAgent() {
         try {
           const body: any = {
             model: groqModel,
-            messages: [{ role: "user", content: promptText }]
+            messages: [
+              { role: "system", content: systemInstruction },
+              { role: "user", content: promptText }
+            ]
           };
           // JSON modu sadece uyumlu modeller veya genel fallback için
           if (isJson && groqModel !== "openai/gpt-oss-20b") {
@@ -577,7 +588,10 @@ export default function AdminBlogAgent() {
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+        body: JSON.stringify({ 
+          contents: [{ parts: [{ text: promptText }] }],
+          system_instruction: { parts: [{ text: systemInstruction }] }
+        })
       });
       if (!response.ok) throw new Error("Gemini API Hatası");
       const data = await response.json();
@@ -590,14 +604,46 @@ export default function AdminBlogAgent() {
       if (!savedKey) throw new Error("⚠️ Hugging Face API Key eksik!");
       const realKey = decryptKey(savedKey);
       addLog(`⚡ Hugging Face sorgulanıyor...`, "info");
+      const inputStr = `[INST] SİSTEM TALİMATI: ${systemInstruction}\n\nKULLANICI: ${promptText} [/INST]`;
       const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${realKey}` },
-        body: JSON.stringify({ inputs: promptText, parameters: { max_new_tokens: 5000, return_full_text: false } })
+        body: JSON.stringify({ inputs: inputStr, parameters: { max_new_tokens: 5000, return_full_text: false } })
       });
       if (!response.ok) throw new Error("Hugging Face API Hatası");
       const data = await response.json();
       return data[0]?.generated_text || "";
+    };
+
+    // 7. QWEN (ÖZEL SUNUCU) HATTI
+    const tryQwen = async (): Promise<string> => {
+      const savedKey = localStorage.getItem("qwen_api_key");
+      if (!savedKey) throw new Error("⚠️ Qwen API Key eksik!");
+      const realKey = decryptKey(savedKey);
+      
+      const qwenModel = selectedModel.includes("Qwen") ? selectedModel.split(" ")[0] : "qwen-turbo";
+      addLog(`⚡ Qwen Özel Sunucusu (${qwenModel}) sorgulanıyor...`, "info");
+      
+      const response = await fetch("https://qwen.privateinstance.com/v1/chat/completions", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json", 
+          "Authorization": `Bearer ${realKey}` 
+        },
+        body: JSON.stringify({
+          model: qwenModel,
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: promptText }
+          ]
+        })
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || "";
     };
 
     // ÇOKLU HAT FALLBACK KADEMELİ ÇAĞRI MANTIĞI
@@ -611,6 +657,7 @@ export default function AdminBlogAgent() {
           if (currentProvider === "groq") return await tryGroq();
           if (currentProvider === "gemini") return await tryGemini();
           if (currentProvider === "huggingface") return await tryHuggingFace();
+          if (currentProvider === "qwen") return await tryQwen();
         } catch (err: any) {
           addLog(`⚠️ ${currentProvider} başarısız oldu: ${err.message}. Diğer sağlayıcıya geçiliyor...`, "warning");
           finalError = err;
@@ -619,14 +666,15 @@ export default function AdminBlogAgent() {
       throw new Error(`Kademeli yapay zeka havuzundaki tüm sağlayıcılar denendi fakat yanıt alınamadı. Son hata: ${finalError?.message || "Bilinmiyor"}`);
     };
 
-    const fbSystem = ["system", "together", "openrouter", "groq", "gemini", "huggingface"];
+    const fbSystem = ["system", "qwen", "together", "openrouter", "groq", "gemini", "huggingface"];
     const fallbackMap: Record<string, string[]> = {
-      system: ["system", "together", "openrouter", "groq", "gemini", "huggingface"],
-      together: ["together", "system", "openrouter", "groq", "gemini", "huggingface"],
-      openrouter: ["openrouter", "together", "system", "groq", "gemini", "huggingface"],
-      groq: ["groq", "system", "together", "openrouter", "gemini", "huggingface"],
-      gemini: ["gemini", "system", "groq", "together", "openrouter", "huggingface"],
-      huggingface: ["huggingface", "system", "groq", "together", "openrouter", "gemini"]
+      system: ["system", "qwen", "together", "openrouter", "groq", "gemini", "huggingface"],
+      together: ["together", "qwen", "system", "openrouter", "groq", "gemini", "huggingface"],
+      openrouter: ["openrouter", "together", "qwen", "system", "groq", "gemini", "huggingface"],
+      groq: ["groq", "qwen", "system", "together", "openrouter", "gemini", "huggingface"],
+      gemini: ["gemini", "qwen", "system", "groq", "together", "openrouter", "huggingface"],
+      huggingface: ["huggingface", "qwen", "system", "groq", "together", "openrouter", "gemini"],
+      qwen: ["qwen", "system", "groq", "together", "openrouter", "gemini", "huggingface"]
     };
 
     return await callProvidersInOrder(fallbackMap[provider] || fbSystem);
@@ -698,6 +746,34 @@ export default function AdminBlogAgent() {
         console.error("Geçersiz JSON Raw:", text);
         throw new Error(`Modelden geçersiz JSON formatı geldi. Model yanıtı yarım bırakmış veya hatalı karakter üretmiş olabilir. Raw: ${clean.substring(0, 150)}...`);
       }
+    }
+  };
+
+  const generateImagePromptWithQwen = async (title: string, style: string): Promise<string> => {
+    try {
+      const styleText = style.includes("cinematic") ? "cinematic photography, 8k resolution, highly detailed" :
+                        style.includes("3d") ? "3d realistic blender render, unreal engine 5, raytracing" :
+                        style.includes("studio") ? "studio lighting, dark clean background, sleek" :
+                        "clean vector illustration, minimalist flat design";
+      
+      const qwenPrompt = `I need an image generation prompt for a blog post titled "${title}". 
+The prompt MUST BE IN ENGLISH ONLY, separated by commas, and strictly describe a visual scene. Include the style: ${styleText}.
+Do NOT output any conversational text, just the raw prompt. Remove any newlines or quotes.`;
+      
+      // Geçici olarak sağlayıcıyı Qwen yapıp çağırıyoruz
+      const oldProvider = localStorage.getItem("ai_provider");
+      localStorage.setItem("ai_provider", "qwen");
+      
+      const res = await callOpenRouter(qwenPrompt);
+      
+      if (oldProvider) localStorage.setItem("ai_provider", oldProvider);
+      else localStorage.removeItem("ai_provider");
+      
+      return res.replace(/[^a-zA-Z0-9, ]/g, "").trim().substring(0, 500);
+    } catch (e) {
+      addLog("Qwen Görsel Promptu Üretemedi, yerel yedeğe geçiliyor...", "warning");
+      const base = translateTitleToEnglishPrompt(title);
+      return base.replace(/[^a-zA-Z0-9, ]/g, "").trim().substring(0, 500);
     }
   };
 
@@ -899,7 +975,7 @@ export default function AdminBlogAgent() {
       // --- ADIM 5: OTO-GÖRSEL ÜRETİM VE SUPABASE KAYIT ---
       setStep(5);
       setIsGeneratingImage(true);
-      const seoImagePrompt = translateTitleToEnglishPrompt(parsedArticle.title);
+      const seoImagePrompt = await generateImagePromptWithQwen(parsedArticle.title, coverStyle);
       setCoverPrompt(seoImagePrompt);
       const autoCoverUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(seoImagePrompt)}?width=1024&height=576&model=flux&nologo=true&enhance=false&seed=${Math.floor(Math.random() * 100000)}`;
       
@@ -1157,7 +1233,7 @@ export default function AdminBlogAgent() {
     addLog("🖼️ Makale başlığına en uygun profesyonel yedek parça görseli tasarlanıyor... Lütfen bekleyin.", "info");
     
     try {
-      const promptSeed = translateTitleToEnglishPrompt(article.title);
+      const promptSeed = await generateImagePromptWithQwen(article.title, coverStyle);
       setCoverPrompt(promptSeed);
       
       const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptSeed)}?width=1024&height=576&model=flux&nologo=true&enhance=false&seed=${Math.floor(Math.random() * 100000)}`;
@@ -1237,7 +1313,7 @@ export default function AdminBlogAgent() {
         slug: finalSlug,
         excerpt: article.excerpt.trim() || null,
         content: fullHtml.trim(),
-        cover_image: generatedCoverUrl || `https://image.pollinations.ai/prompt/${encodeURIComponent(article.title)}?width=1024&height=576&model=flux&nologo=true&enhance=false&seed=${Math.floor(Math.random() * 100000)}`,
+        cover_image: generatedCoverUrl || `https://image.pollinations.ai/prompt/${encodeURIComponent(translateTitleToEnglishPrompt(article.title))}?width=1024&height=576&model=flux&nologo=true&enhance=false&seed=${Math.floor(Math.random() * 100000)}`,
         meta_title: article.title.trim().slice(0, 60),
         meta_description: article.excerpt.trim().slice(0, 155),
         is_published: false,
@@ -1964,10 +2040,10 @@ export default function AdminBlogAgent() {
                           onChange={(e) => setCoverStyle(e.target.value)}
                           className="w-full px-3 py-2 rounded-lg bg-muted border border-border text-xs text-foreground focus:outline-none font-sans"
                         >
+                          <option value="3d font-sans">Gerçekçi 3D Model</option>
                           <option value="cinematic font-sans">Sinematik Fotoğrafçılık</option>
                           <option value="studio font-sans">Stüdyo Ürün Tanıtımı</option>
                           <option value="vector font-sans">Minimalist Vektör İllüstrasyon</option>
-                          <option value="3d font-sans">Gerçekçi 3D Model</option>
                         </select>
                       </div>
 

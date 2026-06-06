@@ -1,9 +1,9 @@
 import Layout from "@/components/layout/Layout";
 import { useState, useEffect, useMemo, useTransition } from "react";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { Link } from "react-router-dom";
 import { Calendar, ArrowRight, BookOpen, Search, Clock, RefreshCw } from "lucide-react";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCachedPosts, setCachedPosts } from "@/lib/blog-cache";

@@ -1,7 +1,7 @@
 import Layout from "@/components/layout/Layout";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import {
   ArrowLeft,
   Phone,
@@ -20,7 +20,7 @@ import {
 import { sanitizeHtml } from "@/lib/sanitize";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 import ProductImagePlaceholder from "@/components/ui/ProductImagePlaceholder";
 
 type Product = Tables<"products">;

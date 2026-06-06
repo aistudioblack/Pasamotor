@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import SEO from "@/components/seo/SEO";
 import { Loader2 } from "lucide-react";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 import { legalDefaults } from "@/data/legalDefaults";
 
 type Page = Tables<"pages">;

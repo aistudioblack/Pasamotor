@@ -6,7 +6,7 @@ import {
   Plus, Edit2, Trash2, X, Loader2, Package, Upload, Link as LinkIcon,
   Check, Percent, Search, GripVertical, ScanLine, Sparkles
 } from "lucide-react";
-import type { Tables } from "@/lib/firebase-types";
+import type { Tables } from "@/lib/db-types";
 import { convertToWebP, getWebPFileName } from "@/lib/imageOptimization";
 import BarcodeScanner from "@/components/admin/BarcodeScanner";
 
@@ -1431,7 +1431,7 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
                   <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {form.images.map((url, i) => (
                       <div key={i} className="group relative rounded-lg overflow-hidden border border-border bg-muted aspect-square">
-                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <img src={url} alt="" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                           <button type="button" onClick={() => moveImage(i, i - 1)} disabled={i === 0} className="p-1 rounded bg-background/80 text-foreground disabled:opacity-30">
                             <GripVertical className="w-3 h-3 rotate-90" />
@@ -1526,7 +1526,7 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
                    <div key={p.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-background hover:border-primary/50 transition-colors group">
                       <div className="flex items-center gap-3 min-w-0 pr-3">
                          {p.images?.[0] ? (
-                            <img src={p.images[0]} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
+                            <img src={p.images[0]} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0"  loading="lazy" decoding="async" />
                          ) : (
                             <div className="w-10 h-10 rounded bg-muted flex items-center justify-center flex-shrink-0">
                                <Package className="w-5 h-5 text-muted-foreground/40" />

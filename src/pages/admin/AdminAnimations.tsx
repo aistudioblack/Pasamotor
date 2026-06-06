@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import { useToast } from "@/hooks/use-toast";
 import { Check, Loader2, Play, Sparkles } from "lucide-react";
 import logo from "@/assets/pasa-motor-logo.webp";

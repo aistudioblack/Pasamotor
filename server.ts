@@ -2,7 +2,6 @@ import express from "express";
 import path from "path";
 import cors from "cors";
 import fs from "fs";
-import admin from "firebase-admin";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import { pushToGithubSdk } from "./api/github-push";
@@ -185,25 +184,8 @@ async function generateText(prompt: string, isJson: boolean = true, useSearch = 
 
 // In order to interact securely with Firebase from the server,
 // we need firebase-admin. It should be initialized with a service account.
-let db: admin.firestore.Firestore | null = null;
-try {
-  // Option 1: Use FIREBASE_SERVICE_ACCOUNT env var
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-    db = admin.firestore();
-    console.log("Firebase Admin SDK initialized.");
-  } else {
-    // Option 2: Attempt default initialization (works in GCP environments like Cloud Run)
-    console.warn("FIREBASE_SERVICE_ACCOUNT environment variable not found. Attempting default initialization.");
-    admin.initializeApp();
-    db = admin.firestore();
-  }
-} catch (error) {
-  console.error("Failed to initialize Firebase Admin SDK:", error);
-}
+// Removed Firebase Admin implementation as part of clean up.
+
 
 const app = express();
 const PORT = 3000;
@@ -475,42 +457,7 @@ ${compatibilityHtml}
     }
   });
 
-  app.post("/api/supplier/clear-products", async (req, res) => {
-    try {
-      if (!db) return res.status(500).json({ error: "Database not initialized." });
-      
-      const collections = ["products", "supplier_products"];
-      const deletedStats: any = {};
 
-      for (const col of collections) {
-        const ref = db.collection(col);
-        const snap = await ref.get();
-        deletedStats[col] = snap.size;
-        
-        if (snap.size > 0) {
-          const chunks = [];
-          const docs = snap.docs;
-          const CHUNK_SIZE = 400;
-          for (let i = 0; i < docs.length; i += CHUNK_SIZE) {
-            chunks.push(docs.slice(i, i + CHUNK_SIZE));
-          }
-
-          for (const chunk of chunks) {
-            const batch = db.batch();
-            for (const doc of chunk) {
-              batch.delete(doc.ref);
-            }
-            await batch.commit();
-          }
-        }
-      }
-
-      res.json({ success: true, deleted: deletedStats });
-    } catch (error: any) {
-      console.error("Database clear error:", error);
-      res.status(500).json({ error: error.message });
-    }
-  });
 
   // Health check
   app.get("/api/health", (req, res) => {
@@ -1135,103 +1082,7 @@ KURALLAR:
     */
   });
 
-  // GET all products
-  app.get("/api/products", async (req, res) => {
-    try {
-      if (!db) return res.status(500).json({ error: "Database not initialized." });
-      
-      const snapshot = await db.collection("products").get();
-      const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      res.json({ success: true, count: products.length, data: products });
-    } catch (error: any) {
-      console.error("GET /api/products error:", error);
-      res.status(500).json({ error: error.message });
-    }
-  });
 
-  // POST create/import products
-  // Supports single or bulk import with sequential batch processing
-  app.post("/api/products/import", async (req, res) => {
-    try {
-      if (!db) return res.status(500).json({ error: "Database not initialized." });
-
-      const payload = req.body;
-      const products = Array.isArray(payload) ? payload : [payload];
-      
-      const collectionRef = db.collection("products");
-      let importedCount = 0;
-
-      // Firestore batches can hold up to 500 operations.
-      // We chunk our payload and process sequentially for maximum performance and stability.
-      const CHUNK_SIZE = 500;
-      for (let i = 0; i < products.length; i += CHUNK_SIZE) {
-        const chunk = products.slice(i, i + CHUNK_SIZE);
-        const batch = db.batch();
-
-        for (const item of chunk) {
-          const id = item.id;
-          let docRef;
-          if (id) {
-            docRef = collectionRef.doc(id);
-          } else {
-            docRef = collectionRef.doc();
-          }
-          
-          // Remove id from the data being stored if necessary
-          const { id: _, ...dataToSave } = item;
-          
-          // Ensure timestamp is added if missing
-          if (!dataToSave.created_at) {
-            dataToSave.created_at = new Date().toISOString();
-          }
-          
-          batch.set(docRef, dataToSave, { merge: true });
-          importedCount++;
-        }
-
-        // Sequential database commit
-        await batch.commit();
-      }
-
-      res.json({ 
-        success: true, 
-        message: `${importedCount} ürün sıralı yazma sistemiyle başarıyla aktarıldı.`,
-        count: importedCount
-      });
-    } catch (error: any) {
-      console.error("POST /api/products/import error:", error);
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // GET single product by ID
-  app.get("/api/products/:id", async (req, res) => {
-    try {
-      if (!db) return res.status(500).json({ error: "Database not initialized." });
-      
-      const doc = await db.collection("products").doc(req.params.id).get();
-      if (!doc.exists) {
-        return res.status(404).json({ error: "Ürün bulunamadı" });
-      }
-      res.json({ success: true, data: { id: doc.id, ...doc.data() } });
-    } catch (error: any) {
-      console.error(`GET /api/products/${req.params.id} error:`, error);
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // DELETE product by ID
-  app.delete("/api/products/:id", async (req, res) => {
-    try {
-      if (!db) return res.status(500).json({ error: "Database not initialized." });
-      
-      await db.collection("products").doc(req.params.id).delete();
-      res.json({ success: true, message: `Ürün (${req.params.id}) silindi.` });
-    } catch (error: any) {
-      console.error(`DELETE /api/products/${req.params.id} error:`, error);
-      res.status(500).json({ error: error.message });
-    }
-  });
 
   // POST Github Push
   app.post("/api/github/push", async (req, res) => {

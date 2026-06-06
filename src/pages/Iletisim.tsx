@@ -2,7 +2,7 @@ import Layout from "@/components/layout/Layout";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from "lucide-react";
 import { useState, lazy, Suspense } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { dbClient } from "@/lib/firebase-client";
+import { dbClient } from "@/lib/db-client";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
 

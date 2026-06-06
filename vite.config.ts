@@ -36,10 +36,27 @@ export default defineConfig(({ command, isSsrBuild }) => ({
       }
     } : {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['motion', 'lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge'],
-          'firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+        manualChunks: (id) => {
+          // Admin — tamamen ayrı bundle (ziyaretçi indirmez)
+          if (id.includes('/pages/admin/')) return 'admin';
+          if (id.includes('@google/genai')) return 'admin';
+
+          // Supabase — ayrı chunk
+          if (id.includes('@supabase')) return 'supabase';
+
+          // Animasyon — ihtiyaçta yüklensin
+          if (id.includes('framer-motion') ||
+              id.includes('/motion/')) return 'animation';
+
+          // UI kütüphaneleri
+          if (id.includes('@radix-ui')) return 'radix';
+          if (id.includes('lucide-react')) return 'icons';
+          if (id.includes('@tanstack')) return 'query';
+
+          // React core
+          if (id.includes('react-dom') ||
+              id.includes('react-router') ||
+              id.includes('node_modules/react/')) return 'react-vendor';
         }
       }
     },
