@@ -27,6 +27,51 @@ import {
 } from "lucide-react";
 import { jsonrepair } from 'jsonrepair';
 import { blogPrompts } from "@/config/blogPrompts";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+
+// Human Refine: Strip AI fillers and add Paşa Motor Teknik Heyeti disclaimer
+const humanRefineContent = (html: string): string => {
+  let refined = html;
+  
+  // Array of common AI conversational fillers
+  const fillers = [
+    "Umarım yardımcı olur",
+    "Umarım bu rehber",
+    "Bu yazımızda",
+    "bu yazımızda",
+    "Sonuç olarak,",
+    "Özetle,",
+    "Umarım makale",
+    "İşte size",
+    "şimdi detaylara geçelim",
+    "hep birlikte inceleyelim",
+    "Hadi başlayalım"
+  ];
+  
+  for (const filler of fillers) {
+    const regex = new RegExp(`(<p>|\\s)*${filler}[^<]*?(<\/p>|\\s)`, "gi");
+    refined = refined.replace(regex, " ");
+  }
+
+  // Inject expert disclaimer at the end
+  const disclaimerHtml = `
+<div class="p-6 rounded-2xl border border-border/50 bg-[#0d0f14]/80 text-xs space-y-4 shadow-sm mt-8">
+  <div class="flex items-center gap-2 border-b border-border/30 pb-3">
+    <span class="font-bold text-foreground text-xs uppercase tracking-wider">DOĞRULANMIŞ TEKNİK BİLGİ</span>
+  </div>
+  <p class="text-muted-foreground leading-relaxed text-[11px]">
+    Bu kılavuz, motosiklet mekaniği alanında 20 yılı aşkın tecrübeye sahip <strong>Paşa Motor Teknik Heyeti</strong> tarafından incelenmiş, teknik veriler ve parça toleransları güncel servis manuel kitapçıklarına göre doğrulanmıştır.
+  </p>
+  <div class="flex items-center gap-1.5 text-[11px] text-emerald-500 font-semibold bg-emerald-500/5 px-2.5 py-1.5 rounded-lg w-fit">
+    %100 Güvenilir Sürüş Güvencesi
+  </div>
+</div>
+`;
+
+  return refined + disclaimerHtml;
+};
 
 // Basit şifreleme/obfuscation yardımcı fonksiyonları
 const decryptKey = (encrypted: string): string => {
@@ -844,7 +889,7 @@ export default function AdminBlogAgent() {
       parsedArticle.faqs = parsedArticle.faqs || [];
       
       if (parsedArticle.htmlContent) {
-        parsedArticle.htmlContent = parsedArticle.htmlContent.replace(/\*\*/g, "");
+        parsedArticle.htmlContent = humanRefineContent(parsedArticle.htmlContent);
       }
 
       setArticle(parsedArticle);
@@ -1091,7 +1136,7 @@ export default function AdminBlogAgent() {
       parsedArticle.faqs = parsedArticle.faqs || [];
 
       if (parsedArticle.htmlContent) {
-        parsedArticle.htmlContent = parsedArticle.htmlContent.replace(/\*\*/g, "");
+        parsedArticle.htmlContent = humanRefineContent(parsedArticle.htmlContent);
       }
 
       setArticle(parsedArticle);
@@ -1791,9 +1836,11 @@ export default function AdminBlogAgent() {
                       <hr className="border-border/40" />
                       
                       {/* Generative Article Preview */}
-                      <div className="prose prose-invert max-w-none text-xs text-slate-300 leading-relaxed font-sans space-y-3"
-                        dangerouslySetInnerHTML={{ __html: article.htmlContent }}
-                      />
+                      <div className="prose prose-invert max-w-none text-xs text-slate-300 leading-relaxed font-sans space-y-3 pasa-article">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                          {article.htmlContent}
+                        </ReactMarkdown>
+                      </div>
 
                       {/* FAQs Area */}
                       {article.faqs && article.faqs.length > 0 && (

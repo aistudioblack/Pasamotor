@@ -1374,7 +1374,9 @@ KURALLAR:
       const pathsToTry = [
         path.join(getDirname(), "index.html"),
         path.join(getDirname(), "../index.html"),
+        path.join(getDirname(), "../dist/client/index.html"),
         path.join(getDirname(), "../dist/index.html"),
+        path.join(process.cwd(), "dist", "client", "index.html"),
         path.join(process.cwd(), "dist", "index.html"),
         path.join(process.cwd(), "index.html"),
       ];

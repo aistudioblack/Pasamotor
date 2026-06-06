@@ -3,7 +3,7 @@ import path from "node:path";
 
 const toAbsolute = (p: string) => path.resolve(process.cwd(), p);
 
-const templatePath = toAbsolute("dist/client/index.html");
+const templatePath = toAbsolute("dist/index.html");
 const template = fs.readFileSync(templatePath, "utf-8");
 
 const routesToPrerender = [
@@ -33,7 +33,7 @@ async function prerender() {
         .replace("<!--app-html-->", html);
 
       const isIndex = url === "/";
-      const filePath = isIndex ? "dist/client/index.html" : `dist/client${url}/index.html`;
+      const filePath = isIndex ? "dist/index.html" : `dist${url}/index.html`;
       const absoluteFilePath = toAbsolute(filePath);
       
       const dir = path.dirname(absoluteFilePath);

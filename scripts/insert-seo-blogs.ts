@@ -28,8 +28,6 @@ const seoBlogs = [
 
 <p>Fatih’te yıllarca Kuba, Mondial ve RKS markalarının yetkili servisi olarak hizmet veren <strong>Paşa Motor</strong> ekibi olarak, motorunuzu daha uzun ömürlü ve sorunsuz kullanabilmeniz için bu kronik meseleleri ve bilimsel, teknik çözüm yollarını kaleme aldık.</p>
 
-<hr />
-
 <h2>1. Kuba Scooter ve Vitesli Modellerde Yaşanan Kronik Sorunlar</h2>
 <p>Kuba Motor'un özellikle Superlight 120, Trendy, Space 50 ve Bluebird modelleri yollarda sıklıkla karşımıza çıkar. En sık görülen arıza başlıkları şunlardır:</p>
 
@@ -46,8 +44,6 @@ const seoBlogs = [
   <li><strong>Profesyonel Çözüm:</strong> Paşa Motor teknik servisimizde, tüm elektrik soketleri korozyon önleyici spreylerle elden geçirilir, akü şasi bağlantısı kalınlaştırılır ve konjektör (regülatör) voltaj kararlılığı test edilir.</li>
 </ul>
 
-<hr />
-
 <h2>2. Mondial Motosikletlerde Sık Karşılaşılan Kronik Problemler</h2>
 <p>Mondial markasının özellikle Drift L, RX3i Evo, Wing 50 ve Revival modelleri yoğun talep görür. Mondial kullanıcılarının en çok geri bildirimde bulunduğu arızalar şunlardır:</p>
 
@@ -63,8 +59,6 @@ const seoBlogs = [
   <li><strong>Profesyonel Çözüm:</strong> Grenaj birleşim noktalarına profesyonel sünger bantlama ve kauçuk pul uygulaması yapılır. Kırık klipsler orijinal tırnaklı vidalarla revize edilir.</li>
 </ul>
 
-<hr />
-
 <h2>3. RKS Motosikletlerin Mekanik ve Kronik Durumları</h2>
 <p>Premium tasarım çizgileriyle öne çıkan RKS'nin Wildcat, RK 125, Sniper Pro ve TNT 125 gibi modellerinde bazı fabrikasyon hassasiyetler bulunur:</p>
 
@@ -79,8 +73,6 @@ const seoBlogs = [
 <ul>
   <li><strong>Profesyonel Çözüm:</strong> Amortisör keçelerinin değişimi mümkün değilse, daha yumuşak ve ayarlanabilir gazlı arka amortisör setlerinin montajı yapılarak sürüş konforu %70 oranında artırılır.</li>
 </ul>
-
-<hr />
 
 <h2>Neden Yetkili Servis ve Orijinal Yedek Parça Önemlidir?</h2>
 <p>Kuba, Mondial veya RKS motosikletinizde kronik bir arıza fark ettiğinizde bunu mahalle arasındaki yetkisiz tamircilere emanet etmek, sorunun daha da büyümesine ve motorun garanti kapsamı dışına çıkmasına yol açabilir. Yetkili servis olan <strong>Paşa Motor</strong> bünyesinde yapılan arıza tespitleri, üretici el kitabına (service manual) uygun tork değerleri ile gerçekleştirilir.</p>
@@ -101,8 +93,6 @@ const seoBlogs = [
 <p>Motosiklet kullanıcılarının en büyük ikilemlerinden biri, yedek parça değişimi sırasında karşılarına çıkar: <strong>Orijinal parça mı almalı, yoksa daha ucuz olan yan sanayi (muadil) parçayı mı tercih etmeli?</strong> İlk etapta yan sanayi parçanın fiyat avantajı cazip görünse de, uzun vadede bu seçimin motosikletinize, bütçenize ve en önemlisi can güvenliğinize faturası çok ağır olabilir.</p>
 
 <p>Bu makalede, <strong>TVS, Kuba, Mondial, RKS</strong> gibi önde gelen markaların orijinal yedek parçaları ile yan sanayi parçalar arasındaki teknik farkları, malzeme kalitesini ve neden her zaman orijinal parçaları tercih etmeniz gerektiğini mühendislik boyutuyla inceliyoruz.</p>
-
-<hr />
 
 <h2>1. Malzeme Kalitesi ve Dayanıklılık Farkı</h2>
 <p>Orijinal parçalar (OEM - Original Equipment Manufacturer), motosikletinizin fabrikasında kullanılan ve üretici firmanın yaptığı tüm dayanıklılık testlerinden geçmiş parçalardır. Yan sanayi parçalar ise genellikle bu standartların dışında, daha düşük maliyetli ham maddeler kullanılarak üretilir.</p>
@@ -139,8 +129,6 @@ const seoBlogs = [
   </tbody>
 </table>
 
-<hr />
-
 <h2>2. Kritik Parçalarda Orijinal Tercih Etmenin Önemi</h2>
 <p>Her yedek parçanın motora etkisi aynı değildir. Bazı kozmetik veya plastik aksamlarda yan sanayi parçalar tolere edilebilirken, motor mekaniği ve sürüş güvenliğiyle doğrudan ilişkili parçalarda orijinal kullanımı <strong>hayati önem taşır</strong>:</p>
 
@@ -152,8 +140,6 @@ const seoBlogs = [
 
 <h3>C. Varyatör Kayışları (Scooter Modelleri)</h3>
 <p>Scooter motosikletlerde gücü tekerleğe ileten varyatör kayışının kopması durumunda motor anında yolda kalır. Bando veya markaların orijinal Mitsuboshi kayışları Kevlar lifleriyle güçlendirilmişken, ucuz muadiller 2.000-3.000 km'de sıfır esnemeyle kopma eğilimi gösterir.</p>
-
-<hr />
 
 <h2>3. Uzun Vadeli Ekonomik Analiz: Neden Orijinal Daha Ucuz?</h2>
 <p>Birok sürücü "Orijinal parça 2000 TL, yan sanayi 800 TL, o halde yan sanayi alıp tasarruf edeyim" diye düşünür. Ancak senaryo genellikle şu şekilde sonuçlanır:</p>
@@ -181,8 +167,6 @@ const seoBlogs = [
 <p>Motosiklet kullanmak büyük bir tutku ve özgürlüktür. Ancak bu özgürlüğün kesintisiz ve güvenli bir şekilde devam etmesi, motosikletinizin periyodik bakımlarının zamanında yapılmasına bağlıdır. Düzenli bakım, en pahalı tamiratlardan çok daha ekonomiktir. Bakım esnasında değiştirilmeyen basit bir parça, zincirleme olarak motorunuza kalıcı hasarlar verebilir.</p>
 
 <p>Kurye motorlarından spor motosikletlere kadar her sınıftan iki tekerlekli dostumuz için periyodik bakımlarda mutlaka kontrol edilmesi veya değiştirilmesi gereken <strong>7 kritik yedek parçayı ve sarf malzemesini</strong> sizler için listeledik.</p>
-
-<hr />
 
 <h2>1. Motor Yağı (En Hayati Sıvı)</h2>
 <p>Motosiklet motorları otomobillere göre çok daha yüksek devirlerde ve yüksek sıcaklıklarda çalışır. Motor yağı, piston ve silindir arasındaki sürtünmeyi azaltarak aşırı ısınmayı önler ve metal tortuları temizler.</p>
@@ -232,8 +216,6 @@ const seoBlogs = [
   <li><strong>Değişim Sıklığı:</strong> Düzenli temizlenip yağlanan zincirler 15.000 - 20.000 km gidebilir. Dişliler ile zincir mutlaka <strong>set halinde</strong> değiştirilmelidir.</li>
 </ul>
 
-<hr />
-
 <h2>Paşa Motor'da Profesyonel Periyodik Bakım Zamanı!</h2>
 <p>Motosikletinizin hem güvenliğini hem de ömrünü korumak için periyodik bakımlarınızı aksatmayın. Fatih Kocamustafapaşa’daki modern servisimizde, uzman ekibimizle tüm bu 7 filtre ve mekanik aksam kontrolünü milimetrik standartlarda gerçekleştiriyoruz. Randevunuzu almak ve kaliteli orijinal yedek parçalarımızla bakım yaptırmak için <a href="/iletisim">Paşa Motor Servis Randevu</a> sayfamızdan bizlerle hemen iletişime geçebilirsiniz.</p>
     `
@@ -252,8 +234,6 @@ const seoBlogs = [
 
 <p>Bu ortak parça stratejisi, kullanıcılara parça bulma kolaylığı ve fiyat avantajı sağlar. Ancak hangi parçaların birbiriyle %100 uyumlu olduğunu bilmek teknik uzmanlık gerektirir. <strong>Paşa Motor</strong> yedek parça ekibi olarak, Kuba ve RKS arasındaki ortak parça uyumluluklarını detaylıca açıkladık.</p>
 
-<hr />
-
 <h2>1. Motor Bloğu ve Yürüyen Aksam Ortaklığı</h2>
 <p>Kuba ve RKS'nin özellikle 50cc and 125cc scooter ile vitesli commuter modellerinde motor blokları silindir çapı, krank boyutu ve subap yapısı olarak birebir aynıdır.</p>
 
@@ -268,8 +248,6 @@ const seoBlogs = [
 <h3>B. 125cc Commuter ve Scooter Blokları</h3>
 <p>Kuba'nın CG/Commuter modelleri ile RKS'nin vitesli commuter modellerinde krank, şanzıman dişli setleri, debriyaj pleytleri ve balataları aynı tasarım ölçülerini taşır. RKS RK125 veya Kuba Çita serisinde debriyaj tası ve balata takımı birbirinin yerine kullanılabilir.</p>
 
-<hr />
-
 <h2>2. Elektrik ve Ateşleme Sistemi Uyumlulukları</h2>
 <p>Kuba ve RKS markalarında CDI (beyin), ateşleme bobini, konjektör (regülatör) ve marş motorları gibi elektrik elemanlarında soket yapısı uyduğu sürece tam bir geçişkenlik söz konusudur:</p>
 <ul>
@@ -277,12 +255,8 @@ const seoBlogs = [
   <li><strong>Marş Motorları:</strong> Akü amper değerleri ve marş motoru tırnak sayıları uyduğu sürece marş dinamosu iki marka arasında sorunsuzca değiştirilir.</li>
 </ul>
 
-<hr />
-
 <h2>3. Fren ve Süspansiyon Parçaları</h2>
 <p>RKS ve Kuba scooter modellerinde kullanılan ön fren kaliperleri, fren ana merkezleri ve hatta ön çatal amortisör boruları çap olarak ortaktır. Örneğin RKS Wildcat ön balatası piyasada bulunamadığında Kuba'nın uyumlu scooter ön balatası takılarak fren performansı fabrikasyon değerlerde korunabilir.</p>
-
-<hr />
 
 <h2>Ortak Parça Alırken Nelere Dikkat Edilmelidir?</h2>
 <p>Kuba ve RKS parçalarının uyumlu olması her parçanın rastgele takılabileceği anlamına gelmez. Şu üç kurala dikkat edilmelidir:</p>
@@ -310,12 +284,8 @@ const seoBlogs = [
 
 <p>Peki motosiklet motor yenileme işlemi nedir? Hangi aşamalardan oluşur ve bu işlem yapılırken nelere dikkat edilmelidir? Sektörün uzmanı <strong>Paşa Motor</strong> teknik ekibi olarak, motor rektifiyesinin tüm inceliklerini paylaşıyoruz.</p>
 
-<hr />
-
 <h2>1. Motor Rektefiye (Yenileme) İşlemi Nedir?</h2>
 <p>Motor rektefiye; aşınmış, deforme olmuş silindir, piston, segman, krank mili ve subap grubu gibi parçaların ölçülerek temizlenmesi, fabrikasyon mikron hassasiyetindeki ölçülere geri getirilmesi veya yeni yedek parçalarla değiştirilerek motor bloğunun sıfırlanması işlemidir. Bu işlem tamamlandığında motorunuz teorik olarak 0 kilometredeki sağlık durumuna ve kompresyon (sıkıştırma) gücüne kavuşur.</p>
-
-<hr />
 
 <h2>2. Motorunuzun Rektefiyeye İhtiyacı Olduğunu Nasıl Anlarsınız?</h2>
 <p>Motor bloğu açılmadan önce bazı belirtiler rektefiye zamanının geldiğini gösterir:</p>
@@ -325,8 +295,6 @@ const seoBlogs = [
   <li><strong>Motordan Gelen Mekanik Vuruntu Sesleri (Yatak Sarma):</strong> Krank mili yataklarından veya piston piminden gelen yoğun metalik vuruntu sesleri.</li>
   <li><strong>Rölantide Stop Etme ve Zor Çalışma:</strong> Silindir sıkıştırma oranının düşmesiyle motorun marş almasının zorlaşması.</li>
 </ul>
-
-<hr />
 
 <h2>3. Motor Rektefiye İşleminin Adımları</h2>
 <p>Bir motosiklet motor rektefiye süreci Paşa Motor servisimizde şu profesyonel aşamalardan geçer:</p>
@@ -342,8 +310,6 @@ const seoBlogs = [
 
 <h3>D. Temizlik ve Montaj</h3>
 <p>Tüm parçalar solvent bazlı yıkama ünitelerinde metal talaşlarından temizlenir. Yeni contalar ve orijinal yedek parçalar kullanılarak, tork anahtarı ile üretici standartlarında cıvatalar sıkılarak motor toplanır.</p>
-
-<hr />
 
 <h2>Rektefiye Sonrası "Rodaj" Süreci Neden Önemlidir?</h2>
 <p>Rektefiyeden yeni çıkmış bir motor tıpkı sıfır alınmış bir motosiklet gibidir. Piston ve segmanların yeni silindire kusursuzca alışabilmesi için ilk 500-1000 km boyunca <strong>rodaj kurallarına</strong> uyulmalıdır:</p>
@@ -371,8 +337,6 @@ const seoBlogs = [
 
 <p>Bu kılavuzda, TVS Apache ve TVS Jupiter kullanıcılarının karşılaştığı tipik arıza durumlarını, doğru parça tedarikinin yollarını ve profesyonel usta tavsiyelerini derledik.</p>
 
-<hr />
-
 <h2>1. TVS Apache RTR Serisinde Sık Yaşanan Durumlar ve Çözümleri</h2>
 <p>Apache RTR serisi, sportif yapısı ve torku yüksek kısa stroklu motor yapısıyla kullanıcıların gözdesidir. Ancak şu detaylara dikkat edilmelidir:</p>
 
@@ -389,8 +353,6 @@ const seoBlogs = [
   <li><strong>Profesyonel Çözüm:</strong> Keçeler sökülerek amortisör borusu çizik kontrolünden geçirilir. Orijinal TVS keçe ve amortisör hidrolik yağı (viskoziteye göre) kullanılarak ön takım sıfırlanır.</li>
 </ul>
 
-<hr />
-
 <h2>2. TVS Jupiter Scooter Sık Karşılaşılan Durumlar</h2>
 <p>Özellikle kuryelerin ve günlük kullanıcıların vazgeçilmezi olan metal grenajlı TVS Jupiter, sınıfının en dayanıklı scooter'ıdır. Ancak yıpranmaya bağlı şu durumlar görülebilir:</p>
 
@@ -405,8 +367,6 @@ const seoBlogs = [
 <ul>
   <li><strong>Profesyonel Çözüm:</strong> Kampana içi asbest içermeyen yüksek tutuşlu orijinal TVS Jupiter balatası ile yenilenir, kampana içi temizlenir.</li>
 </ul>
-
-<hr />
 
 <h2>TVS Motosikletlerde Orijinal Yedek Parça Neden Şarttır?</h2>
 <p>TVS motorlarının üretim toleransları oldukça yüksektir. Örneğin bir yan sanayi hava filtresi takıldığında, TVS motorunun hava-yakıt emiş dengesi bozulur ve motor sürekli öksürme eğilimi gösterir. Aynı şekilde kalitesiz bir debriyaj teli takıldığında çok hızlı koparak sizi yolda bırakacaktır.</p>
@@ -429,8 +389,6 @@ const seoBlogs = [
 
 <p>Bu sistemlerde oluşan arızaları erken fark etmek, yolda kalmanızı önleyeceği gibi daha yüksek maliyetli şanzıman kırılmalarının da önüne geçer. Sektörün bilinen ismi <strong>Paşa Motor</strong> olarak debriyaj ve şanzıman arızalarını teknik detaylarıyla derledik.</p>
 
-<hr />
-
 <h2>1. Motosiklet Debriyaj Balatası Aşınma Belirtileri</h2>
 <p>Debriyaj balatası aşındığında motor gücünü tam olarak şanzımana aktaramaz. Sürücünün en kolay anlayabileceği belirtiler şunlardır:</p>
 
@@ -443,8 +401,6 @@ const seoBlogs = [
 <h3>C. Debriyaj Manetinde Boşluk Kaybı</h3>
 <p>Debriyaj telinin uçlarındaki boşluk azaldığında veya manet aşırı sertleştiğinde debriyaj sürekli hafifçe basılı kalır. Bu da balatanın sürtünerek hızla yanmasına yol açar.</p>
 
-<hr />
-
 <h2>2. Şanzıman Arızası ve Belirtileri</h2>
 <p>Motosiklet şanzımanları sıralı (sequential) köpek dişli sisteme sahiptir. Araba şanzımanlarından farklı olarak çok daha kompakt yapıdadırlar ve şu arızalar görülebilir:</p>
 
@@ -453,8 +409,6 @@ const seoBlogs = [
 
 <h3>B. Şanzımandan Gelen Uğultu ve Metal Sürtme Sesi</h3>
 <p>Tüm viteslerde veya sadece belirli bir viteste giderken motor devriyle doğru orantılı olarak artan kulak tırmalayıcı bir uğultu (whining) sesi gelmesi, şanzıman rulmanlarının dağıldığının ve acilen müdahale edilmesi gerektiğinin habercisidir.</p>
-
-<hr />
 
 <h2>Debriyaj ve Şanzıman Ömrünü Uzatmak İçin Yapılması Gerekenler</h2>
 <ul>
@@ -481,8 +435,6 @@ const seoBlogs = [
 
 <p>Peki İstanbul Fatih bölgesinde, Kocamustafapaşa ve çevre semtlerde orijinal Mondial yedek parçası nasıl ve nereden güvenle tedarik edilir? Yetkilendirilmiş servis noktası olan <strong>Paşa Motor</strong> kalitesiyle Mondial yedek parça süreçlerini kaleme aldık.</p>
 
-<hr />
-
 <h2>1. Yan Sanayi Mondial Parçaları Neden Risk Taşır?</h2>
 <p>Piyasada ucuz, ambalajsız ve merdiven altı olarak üretilen binlerce sahte Mondial parçası dolaşmaktadır. Özellikle şu parçaların yan sanayi takılması büyük riskleri beraberinde getirir:</p>
 <ul>
@@ -490,8 +442,6 @@ const seoBlogs = [
   <li><strong>Egzantrik Milleri ve Subaplar:</strong> Metal kalitesi düşük yan sanayi egzantrik milleri birkaç bin kilometrede aşınarak motorun sesli çalışmasına ve subap yakmasına sebep olur.</li>
   <li><strong>Yakıt ve Enjeksiyon Elemanları:</strong> Enjektör, oksijen sensörü gibi elektronik parçaların yan sanayi seçilmesi ECU (beyin) arızalarına ve motor gidişinde dalgalanmalara yol açar.</li>
 </ul>
-
-<hr />
 
 <h2>2. Paşa Motor'da Hangi Mondial Parçalarını Bulabilirsiniz?</h2>
 <p>Mondial yedek parça stoğumuzda, her model aralığına uygun binlerce parça şemaya ve katalog koduna göre saklanır:</p>
@@ -501,8 +451,6 @@ const seoBlogs = [
   <li><strong>Fren ve Yürüyen Aksam:</strong> Orijinal ön/arka balatalar, fren diskleri, amortisör keçeleri, jantlar ve rulman takımları.</li>
   <li><strong>Sarf Malzemeler:</strong> Orijinal Mondial hava filtreleri, yağ filtreleri ve varyatör kayışları.</li>
 </ul>
-
-<hr />
 
 <h2>Fatih’te Mondial Servis ve Tedarikin Doğru Adresi</h2>
 <p>Motosikletinizi yetkisiz kişilere emanet etmek, hem garanti kapsamını sonlandırır hem de yanlış parça montajıyla motor ömrünü tüketir. <strong>Paşa Motor</strong>, İstanbul Fatih’teki geniş deposu, güler yüzlü ekibi ve modern tavan led aydınlatmalı servis alanıyla Mondial kullanıcılarına kusursuz hizmet sunar.</p>
@@ -524,12 +472,8 @@ const seoBlogs = [
 
 <p>CVT sistemi debriyaj balatası tozu, hava yoluyla giren yol tozları ve sürtünme nedeniyle zamanla kirlenir ve aşınır. Bu yazımızda, scooter varyatör sisteminin nasıl çalıştığını, bakım adımlarını ve doğru varyatör ayarıyla <strong>motosikletinizin hızını artırıp yakıt tüketimini nasıl düşüreceğinizi</strong> açıklıyoruz.</p>
 
-<hr />
-
 <h2>1. Scooter Varyatör Sistemi Nasıl Çalışır?</h2>
 <p>Ön varyatör motorun krank miline bağlıdır ve içinde santrifüj gücüyle hareket eden <strong>varyatör bagaları (misketleri)</strong> yer alır. Motor devri arttıkça bagalar dışarıya doğru savrulur, ön varyatör kasnaklarını birbirine yaklaştırır ve aradaki kayış yukarı tırmanır. Arka varyatör ise tam tersi hareketle genişler. Bu sayede sonsuz vites oranlı pürüzsüz bir kalkış ve hızlanma gerçekleşir.</p>
-
-<hr />
 
 <h2>2. Varyatör ve Debriyajda Bakımsızlık Belirtileri</h2>
 <p>Eğer scooterınızda şu belirtiler başladıysa varyatör kapağını açma vakti gelmiştir:</p>
@@ -539,8 +483,6 @@ const seoBlogs = [
   <li><strong>Varyatörden Gelen Şıkırtı Sesi:</strong> Ön varyatör bagalarının (misketlerinin) yuvarlaklığını kaybederek köşeli hale gelmesi ve tırnak plastiklerinin kırılması.</li>
 </ul>
 
-<hr />
-
 <h2>3. Adım Adım Profesyonel Varyatör Bakımı</h2>
 <p>Paşa Motor servisimizde uyguladığımız profesyonel varyatör bakım rutini:</p>
 <ol>
@@ -549,8 +491,6 @@ const seoBlogs = [
   <li><strong>Arka Debriyaj Bakımı:</strong> Debriyaj balatası zımparalanarak camlaşmış sertleşen yüzey temizlenir. Yaylar tork kontrolünden geçirilir.</li>
   <li><strong>Kayış Analizi:</strong> Varyatör kayış kalınlığı ölçülür, çatlak ve diş dökülmesi kontrol edilerek limit altındaysa yeni orijinal kayışla yenilenir.</li>
 </ol>
-
-<hr />
 
 <h2>Varyatör Ayarı ile Performans ve Tasarruf Sırları</h2>
 <p>Motosikletinizin karakteristiğini varyatör bagalarının ağırlığını değiştirerek ayarlayabilirsiniz:</p>
@@ -576,8 +516,6 @@ const seoBlogs = [
 <p>Kış aylarının gelmesi, soğuk hava, kar ve buzlanma birçok motosiklet kullanıcısı için sezonun kapanması anlamına gelir. Motosikletinizi kış boyunca garajda veya açık alanda uzun süre yatıracaksanız, onu öylece bırakıp gitmek ilkbaharda büyük sürprizlerle (bitmiş bir akü, tıkanmış karbüratör, paslanmış zincir, çatlamış lastikler) karşılaşmanıza neden olur.</p>
 
 <p>Doğru adımlarla kışlık koruma altına alınan bir motosiklet, bahar dönemi geldiğinde tek marşta sorunsuzca çalışacaktır. İşte <strong>Paşa Motor</strong> teknik servis ekibinin sizler için hazırladığı altın değerindeki kışlık saklama adımları.</p>
-
-<hr />
 
 <h2>1. Akü Sağlığını ve Şarjını Koruyun</h2>
 <p>Yatan bir motosiklette akü kendi kendine yavaş yavaş deşarj olur. Soğuk kış günleri bu süreci hızlandırır ve akünün plaka yapısına kalıcı zararlar verir.</p>
@@ -608,8 +546,6 @@ const seoBlogs = [
 <ul>
   <li><strong>Yapılması Gereken:</strong> Motorunuzu güzelce yıkayın ve %100 kurutun. Metal ve kromajlı yüzeylere korozyon önleyici koruyucu sprey veya WD-40 sıkın. Üzerine örteceğiniz kılıfın kesinlikle naylon olmamasına, nefes alabilen özel kumaş kılıf olmasına dikkat edin; naylon kılıflar nemi hapsederek terleme yapar ve çürümeyi hızlandırır.</li>
 </ul>
-
-<hr />
 
 <h2>Bahar Sezonunda Paşa Motor Güvencesiyle Yollara Dönün!</h2>
 <p>Kışlık hazırlığı tam yapılan bir motor yeni senede sizi asla yarı yolda bırakmaz. Bahar geldiğinde motorunuzu güvenle yola çıkarmadan önce, Fatih Kocamustafapaşa’daki servisimizde A’dan Z’ye yola hazırlık check-up'ından geçirebilirsiniz. Kışlık bakım ürünleri, akatörler ve şarj cihazları için <a href="/yedek-parca">Paşa Motor Online Parça</a> sitemizden destek alabilir, her zaman <a href="/iletisim">yetkili servisimizle</a> irtibata geçebilirsiniz.</p>

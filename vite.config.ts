@@ -27,7 +27,7 @@ export default defineConfig(({ command, isSsrBuild }) => ({
   build: {
     target: "esnext",
     minify: "esbuild" as const,
-    outDir: isSsrBuild ? "dist/server" : "dist/client",
+    outDir: isSsrBuild ? "dist/server" : "dist",
     ssr: isSsrBuild,
     rollupOptions: isSsrBuild ? {
       input: "./src/entry-server.tsx",

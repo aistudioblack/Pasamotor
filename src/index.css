@@ -413,8 +413,175 @@ html {
 }
 
 /* ============================================================
-   Kurumsal CTA ve Buton Tasarımları (Paşa Motor Kurumsal Kimlik)
+   Premium Article & Prose Styling
    ============================================================ */
+.pasa-article {
+  font-family: inherit;
+  color: hsl(var(--foreground) / 0.85);
+  line-height: 1.8;
+  font-size: 1.125rem;
+}
+
+.pasa-article h1,
+.pasa-article h2,
+.pasa-article h3,
+.pasa-article h4 {
+  color: hsl(var(--foreground));
+  font-family: var(--font-heading);
+  letter-spacing: -0.025em;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.pasa-article h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  padding-bottom: 0.75rem;
+}
+
+.pasa-article h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.pasa-article p {
+  margin-bottom: 1.75rem;
+}
+
+.pasa-article strong {
+  color: hsl(var(--foreground));
+  font-weight: 700;
+}
+
+.pasa-article a {
+  color: hsl(var(--primary));
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.pasa-article a:hover {
+  border-bottom-color: hsl(var(--primary));
+}
+
+.pasa-article ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 2rem;
+  margin-top: 1.5rem;
+}
+
+.pasa-article ul li {
+  position: relative;
+  padding-left: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.pasa-article ul li::before {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  top: 0.6rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background-color: hsl(var(--primary));
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.6);
+}
+
+.pasa-article ol {
+  padding-left: 1.5rem;
+  margin-bottom: 2rem;
+  list-style-type: decimal;
+}
+
+.pasa-article ol li {
+  margin-bottom: 0.75rem;
+  padding-left: 0.5rem;
+}
+
+.pasa-article ol li::marker {
+  color: hsl(var(--primary));
+  font-weight: 700;
+}
+
+.pasa-article blockquote {
+  border-left: 4px solid hsl(var(--primary));
+  background: linear-gradient(90deg, hsl(var(--primary) / 0.1), transparent);
+  padding: 1.5rem 2rem;
+  margin: 2.5rem 0;
+  border-radius: 0 1rem 1rem 0;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: hsl(var(--foreground) / 0.9);
+}
+
+.pasa-article img {
+  border-radius: 1.5rem;
+  margin: 3rem auto;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+  border: 1px solid hsl(var(--border) / 0.5);
+  display: block;
+}
+
+.pasa-article hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(var(--border)), transparent);
+  margin: 4rem 0;
+}
+
+.pasa-article table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 2.5rem 0;
+  background: hsl(var(--background) / 0.5);
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+}
+
+.pasa-article thead th {
+  background: hsl(var(--muted) / 0.8);
+  font-weight: 700;
+  text-align: left;
+  padding: 1rem 1.25rem;
+  color: hsl(var(--foreground));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.pasa-article tbody td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.pasa-article tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pasa-article tbody tr:hover td {
+  background: hsl(var(--muted) / 0.3);
+}
+
+.pasa-article code {
+  background: hsl(var(--muted));
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.875em;
+  color: hsl(var(--primary));
+}
+
+/* Fix CTA box coloring inside article */
+.pasa-article .cta-box p, 
+.pasa-article .cta-box h3 {
+  margin-bottom: auto !important;
+}
+
 .cta-box {
   display: flex;
   flex-direction: column;

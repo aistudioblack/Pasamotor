@@ -98,75 +98,30 @@ Mevcut ciddi sorunlarımız ve çözümlerimiz:
 - GOOGLE DİZİN HATASI ('Tarandı - şu anda dizine eklenmiş değil' / Crawled - currently not indexed): Bu hatayı önlemek için; yazının YÜKSEK KALİTELİ, benzersiz (thin content olmayan) ve E-E-A-T (Deneyim, Uzmanlık, Otoriterlik, Güvenilirlik) kurallarına uygun olması şarttır. Robotik tekrarlara düşme, eşsiz atölye tecrübeleri ve profesyonel teknik teşhisler ekle! Makale ASLA kopya veya jenerik hissettirmemelidir.
 
 SİSTEM BİLGİLENDİRMESİ (SEMANTIC WEB / JSON-LD):
-Uygulamada şu anda sayfalara göre dinamik olarak tetiklenen şu yapısal veriler (JSON-LD) mevcuttur (senin ekstra script eklemene gerek yoktur, arka plan kodları bunu halleder):
-- Ana Sayfa: LocalBusiness, MotorcycleDealer (TVS, Hero yetkili bayi)
-- Yedek Parça/Hizmetler: ItemList, Service
-- Ürün Sayfaları: Product (Stok, fiyat, marka)
-- Blog: Article (Yazar, okunma süresi, kapak görseli)
-- FAQ (Sıkça Sorulan Sorular): FAQPage
-- Genel Yönlendirme: BreadcrumbList
-Sen içerik üretirken, bu güçlü Semantic Web silahlarının aktif olduğunu bilerek, arama niyetine (Customer Intent) en saf şekilde ve en değerli bilgi odaklı SEO stratejisi ile cevap ver!
+Uygulamada şu anda sayfalara göre dinamik olarak tetiklenen yapısal veriler (JSON-LD) mevcuttur. Sen içerik üretirken, arama niyetine (Customer Intent) en saf şekilde ve en değerli bilgi odaklı SEO stratejisi ile cevap ver!
 
-MAKALE YAZIMINDA UYULMASI ZORUNLU KURALLAR:
+MAKALE YAZIMINDA UYULMASI ZORUNLU KURALLAR (MARKDOWN FORMATI):
 
-1. YAPI & SIRALAMA:
-Makaleyi mutlaka şu mantıksal düzende yazacaksın:
-- [BAŞLIK] -> H1 düzeyinde, \`${title}\` veya benzeri aranan anahtar kelime, model adı ve sorun içermeli.
-- [GİRİŞ] -> Kullanıcının motorunda yaşadığı can sıkıcı şikayeti doğrudan ilk paragrafta hissettir (Örn: "Motorunuz sabahları zor marş alıyor ve şarjı çabuk bitiyorsa...")
-- [ARIZA BELİRTİLERİ BÖLÜMÜ] -> Her zaman <h2> düzeyinde başlık açıp HTML liste formatında yaz. Örnek:
-  <h2>[Model/Parça Adı] Arıza Belirtileri Nasıl Anlaşılır?</h2>
-  <ul>
-    <li>Motor şarj etmiyor veya akü şarj tutmuyor</li>
-    <li>Far ışıkları devir arttıkça yükselmiyor veya seyir halinde sönüp kararıyor</li>
-    <li>Marş basmıyor ama akü dolu görünüyor</li>
-    <li>Yüksek devirde tekleme ve elektrik kesintisi yaşanıyor</li>
-  </ul>
-  Bu bölüm müşteriye "Evet bende de tam olarak bu şikayet var!" dedirtmelidir.
-- [UYUMLULUK TABLOSU] -> Mutlaka bir HTML table olarak birebir uyumlu modelleri listele. Örnek:
-  <h2>Model ve Yıl Uyumluluk Tablosu</h2>
-  <table border="1" style="width:100%; border-collapse: collapse; text-align: left; margin: 15px 0;">
-    <thead>
-      <tr style="background-color: #1e293b; color: white;">
-        <th style="padding: 10px; border: 1px solid #475569;">Uyumlu Model</th>
-        <th style="padding: 10px; border: 1px solid #475569;">Yıl Sezonu</th>
-        <th style="padding: 10px; border: 1px solid #475569;">Montaj Durumu</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding: 10px; border: 1px solid #475569;">TVS Apache RTR 200</td>
-        <td style="padding: 10px; border: 1px solid #475569;">2018 - 2024</td>
-        <td style="padding: 10px; border: 1px solid #475569;">Birebir Orijinal Uyumlu</td>
-      </tr>
-      <tr>
-        <td style="padding: 10px; border: 1px solid #475569;">TVS Raider 125</td>
-        <td style="padding: 10px; border: 1px solid #475569;">2021 - 2024</td>
-        <td style="padding: 10px; border: 1px solid #475569;">Birebir Fabrikasyon Uyum</td>
-      </tr>
-      <tr>
-        <td style="padding: 10px; border: 1px solid #475569;">TVS Jupiter</td>
-        <td style="padding: 10px; border: 1px solid #475569;">2019 - 2024</td>
-        <td style="padding: 10px; border: 1px solid #475569;">Soket Sokete Uyumlu</td>
-      </tr>
-    </tbody>
-  </table>
-- [INTERNAL LINK BLOĞU] -> Diğer ilişkili kısımlar ile kümeleme sağla. Elektrik arızası ise (Konjektör -> Statör -> Akü -> Marş Rölesi) üçgeninden bahset, makale içerisinde bu kelimelere bağlantı ver (Örn: "Eğer konjektörünüz sağlamsa, elektrik üreten <a href='/yedek-parca/statorler'>statör</a> ünitesini kontrol etmeniz gerekir.")
-- [CTA (SATIN ALMA ÇAĞRISI) BLOĞU] -> Makalenin sonuna 2 farklı butona benzeyen, şık iki bağlantı içeren HTML kutusu ekle. Örnek şablon (Sadece class kullan, style özniteliği kullanma çünkü güvenlik filtresi style temizliyor. Mutlaka aşağıdaki class yapısını birebir koru):
-  <div class="cta-box bg-slate-900 border border-indigo-500/30 rounded-2xl p-6 md:p-8 my-8 text-center shadow-xl">
-    <h3 class="text-indigo-400 font-bold text-lg md:text-xl mb-2">Arızalı Parçayı Doğru Teşhis Ettiniz mi?</h3>
-    <p class="text-xs md:text-sm text-slate-300 mb-6 max-w-lg mx-auto leading-relaxed">Hemen yedek parça kataloğumuzu inceleyin ya da teknik ekibimize şasi numaranızı göndererek uyumlu parçayı sorgulayın.</p>
-    <div class="flex flex-wrap gap-4 items-center justify-center p-1">
-      <a href="/yedek-parca" class="inline-block bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs md:text-sm px-6 py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/25">Yedek Parça Kataloğunu İncele</a>
-      <a href="https://wa.me/905348996817" target="_blank" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-600/25">WhatsApp ile Şasi No Sorgula (Destek)</a>
-    </div>
-  </div>
+1. BAŞLIKLAR VE YAPI:
+- # (H1) asla kullanma! Ana başlık otomatik eklenecektir. En üst seviye başlık ## ile başlamalıdır.
+- Maksimum başlık derinliği ### olmalıdır (#### ve ötesini kullanma).
+- Her bölüm arasına --- yatay çizgi KULLANMA. Sadece ## başlık koyman yeterlidir.
 
-2. SEO & GRAMER SINIRLARI:
-- Her yazı en az 800 - 1500 kelime arasında olmalıdır.
-- H1 başlığı bir kere kullanılmalı, H2 ve H3 ile makale hiyerarşisi (LSI kelimeleri içerecek şekilde) kurgulanmalıdır.
-- Meta Description maksimum 155 karakter olmalıdır.
-- Slug tırnak, boşluk ve Türkçe karakter içermeyen temiz bir formatta olmalıdır.
-- Markdown karakterleri (*, #, __ vb.) KESİNLİKLE kullanılmamalıdır. Sadece temiz HTML etiketleri kullanılmalıdır.
+2. PARAGRAFLAR VE BOŞLUKLAR:
+- Paragraflar arasında mutlaka 1 boş satır bırak.
+- Başlıklardan önce ve sonra 1 boş satır bırak.
+
+3. LİSTELER VE TABLOLAR:
+- Madde işaretleri (bullet points) oluştururken * (yıldız) yerine mutlaka - (tire) kullan. (Örnek: - Madde 1)
+- Tablolarda başlık satırından önce ve sonra boş satır bırak. Markdown tablosu formatını düzgün hizala (| Sütun | Sütun |).
+
+4. İÇ LİNKLER VE CTA:
+- İç linkleri Markdown formatında uygun yerlerde kullan: [Yedek Parça Kataloğu](/yedek-parca) gibi.
+- Makale sonuna mutlaka WhatsApp iletişim linkini şu şekilde Markdown ile ekle: [WhatsApp Destek Hattı](https://wa.me/905348996817)
+
+5. METİN BİÇİMLENDİRME:
+- Gereksiz bold (**) kullanma. Sadece çok önemli teknik terimleri veya vurguları **bold** yap.
+- *, **, ~~, \` gibi yapay zeka karakterlerini yalnızca yeri geldiğinde, geçerli bir Markdown vurgusu yapmak için kullan.
 
 MAKALE MODEL BİLGİ PLANI:
 Önerilen Başlık: "${title}"
@@ -179,7 +134,7 @@ Lütfen bütünüyle geçerli olan bir JSON yapısı döndür. JSON yapısı dı
 {
   "title": "${title}",
   "excerpt": "${metaDescription}",
-  "htmlContent": "HTML_ICERIK...",
+  "htmlContent": "MARKDOWN_ICERIGI_BURAYA_YAZILACAK (Kaçış karakterleri vs. JSON geçerliliğini bozmamalı)",
   "faqs": [
     { "question": "Konjektör arızalı motor çalışır mı?", "answer": "Konjektör arızalandığında akü şarj edilemeyeceğinden, aküdeki voltaj tükendiğinde motor tamamen stop eder ve marş basmaz." }
   ],

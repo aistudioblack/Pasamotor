@@ -1,11 +1,17 @@
 {
-  "outputDirectory": "dist/client",
+  "outputDirectory": "dist",
   "buildCommand": "npm run build",
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/server.cjs", "destination": "/" },
+    { "source": "/server.cjs.map", "destination": "/" },
+    { "source": "/server/(.*)", "destination": "/" }
+  ],
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" },
-    { "source": "/sitemap.xml", "destination": "/api" },
-    { "source": "/robots.txt", "destination": "/api" }
+    { "source": "/api/:path*", "destination": "/api/index.ts" },
+    { "source": "/sitemap.xml", "destination": "/api/index.ts" },
+    { "source": "/robots.txt", "destination": "/api/index.ts" },
+    { "source": "/((?!api/|api$|sitemap\\.xml|robots\\.txt).*)" , "destination": "/index.html" }
   ],
   "headers": [
     {

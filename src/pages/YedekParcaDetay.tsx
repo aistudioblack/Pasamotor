@@ -423,17 +423,7 @@ const YedekParcaDetay = () => {
                 </h3>
                 {product.content ? (
                   <div
-                    className="
-                      prose prose-invert max-w-none 
-                      prose-headings:font-heading prose-headings:tracking-tight prose-headings:text-foreground
-                      prose-h2:text-xl md:prose-h2:text-2xl prose-h2:font-extrabold prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-b prose-h2:border-border/60 prose-h2:pb-3
-                      prose-h3:text-lg md:prose-h3:text-xl prose-h3:font-bold prose-h3:mt-8 prose-h3:mb-3
-                      prose-p:text-foreground/80 prose-p:leading-[1.85] prose-p:my-4 md:prose-p:text-[1.05rem]
-                      prose-strong:text-foreground prose-strong:font-bold
-                      prose-ul:my-5 prose-ul:pl-6 prose-li:text-foreground/85 prose-li:leading-[1.75] prose-li:my-2 md:prose-li:text-[1.05rem]
-                      prose-li:marker:text-primary
-                      prose-a:text-primary prose-a:font-medium hover:prose-a:underline hover:prose-a:text-primary/80 transition-colors
-                    "
+                    className="pasa-article"
                     dangerouslySetInnerHTML={{
                       __html: sanitizeHtml(
                         product.content.replace(/<h1[^>]*>.*?<\/h1>/gi, ""), // Exclude duplicate H1 from editor
