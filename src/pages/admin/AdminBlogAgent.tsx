@@ -621,7 +621,7 @@ export default function AdminBlogAgent() {
       if (!savedKey) throw new Error("⚠️ Qwen API Key eksik!");
       const realKey = decryptKey(savedKey);
       
-      const qwenModel = selectedModel.includes("Qwen") ? selectedModel.split(" ")[0] : "qwen-turbo";
+      const qwenModel = "qwen-turbo"; // selectedModel is not in scope, use default
       addLog(`⚡ Qwen Özel Sunucusu (${qwenModel}) sorgulanıyor...`, "info");
       
       const response = await fetch("https://qwen.privateinstance.com/v1/chat/completions", {
@@ -977,7 +977,26 @@ Do NOT output any conversational text, just the raw prompt. Remove any newlines 
       setIsGeneratingImage(true);
       const seoImagePrompt = await generateImagePromptWithQwen(parsedArticle.title, coverStyle);
       setCoverPrompt(seoImagePrompt);
-      const autoCoverUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(seoImagePrompt)}?width=1024&height=576&model=flux&nologo=true&enhance=false&seed=${Math.floor(Math.random() * 100000)}`;
+      
+      // Let backend handle DALL-E 3 / Pollinations Logic
+      let autoCoverUrl = "";
+      try {
+        const imgRes = await fetch("/api/ai/generate-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: seoImagePrompt })
+        });
+        if (imgRes.ok) {
+          const imgData = await imgRes.json();
+          autoCoverUrl = imgData.image;
+        } else {
+          autoCoverUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(seoImagePrompt.replace(/[^a-zA-Z0-9,\s]/g, ''))}?width=1024&height=576&model=flux&nologo=true&seed=1`;
+        }
+      } catch (err) {
+        autoCoverUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(seoImagePrompt.replace(/[^a-zA-Z0-9,\s]/g, ''))}?width=1024&height=576&model=flux&nologo=true&seed=1`;
+      }
+
+      setGeneratedCoverUrl(autoCoverUrl);
       
       addLog("🖼️ [OTONOM PİLOT] Makaleye en uygun özgün ve yüksek performanslı yedek parça görseli üretiliyor...", "info");
       
@@ -1236,7 +1255,22 @@ Do NOT output any conversational text, just the raw prompt. Remove any newlines 
       const promptSeed = await generateImagePromptWithQwen(article.title, coverStyle);
       setCoverPrompt(promptSeed);
       
-      const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptSeed)}?width=1024&height=576&model=flux&nologo=true&enhance=false&seed=${Math.floor(Math.random() * 100000)}`;
+      let finalUrl = "";
+      try {
+        const imgRes = await fetch("/api/ai/generate-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: promptSeed })
+        });
+        if (imgRes.ok) {
+          const imgData = await imgRes.json();
+          finalUrl = imgData.image;
+        } else {
+          finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptSeed.replace(/[^a-zA-Z0-9,\s]/g, ''))}?width=1024&height=576&model=flux&nologo=true&seed=1`;
+        }
+      } catch (err) {
+        finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptSeed.replace(/[^a-zA-Z0-9,\s]/g, ''))}?width=1024&height=576&model=flux&nologo=true&seed=1`;
+      }
       
       // Tarayıcı üzerinde görseli tam yükleyene kadar bekleyelim (Önizleme boş kalmasın)
       await new Promise<void>((resolve) => {

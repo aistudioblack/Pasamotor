@@ -130,6 +130,98 @@ const AdminDashboard = () => {
     load();
   }, []);
 
+  // SEO Posts Auto-injector
+  useEffect(() => {
+    const injectSeoPosts = async () => {
+      try {
+        const postsToInject = [
+          {
+            title: "TVS Apache vs Bajaj Pulsar Yedek Parça Fiyat Karşılaştırması",
+            slug: "tvs-apache-vs-bajaj-pulsar-yedek-parca-fiyatlari",
+            excerpt: "TVS Apache ve Bajaj Pulsar modelleri için yedek parça fiyatları ve bakım maliyetlerini karşılaştırdığımız kapsamlı rehberimiz.",
+            content: `<h2>TVS Apache mi, Bajaj Pulsar mı? - Bakım Maliyetleri Karşılaştırması</h2>\n<p>Türkiye pazarında hem sportif tasarımları hem de ekonomik olmaları sebebiyle TVS Apache ve Bajaj Pulsar modelleri arasında tatlı bir rekabet bulunmaktadır. Motosiklet severler için ilk satın alma maliyeti kadar yedek parça bulunabilirliği ve bakım periyodu faturası da önemlidir.</p>\n\n<h3>TVS Apache Yedek Parça Fiyatları</h3>\n<p>TVS Apache serisi genellikle daha uygun fiyatlı bakım setleri ve orijinal granaj parçalarıyla öne çıkar. Hindistan menşeili parçaların dayanıklılığı sayesinde bir çok Apache sahibi, uzun kilometreler boyunca arıza yaşamadan seyahat etmektedir.</p>\n\n<h3>Bajaj Pulsar Yedek Parça Fiyatları</h3>\n<p>Bajaj Pulsar, teknolojisi ve performansı ile ön plana çıksa da; zaman zaman bu modelde yedek parça maliyetleri döviz kuruna endeksli olarak Apache'ye kıyasla %10-%15 arasında farklılık gösterebilir.</p>\n\n<h3>Sonuç</h3>\n<p>Her iki motosikletin de kendine has avantajları bulunmaktadır. Paşa Motor olarak hem <a href="/tvs-motosiklet-yedek-parca">TVS yedek parçalarını</a> hem de Bajaj orijinal parçalarını sizlere en uygun fiyatlara garantili şekilde sunuyoruz.</p>`,
+            cover_image: "/images/tvs_bajaj_compare.png",
+            meta_title: "TVS Apache vs Bajaj Pulsar Yedek Parça Karşılaştırması",
+            meta_description: "TVS Apache mi, Bajaj Pulsar mı? Yedek parça maliyetleri, periyodik bakım fiyatları ve orijinal parça avantajları üzerine kapsamlı karşılaştırma rehberimiz.",
+            is_published: true,
+            published_at: new Date().toISOString()
+          },
+          {
+            title: "Honda PCX Bakım Seti: Periyodik Bakımda Neler Değişmeli?",
+            slug: "honda-pcx-bakim-seti-periyodik-bakim-rehberi",
+            excerpt: "Honda PCX scooter'ınızın periyodik bakımı esnasında değişmesi gereken orijinal filtre, yağ ve balata setlerini inceleyin.",
+            content: `<h2>Honda PCX Uzun Ömürlü Bakım Stratejisi</h2>\n<p>Popüler ve sevilen scooter Honda PCX, şehir içi kullanım esnekliği ile kalpleri fethediyor. PCX'inizin ilk günkü performansını koruması için her bakım aralığında (genellikle ortalama 3000-4000 km) bazı kritik bileşenlere dikkat etmelisiniz.</p>\n\n<h3>1. Hava Filtresi Değişimi</h3>\n<p>Tozlu şehir içi ortamları motorunuzun hava akışını engelleyerek yakıt tüketimini arttırır. Honda PCX hava filtresi her bakımda temizlenmeli, her 8.000 km'de bir orijinal <a href="/honda-motosiklet-yedek-parca">Honda yedek parça</a> filtresi ile değiştirilmelidir.</p>\n\n<h3>2. Fren Balataları</h3>\n<p>Scooter güvenliğinin en önemli kalkanı fren balatalarıdır. Erimiş bir balata, disk sisteminizin direkt olarak hasar görmesine ve gereksiz binlerce liralık masrafa yol açabilir. Orijinal balata veya kaliteli muadil balata seçenekleri hayati önem taşır.</p>\n\n<h3>3. Varyatör Bagaları ve Kayış</h3>\n<p>Performans düşüklüğü hissedildiğinde tahrik kayışı ve varyatör bagalarının kondisyonu kontrol edilmelidir. PCX'inizin kalkışlarında titreme yaşanıyorsa bakım zamanı gelmiştir.</p>\n\n<p>Paşa Motor üzerinden tüm orijinal Honda PCX bakım setlerine kolayca erişebilir, güvenle kapınıza sipariş verebilirsiniz.</p>`,
+            cover_image: "/images/honda_pcx_maint.png",
+            meta_title: "Honda PCX Bakım Seti | Orijinal Fren Balatası & Filtre",
+            meta_description: "Honda PCX'inizin uzun ömürlü olması için periyodik bakımda dikkat edilecekleri listeledik. Hava filtresi, bagalar ve orijinal PCX yedek parça fiyatları.",
+            is_published: true,
+            published_at: new Date().toISOString()
+          },
+          {
+            title: "TVS Apache Yağ Eksiltme ve Çekişten Düşme Sorunu Nasıl Çözülür?",
+            slug: "tvs-apache-yag-eksiltme-ve-cekis-sorunu",
+            excerpt: "TVS Apache RTR serisindeki yağ eksiltme ve piston-segman sorunlarını orijinal yedek parça kullanarak nasıl çözeceğinizi uzman detaylarıyla anlatıyoruz.",
+            content: `<h2>TVS Apache'de Sık Görülen Yağ Eksiltme Problemi</h2>\n<p>TVS Apache RTR 150 ve 200 modelleri, yüksek devir çeviren güçlü motor yapılarına sahiptir. Ancak yoğun şehir içi trafikte ve yüksek sıcaklıklarda zamanla piston segmanlarında yaşanan aşınmalar sonucunda <strong>yağ eksiltme</strong> problemi ile karşılaşılmaktadır.</p>\n\n<h3>Çözüm: Orijinal Piston ve Silindir Seti</h3>\n<p>Bu gibi durumlarda yan sanayi veya uydurma parçalar yerine mutlaka <strong>Orijinal TVS Apache Silindir Piston Segman Seti</strong> tercih edilmelidir. Paşa Motor olarak, motosikletinizin kompresyon oranını ilk günkü değerlerine döndürecek orijinal <a href="/tvs-motosiklet-yedek-parca">TVS yedek parçalarını</a> yetkili servis güvencesiyle sağlamaktayız.</p>`,
+            cover_image: "/images/tvs-apache-draft.png",
+            meta_title: "TVS Apache Yağ Eksiltme Sorunu ve Orijinal Çözümü",
+            meta_description: "TVS Apache serisi rtr 150 ve 200 yağ eksiltme sorununa karşı segman, silindir ve piston takımı kontrolü üzerine usta tavsiyeleri.",
+            is_published: false
+          },
+          {
+            title: "Hero Dash 125 Marş Basmama Sorunu: Akü mü, Röle mi?",
+            slug: "hero-dash-125-mars-basmama-sorunu",
+            excerpt: "Hero Dash 125 scooterınız sabahları veya soğuk havalarda marş basmıyorsa bunun aküden mi yoksa marş panelinden mi kaynaklandığını öğrenin.",
+            content: `<h2>Hero Dash 125 Elektriksel Bakım İpuçları</h2>\n<p>Hero Dash 125, dayanıklılığıyla meşhur olsa da özellikle uzun süre kullanılmadığında veya kış aylarında marş basmama sorunu gösterebilmektedir. Sorunun ana kaynağı genellikle iki parçadır: <strong>Akü ve Marş Rölesi</strong>.</p>\n\n<h3>Arıza Tespiti Nasıl Yapılır?</h3>\n<p>Eğer kontağı açtığınızda göstergeler zayıf yanıyor ve 'tık tık' sesi geliyorsa akünüz bitmiş demektir. Ancak göstergeler canlı geldiği halde hiç ses yoksa sorun kuvvetle muhtemel marş rölesindedir. Orijinal <a href="/hero-motosiklet-yedek-parca">Hero yedek parçalarına</a> sitemiz üzerinden hemen ulaşabilirsiniz.</p>`,
+            cover_image: "/images/hero-dash-draft.png",
+            meta_title: "Hero Dash 125 Marş Basmama Sorunu & Akü Bakımı",
+            meta_description: "Hero Dash 125 sabahları neden çalışmaz? Marş rölesi mi arızalı akü mü bitti? Fatih Hero yetkili servisinden teknik notlar.",
+            is_published: false
+          },
+          {
+            title: "Falcon Freedom 250 Karbüratör Ayarı ve Yakıt Sorunları",
+            slug: "falcon-freedom-250-karburator-yakit",
+            excerpt: "Falcon Freedom 250 kullanıcılarının sıkça aradığı kronik tekleme ve yüksek yakıt tüketimi sorunlarına karşı etkili karbüratör ayarı yöntemleri.",
+            content: `<h2>Falcon Freedom 250'de Yakıt Performansı</h2>\n<p>Chopper tarzının sevilen temsilcisi Falcon Freedom 250'de yaşanan aşırı yakıt tüketimi veya ani gaz açılışlarında boğulma, doğrudan <strong>Karbüratör hava/yakıt karışımı ayarsızlığından</strong> kaynaklanır.</p>\n\n<h3>Çözüm Yolları</h3>\n<p>Filtrelerinizin tıkalı olup olmadığını kontrol edin ve gerekiyorsa orijinal hava filtresi siparişi verin. Paşa Motor <a href="/falcon-motosiklet-yedek-parca">Falcon yetkili servisimizde</a>, Freedom modelleriniz sensör cihazlarıyla vakum senkronizasyonu yapılarak fabrikasyon değerlerine getirilmektedir.</p>`,
+            cover_image: "/images/falcon-draft.png",
+            meta_title: "Falcon Freedom 250 Karbüratör Ayarı ve Bakımı",
+            meta_description: "Falcon Freedom 250 aşırı yakıt tüketimi ve rölanti sorunlarına kesin çözüm getiren bakım ve yedek parça ipuçları.",
+            is_published: false
+          },
+          {
+            title: "Işıldar Elektrikli Scooter Akü Menzil Düşüşü: Kronik mi, Kullanıcı Hatası mı?",
+            slug: "isildar-elektrikli-scooter-aku-menzil",
+            excerpt: "Işıldar markalı e-scooter'ınız veya elektrikli bisikletinizin tam şarjla eskisi kadar uzağa gidememesinin asıl nedenleri.",
+            content: `<h2>Işıldar E-Motosiklet Batarya ve Menzil Yönetimi</h2>\n<p>Kullanıcıların en sık şikayet ettiği konulardan biri de zamanla düşen menzildir. Işıldar modellerindeki kurşun asit (Jel) akülerin ömrü genellikle doğru şarj prensiplerine uymamaktan kaynaklı kısalmaktadır.</p>\n\n<h3>Akü Yenileme ve Bakımı</h3>\n<p>Düşük voltaja maruz kalmış batarya takımlarının değişmesi tek çözüm olabilir. Fatih İstanbul <a href="/isildar-motosiklet-yedek-parca">Işıldar yetkili servisi</a> olarak, sitemizden %100 uyumlu, garantili Jel yedek akü setlerini temin edebilir veya akümülatör montajınız için servis rotamızı kullanabilirsiniz.</p>`,
+            cover_image: "/images/isildar-draft.png",
+            meta_title: "Işıldar Elektrikli Motor Akü Değişimi ve Menzil Sorunu",
+            meta_description: "Işıldar elektrikli bisiklet ve motorlarında düşen menzil problemi neden olur? Yeni akü takılması ve kullanım talimatları.",
+            is_published: false
+          },
+          {
+            title: "Scooter Tahrik Kayışı Neden Kopar? (TVS Jupiter, RKS, Kuba)",
+            slug: "scooter-tahrik-kayisi-neden-kopar",
+            excerpt: "TVS Jupiter başta olmak üzere standart scooter CVT sistemlerinde kayış ömrü ve debriyaj bagası değiştirme süreçlerinin önemi.",
+            content: `<h2>Scooter CVT Performansını Korumak</h2>\n<p>Scooter'ların hareket kalbi olan varyatör ve tahrik kayışları, motosikletin hızlanmasını direkt etkiler. Tahrik kayışı her 10.000 km ile 12.000 km arasında muhakkak kontrol edilmeli ve erime-çatlama görüldüyse derhal değiştirilmelidir.</p>\n\n<h3>Varyatör Temizliği</h3>\n<p>Kayış kopma ihtimalini sıfıra indirmek ve gaz tepkimelerini canlandırmak için baga ağırlıklarını (roller weights) da kayışla beraber set olarak yenileyin. Satış sitemizdeki orijinal <a href="/tvs-motosiklet-yedek-parca">TVS</a>, Hero ve RKS kayışları güvenliğinizin en kritik parçasını oluşturur.</p>`,
+            cover_image: "/images/scooter-belt-draft.png",
+            meta_title: "Scooter Tahrik Kayışı ve Baga Bakımı",
+            meta_description: "TVS Jupiter, RKS ve Kuba scooterlarında kayış kopması neden olur? Performansı düşüren debriyaj sorunlarına yetkili servis çözümleri.",
+            is_published: false
+          }
+        ];
+
+        for (const post of postsToInject) {
+          const { data: existing } = await dbClient.from('posts').select('id').eq('slug', post.slug);
+          if (!existing || existing.length === 0) {
+            await dbClient.from('posts').insert(post);
+          }
+        }
+      } catch (e) {
+        console.error("Auto-inject failed", e);
+      }
+    };
+    injectSeoPosts();
+  }, []);
+
   return (
     <AdminLayout>
       <div className="max-w-6xl mx-auto">

@@ -3,7 +3,8 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { dbClient } from "@/lib/db-client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Edit2, Trash2, X } from "lucide-react";
-import * as LucideIcons from "lucide-react";
+import DynamicIcon from "@/components/ui/DynamicIcon";
+import dynamicIconImports from "lucide-react/dynamicIconImports";
 
 interface Service {
   id: string;
@@ -118,9 +119,13 @@ const AdminServices = () => {
   };
 
   // Safe icon render
+  const toKebabCase = (str: string) => str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase() as keyof typeof dynamicIconImports;
   const renderIcon = (name: string, className?: string) => {
-     const IconComp = (LucideIcons as any)[name] || LucideIcons.Wrench;
-     return <IconComp className={className} />;
+     let kebabName = toKebabCase(name);
+     if (!(kebabName in dynamicIconImports)) {
+       kebabName = "wrench";
+     }
+     return <DynamicIcon name={kebabName} className={className} />;
   };
 
   const availableIcons = ["ShoppingBag", "Wrench", "Package", "Settings", "Activity", "Zap", "Truck", "Shield"];

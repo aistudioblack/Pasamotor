@@ -7,6 +7,17 @@ import AdminLayout from "@/components/admin/AdminLayout";
 
 const changelogData = [
   {
+    version: "v3.2.0 - Yerel SEO Gücü, SEO Ajanı ve Blog Geliştirmeleri",
+    date: "2026-06-08",
+    icon: Target,
+    items: [
+      { type: "improvement", text: "Index.html içerisine LocalBusiness (MotorcycleRepair) Schema Update'i uygulandı. TVS, Hero, Falcon ve Işıldar markaları 'makesOffer' bazlı schema taglerine eklenerek lokal Fatih (İstanbul) arama sonuçlarında görünürlük hedeflendi." },
+      { type: "fix", text: "AdminBlogAgent.tsx içerisindeki otomatik görsel üretim modülü (generateImage) DALL-E 3 API (OpenAI) fallback ve sunucu tarafı (/api/ai/generate-image) köprüsü üzerinden stabil çalışacak şekilde düzeltildi. Kırık görseller ortadan kaldırıldı." },
+      { type: "feature", text: "Yapay zeka üzerinden Fatih bölgesi motosiklet yetkili servis ve yedek parça pazar analizi raporlanarak sıralama kazanma stratejileri oluşturuldu." },
+      { type: "feature", text: "Google Trends baz alınarak TVS, Hero, Falcon ve Işıldar kullanıcılarının bakım/yedek parça arayışlarına yanıt veren SEO uyumlu 5 blog taslağı geliştirildi." }
+    ]
+  },
+  {
     version: "v3.1.5 - Secure Image Storage Bridge & RLS Bypass",
     date: "2026-06-04",
     icon: Server,

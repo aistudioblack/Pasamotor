@@ -369,7 +369,7 @@ const BlogDetay = () => {
               <div>
                 <div className="flex items-center gap-1.5 text-sm font-bold text-foreground">
                   Yazar: Paşa Motor Teknik Heyeti
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 fill-emerald-500/10" title="Doğrulanmış Teknik Kaynak" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 fill-emerald-500/10" aria-label="Doğrulanmış Teknik Kaynak" />
                 </div>
                 <div className="text-xs text-muted-foreground">Motosiklet Yedek Parça ve Servis Uzmanlığı</div>
               </div>
@@ -397,7 +397,6 @@ const BlogDetay = () => {
               width={1200}
               height={675}
               className="w-full h-full object-cover hover:scale-[1.015] transition-transform duration-700"
-              priority="true"
             />
           </div>
         </div>

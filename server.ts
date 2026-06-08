@@ -704,8 +704,38 @@ ${compatibilityHtml}
   app.post("/api/ai/generate-image", async (req, res) => {
     try {
       const { prompt } = req.body;
+      
+      const openAiKey = process.env.OPENAI_API_KEY;
+      if (openAiKey) {
+        // Use DALL-E 3 if API key available
+        const doDalle = await fetch("https://api.openai.com/v1/images/generations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${openAiKey}`
+          },
+          body: JSON.stringify({
+            model: "dall-e-3",
+            prompt: prompt,
+            n: 1,
+            size: "1024x1024"
+          })
+        });
+        
+        if (doDalle.ok) {
+          const dalleData = await doDalle.json();
+          if (dalleData.data && dalleData.data.length > 0) {
+            return res.json({ image: dalleData.data[0].url });
+          }
+        }
+      }
+      
+      // Fallback to Pollinations AI (Flux)
+      const cleanPrompt = prompt.replace(/[^a-zA-Z0-9,\s]/g, '').substring(0, 800);
       const seed = Math.floor(Math.random() * 1000000);
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1280&height=720&nologo=true&seed=${seed}`;
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1024&height=576&model=flux&nologo=true&seed=${seed}`;
+      
+      // We don't download it automatically here, frontend expects the url:
       res.json({ image: imageUrl });
     } catch (error: any) {
       console.error("API AI Generate Image error:", error);
@@ -1369,6 +1399,12 @@ KURALLAR:
         { loc: "https://pasamotor.com.tr/kuba-motor-yetkili-servis", changefreq: "monthly", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/rks-motor-yetkili-servis", changefreq: "monthly", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/mondial-motor-yetkili-servis", changefreq: "monthly", priority: "0.9" },
+        { loc: "https://pasamotor.com.tr/tvs-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
+        { loc: "https://pasamotor.com.tr/hero-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
+        { loc: "https://pasamotor.com.tr/honda-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
+        { loc: "https://pasamotor.com.tr/yamaha-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
+        { loc: "https://pasamotor.com.tr/falcon-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
+        { loc: "https://pasamotor.com.tr/isildar-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/hakkimizda", changefreq: "monthly", priority: "0.8" },
         { loc: "https://pasamotor.com.tr/hizmetler", changefreq: "weekly", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/yedek-parca", changefreq: "daily", priority: "0.9" },
@@ -1523,6 +1559,60 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
         res, 
         "Mondial Yetkili Servis ve Yedek Parça | Paşa Motor İstanbul", 
         "Mondial motosikletiniz için güvenilir garanti hizmetleri, periyodik bakım ve orijinal Türkiye geneli yedek parça noktası Paşa Motor. İstanbul Fatih'te."
+      );
+    });
+
+    app.get("/tvs-motosiklet-yedek-parca", (req, res) => {
+      return serveSEOInjectedHtml(
+        req, 
+        res, 
+        "TVS Motosiklet Yedek Parça | Orijinal TVS Parçaları - Paşa Motor", 
+        "TVS Apache, Jupiter, Ntorq ve Raider modelleri için en geniş orijinal TVS yedek parça kataloğu. Türkiye geneli hızlı kargo, orijinal parça güvencesi."
+      );
+    });
+
+    app.get("/hero-motosiklet-yedek-parca", (req, res) => {
+      return serveSEOInjectedHtml(
+        req, 
+        res, 
+        "Hero Motosiklet Yedek Parça | Orijinal Hero Parçaları - Paşa Motor", 
+        "Hero Xpulse, Dash, Hunk ve Pleasure yedek parçaları stoklarımızda. Garantili ve barkodlu %100 orijinal Hero motosiklet yedek parça mağazası."
+      );
+    });
+
+    app.get("/honda-motosiklet-yedek-parca", (req, res) => {
+      return serveSEOInjectedHtml(
+        req, 
+        res, 
+        "Honda Motosiklet Yedek Parça | Kaliteli Muadil ve Orijinal - Paşa Motor", 
+        "Honda PCX, Dio, Spacy, Forza için aradığınız bakım setleri ve orijinal / kaliteli muadil yedek parçalar en uygun fiyatlarla Paşa Motor'da."
+      );
+    });
+    
+    app.get("/yamaha-motosiklet-yedek-parca", (req, res) => {
+      return serveSEOInjectedHtml(
+        req, 
+        res, 
+        "Yamaha Motosiklet Yedek Parça | Orijinal Yedek Parça Siparişi", 
+        "Yamaha NMAX, XMAX, MT serisi bakım setleri, fren balataları, filtreler. Orijinal Yamaha yedek parçalarına saniyeler içinde ulaşın!"
+      );
+    });
+
+    app.get("/falcon-motosiklet-yedek-parca", (req, res) => {
+      return serveSEOInjectedHtml(
+        req, 
+        res, 
+        "Falcon Motosiklet Yedek Parça | Fatih Bölge Bayii - Paşa Motor", 
+        "Falcon motosiklet orijinal yedek parça ve aksesuar kataloğu. En hızlı tedarik ve yetkili servis güvencesi."
+      );
+    });
+
+    app.get("/isildar-motosiklet-yedek-parca", (req, res) => {
+      return serveSEOInjectedHtml(
+        req, 
+        res, 
+        "Işıldar Motosiklet ve Elektrikli Bisiklet Yedek Parça | Paşa", 
+        "Işıldar yetkili bayisi Paşa Motor ile orijinal Işıldar benzinli ve elektrikli motor yedek parçalarını hemen sipariş verin."
       );
     });
 

@@ -21,7 +21,7 @@ import {
   Sparkles,
   ShieldCheck
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import type { Tables } from "@/lib/db-types";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
@@ -60,6 +60,19 @@ const CATEGORIES_LIST = [
 
 const YedekParca = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  const brandMatchMap: Record<string, string> = {
+    "/tvs-motosiklet-yedek-parca": "TVS",
+    "/hero-motosiklet-yedek-parca": "Hero",
+    "/honda-motosiklet-yedek-parca": "HONDA",
+    "/yamaha-motosiklet-yedek-parca": "YAMAHA",
+    "/falcon-motosiklet-yedek-parca": "Falcon",
+    "/isildar-motosiklet-yedek-parca": "Işıldar",
+  };
+  
+  const initialBrand = brandMatchMap[location.pathname] || "Tümü";
+
   // Master state: DB'den çekilen ürünler
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -71,7 +84,7 @@ const YedekParca = () => {
   // Filtreler State'i
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [activeBrand, setActiveBrand] = useState<string>("Tümü");
+  const [activeBrand, setActiveBrand] = useState<string>(initialBrand);
   const [activeCategory, setActiveCategory] = useState<string>("tumu");
 
   useEffect(() => {

@@ -7,5 +7,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn("⚠️ SUPABASE CONFIG MISSING! Lütfen .env dosyasını tanımlayın.");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  realtime: {
+    params: { eventsPerSecond: -1 }
+  }
+});
 export const dbClient = supabase; // for backward compatibility during transition

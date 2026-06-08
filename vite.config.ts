@@ -5,6 +5,9 @@ import fs from "fs";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, isSsrBuild }) => ({
+  optimizeDeps: {
+    include: ['lucide-react/dynamicIconImports']
+  },
   server: {
     host: "0.0.0.0",
     port: 3000,
@@ -50,7 +53,6 @@ export default defineConfig(({ command, isSsrBuild }) => ({
 
           // UI kütüphaneleri
           if (id.includes('@radix-ui')) return 'radix';
-          if (id.includes('lucide-react')) return 'icons';
           if (id.includes('@tanstack')) return 'query';
 
           // React core

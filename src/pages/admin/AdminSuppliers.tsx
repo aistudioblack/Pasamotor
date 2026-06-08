@@ -176,7 +176,7 @@ const AdminSuppliers = () => {
 
   const callSync = async (
     supplier: Supplier,
-    mode: "full_import" | "incremental" | "test_connection" | "test_login",
+    mode: "full_import" | "incremental" | "test_connection" | "test_login" | "sync_update",
   ) => {
     if ((supplier.source_type === "csv_manual" || supplier.source_type === "xml_manual" || supplier.source_type === "json_manual") && mode !== "test_connection") {
       toast.info("Manuel kaynaklar için 'Dosya Yükle' seçeneğini kullanın");
