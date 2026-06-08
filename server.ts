@@ -1173,19 +1173,19 @@ KURALLAR:
     const results = [];
     const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 PasaMotorSEO";
 
-    try {
-      const googleUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
-      const gRes = await fetch(googleUrl, { headers: { "User-Agent": userAgent } });
-      if (gRes.ok || gRes.status === 200) results.push({ engine: "Google Sitemap Ping", status: "success", message: `Sitemap başarıyla bildirildi (HTTP ${gRes.status}).` });
-      else results.push({ engine: "Google Sitemap Ping", status: "warning", message: `Sitemap bildirimi yapıldı ancak sunucu HTTP ${gRes.status} döndü.` });
-    } catch (err: any) { results.push({ engine: "Google Sitemap Ping", status: "error", message: err.message }); }
+    // Google and Bing deprecated their anonymous sitemap ping endpoints.
+    // They now return HTTP 404 and HTTP 410 respectively.
+    results.push({
+      engine: "Google Sitemap Ping",
+      status: "info",
+      message: "Google bu özelliği (Ping) kapattı, artık Search Console kullanılması gerekiyor."
+    });
 
-    try {
-      const bingUrl = `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
-      const bRes = await fetch(bingUrl, { headers: { "User-Agent": userAgent } });
-      if (bRes.ok || bRes.status === 200) results.push({ engine: "Bing Sitemap Ping", status: "success", message: `Sitemap başarıyla bildirildi (HTTP ${bRes.status}).` });
-      else results.push({ engine: "Bing Sitemap Ping", status: "warning", message: `Sitemap bildirimi yapıldı ancak sunucu HTTP ${bRes.status} döndü.` });
-    } catch (err: any) { results.push({ engine: "Bing Sitemap Ping", status: "error", message: err.message }); }
+    results.push({
+      engine: "Bing Sitemap Ping",
+      status: "info",
+      message: "Bing anonim Ping özelliğini kapattı (HTTP 410), IndexNow kullanılıyor."
+    });
 
     if (indexNowKey) {
       try {
