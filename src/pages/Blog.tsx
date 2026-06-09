@@ -7,6 +7,7 @@ import type { Tables } from "@/lib/db-types";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCachedPosts, setCachedPosts } from "@/lib/blog-cache";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 
 type Post = Tables<"posts">;
 
@@ -221,7 +222,7 @@ const Blog = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2">
                     <div className="relative aspect-[16/10] lg:aspect-auto lg:min-h-[420px] overflow-hidden bg-muted">
                       {featured.cover_image ? (
-                        <img
+                        <ImageWithFallback
                           src={featured.cover_image}
                           alt={featured.title}
                           width={1200}
@@ -277,7 +278,7 @@ const Blog = () => {
                   >
                     <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                       {post.cover_image ? (
-                        <img
+                        <ImageWithFallback
                           src={post.cover_image}
                           alt={post.title}
                           width={600}

@@ -26,6 +26,7 @@ import type { Tables } from "@/lib/db-types";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
 import ProductImagePlaceholder from "@/components/ui/ProductImagePlaceholder";
+import { CITIES } from "@/data/cities";
 
 type Product = Tables<"products">;
 
@@ -966,6 +967,31 @@ const YedekParca = () => {
 
           </div>
 
+        </div>
+      </section>
+
+      {/* Türkiye Geneline Kargo Section */}
+      <section className="py-16 md:py-24 bg-muted/30 border-y border-border/40 relative z-10">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight mb-4">Türkiye'nin Her Yerine Kargo ile Gönderiyoruz</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              İstanbul Fatih'teki yetkili servisimizden Türkiye'nin dört bir yanına orijinal parçaları aynı gün kargoya veriyoruz.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {CITIES.map(city => (
+              <Link 
+                key={city.slug} 
+                to={`/sehir/${city.slug}`}
+                className="bg-card border border-border hover:border-primary px-4 py-3 rounded-xl text-center transition-colors shadow-sm cursor-pointer"
+              >
+                <div className="font-semibold text-foreground text-sm">{city.name}</div>
+                <div className="text-xs text-muted-foreground mt-1">Motosiklet Yedek Parça</div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 

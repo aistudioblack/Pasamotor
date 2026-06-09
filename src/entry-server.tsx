@@ -14,6 +14,7 @@ import Galeri from "./pages/Galeri";
 import Iletisim from "./pages/Iletisim";
 import YedekParca from "./pages/YedekParca";
 import Blog from "./pages/Blog";
+import SehirYedekParca from "./pages/SehirYedekParca";
 import KubaServis from "./pages/seo/KubaServis";
 import RksServis from "./pages/seo/RksServis";
 import MondialServis from "./pages/seo/MondialServis";
@@ -41,6 +42,7 @@ export function render(url: string) {
                 <Route path="/iletisim" element={<Iletisim />} />
                 <Route path="/yedek-parca" element={<YedekParca />} />
                 <Route path="/blog" element={<Blog />} />
+                <Route path="/sehir/:slug" element={<SehirYedekParca />} />
                 <Route path="/kuba-motor-yetkili-servis" element={<KubaServis />} />
                 <Route path="/rks-motor-yetkili-servis" element={<RksServis />} />
                 <Route path="/mondial-motor-yetkili-servis" element={<MondialServis />} />

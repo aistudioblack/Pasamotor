@@ -14,6 +14,7 @@ import { getCachedPostBySlug, addPostToCache, getCachedPosts } from "@/lib/blog-
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 
 type Post = Tables<"posts">;
 
@@ -391,7 +392,7 @@ const BlogDetay = () => {
       {post.cover_image && (
         <div className="container mx-auto px-4 max-w-5xl -mt-4 mb-16 relative">
           <div className="rounded-2xl md:rounded-3xl overflow-hidden border border-border/80 bg-muted/30 aspect-[16/9] shadow-2xl shadow-primary/5 overflow-hidden">
-            <img
+            <ImageWithFallback
               src={post.cover_image}
               alt={post.title}
               width={1200}
@@ -544,7 +545,7 @@ const BlogDetay = () => {
                 >
                   <div className="aspect-[16/10] bg-muted overflow-hidden relative">
                     {r.cover_image ? (
-                      <img 
+                      <ImageWithFallback 
                         src={r.cover_image} 
                         alt={r.title} 
                         width={400} 

@@ -51,6 +51,7 @@ const YedekParcaDetay = lazy(() => import("./pages/YedekParcaDetay.tsx"));
 const Blog = lazy(() => import("./pages/Blog.tsx"));
 const BlogDetay = lazy(() => import("./pages/BlogDetay.tsx"));
 const LegalPage = lazy(() => import("./pages/LegalPage.tsx"));
+const SehirYedekParca = lazy(() => import("./pages/SehirYedekParca.tsx"));
 const KubaServis = lazy(() => import("./pages/seo/KubaServis.tsx"));
 const RksServis = lazy(() => import("./pages/seo/RksServis.tsx"));
 const MondialServis = lazy(() => import("./pages/seo/MondialServis.tsx"));
@@ -112,6 +113,7 @@ const App = () => (
                 <Route path="/yedek-parca/:slug" element={<YedekParcaDetay />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogDetay />} />
+                <Route path="/sehir/:slug" element={<SehirYedekParca />} />
                 <Route path="/sayfa/:slug" element={<LegalPage />} />
                 <Route path="/kuba-motor-yetkili-servis" element={<KubaServis />} />
                 <Route path="/rks-motor-yetkili-servis" element={<RksServis />} />

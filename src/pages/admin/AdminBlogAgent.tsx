@@ -756,8 +756,15 @@ export default function AdminBlogAgent() {
                         style.includes("studio") ? "studio lighting, dark clean background, sleek" :
                         "clean vector illustration, minimalist flat design";
       
-      const qwenPrompt = `I need an image generation prompt for a blog post titled "${title}". 
-The prompt MUST BE IN ENGLISH ONLY, separated by commas, and strictly describe a visual scene. Include the style: ${styleText}.
+      const qwenPrompt = `Create an image generation prompt for a blog post titled "${title}". 
+The prompt MUST BE IN ENGLISH ONLY, separated by commas, and strictly describe a highly realistic and relevant visual scene. 
+CRITICAL RULES:
+1. Provide a literal, 100% relevant visual scene tailored specifically to the title.
+2. If the title mentions motorcycles, parts, or maintenance, the scene MUST be inside a professional motorcycle repair workshop.
+3. Every scene MUST feature a prominent shop sign or branding that reads exactly 'PAŞA MOTOR' in the background.
+4. If the title mentions engine oil, explicitly include 'a clear bottle of Castrol, Motul, or Putoline brand motor oil' in the scene.
+5. Strict rule: "DO NOT INCLUDE ANY ENGLISH TEXT OR GIBBERISH TEXT IN THE IMAGE". Use only 'PAŞA MOTOR' if any text is generated.
+Include the style: ${styleText}.
 Do NOT output any conversational text, just the raw prompt. Remove any newlines or quotes.`;
       
       // Geçici olarak sağlayıcıyı Qwen yapıp çağırıyoruz

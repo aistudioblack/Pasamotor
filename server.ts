@@ -1,3 +1,5 @@
+import { runAutoSync } from "./src/lib/syncEngine";
+import { CITIES } from "./src/data/cities";
 import express from "express";
 import path from "path";
 import cors from "cors";
@@ -1159,9 +1161,9 @@ KURALLAR:
   // GET Auto Sync Suppliers Cron Job Endpoint
   app.get("/api/supplier/cron/sync", async (req, res) => {
     try {
-      const { runAutoSync } = await import("./src/lib/syncEngine");
-      await runAutoSync();
-      res.json({ success: true, message: "Supplier auto-sync executed successfully." });
+      // Do not await to prevent HTTP timeout. It takes minutes.
+      runAutoSync().catch(err => console.error("Auto-sync background error:", err));
+      res.json({ success: true, message: "Supplier auto-sync triggered in background." });
     } catch (error: any) {
       console.error("GET /api/supplier/cron/sync error:", error);
       res.status(500).json({ error: error.message });
@@ -1412,6 +1414,15 @@ KURALLAR:
         { loc: "https://pasamotor.com.tr/iletisim", changefreq: "monthly", priority: "0.8" },
         { loc: "https://pasamotor.com.tr/galeri", changefreq: "weekly", priority: "0.7" },
       ];
+
+      // Add city routes
+      CITIES.forEach(city => {
+        urls.push({
+          loc: `https://pasamotor.com.tr/sehir/${city.slug}`,
+          changefreq: "monthly",
+          priority: "0.8"
+        });
+      });
 
       try {
         const supabase = getSupabase();

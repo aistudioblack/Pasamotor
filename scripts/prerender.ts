@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { CITIES } from "../src/data/cities";
+
 const toAbsolute = (p: string) => path.resolve(process.cwd(), p);
 
 const templatePath = toAbsolute("dist/index.html");
@@ -13,7 +15,8 @@ const routesToPrerender = [
   "/galeri",
   "/iletisim",
   "/yedek-parca",
-  "/blog"
+  "/blog",
+  ...CITIES.map(c => `/sehir/${c.slug}`)
 ];
 
 async function prerender() {
