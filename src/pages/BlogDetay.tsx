@@ -500,6 +500,7 @@ const BlogDetay = () => {
                       th: ({node, ...props}) => <th className="border border-border px-4 py-2 text-left font-semibold text-foreground" {...props} />,
                       td: ({node, ...props}) => <td className="border border-border px-4 py-2 text-muted-foreground" {...props} />,
                       code: ({node, ...props}) => <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-primary" {...props} />,
+                      img: ({node, ...props}) => <ImageWithFallback {...props} className="w-full h-auto rounded-xl my-6 shadow-md border border-border/50" />,
                     }}
                   >
                     {processedContent}

@@ -7,6 +7,16 @@ import AdminLayout from "@/components/admin/AdminLayout";
 
 const changelogData = [
   {
+    version: "v3.2.2 - Blog Görseli Hataları Giderildi",
+    date: "2026-06-10",
+    icon: Activity,
+    items: [
+      { type: "fix", text: "Özel AI (DALL-E) tarafından üretilen blog görsellerinin belirli bir süre sonra silinmesi/kaybolması hatası giderildi." },
+      { type: "feature", text: "ImageWithFallback akıllı bileşenine, bozulan eski veya mevcut linkleri tarayıcı tarafında fark edip Pollinations AI üzerinden 'on-the-fly' yeniden üreten güvenli mekanizma (Fallback-of-Fallback) entegre edildi. Artık görseller hiçbir zaman kırık/boş görünmeyecek." },
+      { type: "improvement", text: "Blog içeriklerindeki resimlerin tümü (Markdown içi img etiketleri) de bu güvenlik ağı içine alındı." }
+    ]
+  },
+  {
     version: "v3.2.1 - Sistem Hata Yönetimi ve Stabilite Optimizasyonu",
     date: "2026-06-10",
     icon: Activity,
