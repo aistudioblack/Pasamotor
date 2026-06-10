@@ -120,7 +120,7 @@ const Footer = () => {
               </div>
               <div className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>Kızılelma Cad. No:66/A, Kocamustafapaşa, 34104 Fatih/İstanbul</span>
+                <span>Seyid Ömer Mah. Kızılelma Cad. No:66/A, Kocamustafapaşa, 34104 Fatih/İstanbul</span>
               </div>
             </div>
           </div>
