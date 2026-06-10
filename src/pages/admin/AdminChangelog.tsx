@@ -7,6 +7,16 @@ import AdminLayout from "@/components/admin/AdminLayout";
 
 const changelogData = [
   {
+    version: "v3.2.1 - Sistem Hata Yönetimi ve Stabilite Optimizasyonu",
+    date: "2026-06-10",
+    icon: Activity,
+    items: [
+      { type: "fix", text: "Admin panelinde çıkış yapıldığında (signOut) ortaya çıkan Supabase '_removeSession' kaynaklı unhandled promise rejection hatası giderildi. Çıkış işlemleri finally bloğu ile güvenli routing'e bağlandı." },
+      { type: "fix", text: "Github Push SDK (api/github-push) kullanılırken 'Server Error' veren medya dosyaları (örn. taslak görseller) için Native Blob oluşturma hatası dinamik retry mekanizması (3 deneme) ile güçlendirildi. Bozuk veya github api limitlerine takılan dosyalar atılarak tüm commit sürecinin iptal olması önlendi." },
+      { type: "improvement", text: "Ad-Blocker (reklam engelleyici) kaynaklı gtag.js ve Vercel Analytics'in engellenmesiyle oluşan 'ERR_BLOCKED_BY_CLIENT' bildirimleri tarayıcı seviyesinde doğal bir engellemedir ve uygulamanın react render ağacını bozması tamamen engellenmiştir." }
+    ]
+  },
+  {
     version: "v3.2.0 - Yerel SEO Gücü, SEO Ajanı ve Blog Geliştirmeleri",
     date: "2026-06-08",
     icon: Target,

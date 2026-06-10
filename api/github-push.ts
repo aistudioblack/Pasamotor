@@ -89,23 +89,39 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
        content = fs.readFileSync(filePath, "utf-8");
     }
 
-    try {
-      const blob = await octokit.git.createBlob({
-        owner,
-        repo,
-        content,
-        encoding
-      });
-      
+    let blobSha = "";
+    let retryCount = 0;
+    while (retryCount < 3) {
+      try {
+        const blob = await octokit.git.createBlob({
+          owner,
+          repo,
+          content,
+          encoding
+        });
+        blobSha = blob.data.sha;
+        break;
+      } catch (err: any) {
+        retryCount++;
+        console.warn(`Retry ${retryCount} for blob ${file} due to: ${err.message}`);
+        if (retryCount >= 3) {
+          console.error("Error creating blob natively for", file, err);
+          // throw new Error(`Blob oluşturma hatası (${file}): ` + err.message);
+        } else {
+          await new Promise(r => setTimeout(r, 1500));
+        }
+      }
+    }
+    
+    if (blobSha) {
       treeData.push({
         path: file.replace(/\\/g, "/"),
         mode: "100644" as const,
         type: "blob" as const,
-        sha: blob.data.sha
+        sha: blobSha
       });
-    } catch (err: any) {
-       console.error("Error creating blob for", file, err);
-       throw new Error(`Blob oluşturma hatası (${file}): ` + err.message);
+    } else {
+      console.warn(`Skipping file from commit due to blob creation failure: ${file}`);
     }
   }
 

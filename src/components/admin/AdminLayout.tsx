@@ -163,8 +163,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   }, [navigate]);
 
   const handleLogout = async () => {
-    await dbClient.auth.signOut();
-    navigate("/admin/giris");
+    try {
+      await dbClient.auth.signOut();
+    } catch (err) {
+      console.warn("Logout warning:", err);
+    } finally {
+      setUser(null);
+      navigate("/admin/giris");
+    }
   };
 
   const isSuperAdmin = user?.email === "ahmetcafoglu@hotmail.com";
