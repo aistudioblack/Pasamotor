@@ -288,7 +288,7 @@ const AdminProducts = () => {
 
   const filtered = items;
 
-  const allBrands = ["TVS", "Hero", "Falcon", "Işıldar", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"];
+  const allBrands = ["TVS", "Hero", "Falcon", "Işıldar", "Vox", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"];
 
   const autoFixAllBrokenTitles = async () => {
     setOptimizingTitles(true);

@@ -53,6 +53,7 @@ const AdminBrands = () => {
           { id: "brand_hero", name: "Hero", desc: "Dünyanın en büyük iki tekerlekli araç üreticisi" },
           { id: "brand_falcon", name: "Falcon", desc: "Güvenilir ve ekonomik motosikletler" },
           { id: "brand_isildar", name: "Işıldar", desc: "Kaliteli Türk motosiklet markası" },
+          { id: "brand_vox", name: "Vox", desc: "Güvenlik, konfor ve şık tasarımı bir arada sunan seçkin motosiklet ve aksesuar markası" },
           { id: "brand_rapidox", name: "RapidoX", desc: "Orijinal ve yüksek kaliteli yedek parçalar sunan lider marka" },
           { id: "brand_honda", name: "Honda", desc: "Dünyaca ünlü yüksek kaliteli Japon motosiklet üreticisi" },
           { id: "brand_bajaj", name: "Bajaj", desc: "Dayanıklı ve ekonomik Hintli motosiklet üreticisi" },

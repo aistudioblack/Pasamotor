@@ -48,7 +48,7 @@ try {
   console.warn("Session storage read failed:", e);
 }
 
-const BRANDS_LIST = ["Tümü", "TVS", "Hero", "Falcon", "Işıldar", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"] as const;
+const BRANDS_LIST = ["Tümü", "TVS", "Hero", "Falcon", "Işıldar", "Vox", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"] as const;
 
 const CATEGORIES_LIST = [
   { slug: "tumu", name: "Tüm Kategoriler" },

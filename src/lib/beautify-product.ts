@@ -126,6 +126,7 @@ export function beautifyProduct(manufacturer: string, oemCode: string, rawName: 
     { key: "yamaha", name: "Yamaha" },
     { key: "kawasaki", name: "Kawasaki" },
     { key: "kuba", name: "Kuba" },
+    { key: "vox", name: "Vox" },
     { key: "rapidox", name: "RapidoX" },
     { key: "rks", name: "RKS" },
     { key: "tvs", name: "TVS" },
