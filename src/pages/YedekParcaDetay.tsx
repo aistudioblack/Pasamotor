@@ -139,6 +139,7 @@ const YedekParcaDetay = () => {
     );
   }
 
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -147,14 +148,14 @@ const YedekParcaDetay = () => {
       product.description || product.meta_description || product.title,
     image:
       product.images && product.images.length > 0
-        ? product.images
-        : ["https://pasamotor.com.tr/favicon.png"],
+        ? product.images.map(img => img.startsWith("http") ? img : `${origin}${img}`)
+        : [`${origin}/favicon.png`],
     brand: { "@type": "Brand", name: product.brand },
     sku: product.slug,
     category: product.category,
     offers: {
       "@type": "Offer",
-      url: `https://pasamotor.com.tr/yedek-parca/${product.slug}`,
+      url: `${origin}/yedek-parca/${product.slug}`,
       priceCurrency: "TRY",
       price: product.price ?? undefined,
       availability: product.is_active

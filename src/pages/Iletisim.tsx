@@ -9,10 +9,11 @@ import JsonLd from "@/components/seo/JsonLd";
 const InteractiveMap = lazy(() => import("@/components/contact/InteractiveMap"));
 import SafeEmail from "@/components/ui/SafeEmail";
 
+const origin = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
 const contactSchema = {
   "@context": "https://schema.org",
   "@type": "ContactPage",
-  url: "https://pasamotor.com.tr/iletisim",
+  url: `${origin}/iletisim`,
   about: { "@type": "LocalBusiness", name: "Paşa Motor" },
   mainEntity: {
     "@type": "Organization",

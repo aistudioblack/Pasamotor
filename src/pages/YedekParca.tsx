@@ -451,13 +451,14 @@ const YedekParca = () => {
   }, [currentPage, totalPages]);
 
   // Schema SEO Yapılandırılması
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     itemListElement: filteredProducts.slice(0, itemsPerPage).map((p, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `https://pasamotor.com.tr/yedek-parca/${p.slug}`,
+      url: `${origin}/yedek-parca/${p.slug}`,
       name: p.title,
     })),
   };

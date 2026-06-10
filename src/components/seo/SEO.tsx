@@ -13,7 +13,7 @@ interface SEOProps {
   schema?: Record<string, any> | Array<Record<string, any>>;
 }
 
-const SITE = "https://pasamotor.com.tr";
+const SITE = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
 const DEFAULT_IMAGE = `${SITE}/favicon.png`;
 
 export const localBusinessSchema = () => ({

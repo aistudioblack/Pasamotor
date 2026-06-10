@@ -24,6 +24,8 @@ const SehirYedekParca = () => {
   const message = `Merhaba, ${city.name} için orijinal motosiklet yedek parçası arıyorum.`;
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SEO 
@@ -37,8 +39,8 @@ const SehirYedekParca = () => {
         data={{
           name: "Paşa Motor - Türkiye Geneli Kargo",
           description: city.seoDescription,
-          url: `https://pasamotor.com.tr/sehir/${city.slug}`,
-          image: "https://pasamotor.com.tr/favicon.png",
+          url: `${origin}/sehir/${city.slug}`,
+          image: `${origin}/favicon.png`,
           priceRange: "₺₺",
           address: {
             "@type": "PostalAddress",
@@ -162,10 +164,10 @@ const SehirYedekParca = () => {
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { name: "TVS Motor", link: "/yedek-parca", img: "https://pasamotor.com.tr/tvs-motor-logo.png" },
-                { name: "Hero Motor", link: "/yedek-parca", img: "https://pasamotor.com.tr/logo.png" }, // Using general logo as placeholder
-                { name: "Falcon", link: "/yedek-parca", img: "https://pasamotor.com.tr/falcon-motor-logo.png" },
-                { name: "Işıldar", link: "/yedek-parca", img: "https://pasamotor.com.tr/isildar-motor-logo.png" }
+                { name: "TVS Motor", link: "/yedek-parca", img: "/tvs-motor-logo.png" },
+                { name: "Hero Motor", link: "/yedek-parca", img: "/logo.png" }, // Using general logo as placeholder
+                { name: "Falcon", link: "/yedek-parca", img: "/falcon-motor-logo.png" },
+                { name: "Işıldar", link: "/yedek-parca", img: "/isildar-motor-logo.png" }
               ].map(brand => (
                 <Link to={brand.link} key={brand.name} className="group bg-card border border-border rounded-2xl p-6 text-center hover:border-primary transition-colors block">
                   <div className="h-16 flex items-center justify-center mb-4">

@@ -215,21 +215,24 @@ const BlogDetay = () => {
 
   const articleSchema = useMemo(() => {
     if (!post) return null;
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
     return {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
       headline: post.title,
       description: post.excerpt || post.meta_description || "",
-      image: post.cover_image || "https://pasamotor.com.tr/favicon.png",
+      image: post.cover_image 
+        ? (post.cover_image.startsWith("http") ? post.cover_image : `${origin}${post.cover_image}`)
+        : `${origin}/favicon.png`,
       datePublished: post.published_at,
       dateModified: post.updated_at,
-      mainEntityOfPage: { "@type": "WebPage", "@id": `https://pasamotor.com.tr/blog/${post.slug}` },
-      author: { "@type": "Organization", name: "Paşa Motor", url: "https://pasamotor.com.tr" },
+      mainEntityOfPage: { "@type": "WebPage", "@id": `${origin}/blog/${post.slug}` },
+      author: { "@type": "Organization", name: "Paşa Motor", url: origin },
       publisher: {
         "@type": "Organization",
         name: "Paşa Motor",
-        url: "https://pasamotor.com.tr",
-        logo: { "@type": "ImageObject", url: "https://pasamotor.com.tr/favicon.png" },
+        url: origin,
+        logo: { "@type": "ImageObject", url: `${origin}/favicon.png` },
       },
     };
   }, [post]);

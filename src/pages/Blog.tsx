@@ -112,16 +112,17 @@ const Blog = () => {
     });
   };
 
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
   const blogSchema = {
     "@context": "https://schema.org",
     "@type": "Blog",
     name: "Paşa Motor Blog",
-    url: "https://pasamotor.com.tr/blog",
+    url: `${origin}/blog`,
     publisher: { "@type": "Organization", name: "Paşa Motor" },
     blogPost: posts.slice(0, 20).map((p) => ({
       "@type": "BlogPosting",
       headline: p.title,
-      url: `https://pasamotor.com.tr/blog/${p.slug}`,
+      url: `${origin}/blog/${p.slug}`,
       datePublished: p.created_at || p.published_at,
       image: p.cover_image || undefined,
     })),
