@@ -216,6 +216,66 @@ html {
    All transform/opacity based, GPU friendly.
    ============================================================ */
 
+/* --- ÇILGIN ANIMASYONLAR --- */
+
+/* 5. Öfkeli Piston (Çılgın Devir) */
+@keyframes logo-engine-rage {
+  0%, 100% { transform: scale(1) translate(0, 0) rotate(0deg); filter: brightness(1) drop-shadow(0 0 0px #ef4444); }
+  5%, 25%, 45%, 65%, 85% { transform: scale(1.12) translate(-3px, -8px) rotate(-1.5deg); filter: brightness(1.6) drop-shadow(0 0 12px rgba(239, 68, 68, 0.8)); }
+  15%, 35%, 55%, 75%, 95% { transform: scale(1.08) translate(3px, 6px) rotate(1.5deg); filter: brightness(1.4) drop-shadow(0 0 8px rgba(249, 115, 22, 0.7)); }
+}
+.animate-logo-engine-rage { animation: logo-engine-rage 0.6s linear 1; }
+
+/* 6. Drift Kralı (Viraj Savrulması) */
+@keyframes logo-drift-king {
+  0% { transform: scale(1) translateX(0) skewX(0); filter: drop-shadow(0 0 0px rgba(0,0,0,0)); }
+  15% { transform: scale(0.95) translateX(-40px) skewX(-15deg) rotate(-8deg); filter: drop-shadow(15px 5px 10px rgba(0,0,0,0.4)); }
+  30% { transform: scale(1.05) translateX(50px) skewX(20deg) rotate(12deg); filter: drop-shadow(-20px 8px 15px rgba(239,68,68,0.3)); }
+  50% { transform: scale(1.1) translateX(0) skewX(-8deg) rotate(-5deg); filter: drop-shadow(0px 10px 20px rgba(249,115,22,0.4)); }
+  75% { transform: scale(1.02) translateX(0) skewX(4deg) rotate(2deg); }
+  100% { transform: scale(1) translateX(0) skewX(0) rotate(0); }
+}
+.animate-logo-drift-king { animation: logo-drift-king 2s cubic-bezier(0.175, 0.885, 0.32, 1.255) 1; }
+
+/* 7. Jöleli Amortisör */
+@keyframes logo-jelly-impact {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.25, 0.7) translateY(15px); }
+  35% { transform: scale(0.75, 1.3) translateY(-25px); }
+  55% { transform: scale(1.15, 0.85) translateY(10px); }
+  75% { transform: scale(0.9, 1.1) translateY(-5px); }
+  90% { transform: scale(1.03, 0.97) translateY(2px); }
+  100% { transform: scale(1) translateY(0); }
+}
+.animate-logo-jelly-impact { animation: logo-jelly-impact 1.2s ease-in-out 1; }
+
+/* 8. Hiper Uzay Geçişi */
+@keyframes logo-warp-jump {
+  0% { transform: scale(1) skewX(0) rotateY(0); filter: brightness(1) contrast(1); }
+  30% { transform: scale(1.3, 0.8) translateY(10px) skewX(5deg); }
+  45% { transform: scale(0.01, 3.5) translateY(-200px) skewY(30deg); filter: brightness(3) contrast(2) blur(2px); opacity: 0; }
+  46% { transform: scale(0.01, 3.5) translateY(200px) skewY(-30deg); filter: brightness(3) contrast(2) blur(2px); opacity: 0; }
+  70% { transform: scale(0.8, 1.4) translateY(-15px) skewX(-10deg); filter: brightness(1.5); opacity: 1; }
+  85% { transform: scale(1.1, 0.9) translateY(5px); }
+  100% { transform: scale(1) skewX(0) rotateY(0); }
+}
+.animate-logo-warp-jump { animation: logo-warp-jump 1.8s cubic-bezier(0.77, 0, 0.175, 1) 1; }
+
+/* 9. Siber Glitch (Neon Arıza) */
+@keyframes logo-neon-glitch {
+  0%, 100% { transform: translate(0, 0) skew(0deg); filter: brightness(1) drop-shadow(0 0 0px transparent); }
+  10% { transform: translate(-3px, 2px) skew(-5deg); filter: brightness(1.8) drop-shadow(2px 0px 0px #ef4444) drop-shadow(-2px 0px 0px #3b82f6); }
+  20% { transform: translate(2px, -3px) skew(3deg); filter: brightness(1.1); }
+  30% { transform: translate(-1px, -1px) skew(-1deg); filter: brightness(1.5) drop-shadow(-2px 0px 0px #ef4444) drop-shadow(2px 0px 0px #10b981); }
+  40% { transform: translate(3px, 3px) skew(7deg); filter: brightness(0.7); }
+  50% { transform: translate(-3px, -2px) skew(-8deg); filter: brightness(2) drop-shadow(3px -1px 0px #ef4444) drop-shadow(-3px 1px 0px #3b82f6); }
+  60% { transform: translate(0, 0) skew(0deg); }
+  70% { transform: translate(2px, -2px) skew(4deg); filter: brightness(1.6); }
+  80% { transform: translate(-2px, 1px) skew(-2deg); }
+  90% { transform: translate(1px, -1px) skew(1deg); filter: brightness(1.3); }
+}
+.animate-logo-neon-glitch { animation: logo-neon-glitch 1s linear 1; }
+
 /* 1. Motor Yağı Temizliği */
 @keyframes logo-oil-cleanse {
   0%   { filter: brightness(1) sepia(0); transform: rotate(0deg); }

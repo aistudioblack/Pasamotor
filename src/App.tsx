@@ -42,41 +42,42 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const Hakkimizda = lazy(() => import("./pages/Hakkimizda.tsx"));
-const Hizmetler = lazy(() => import("./pages/Hizmetler.tsx"));
-const Galeri = lazy(() => import("./pages/Galeri.tsx"));
-const Iletisim = lazy(() => import("./pages/Iletisim.tsx"));
-const YedekParca = lazy(() => import("./pages/YedekParca.tsx"));
-const YedekParcaDetay = lazy(() => import("./pages/YedekParcaDetay.tsx"));
-const Blog = lazy(() => import("./pages/Blog.tsx"));
-const BlogDetay = lazy(() => import("./pages/BlogDetay.tsx"));
-const LegalPage = lazy(() => import("./pages/LegalPage.tsx"));
-const SehirYedekParca = lazy(() => import("./pages/SehirYedekParca.tsx"));
-const KubaServis = lazy(() => import("./pages/seo/KubaServis.tsx"));
-const RksServis = lazy(() => import("./pages/seo/RksServis.tsx"));
-const MondialServis = lazy(() => import("./pages/seo/MondialServis.tsx"));
-const NotFound = lazy(() => import("./pages/NotFound.tsx"));
-const AdminLogin = lazy(() => import("./pages/admin/AdminLogin.tsx"));
-const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.tsx"));
-const AdminProducts = lazy(() => import("./pages/admin/AdminProducts.tsx"));
-const AdminPosts = lazy(() => import("./pages/admin/AdminPosts.tsx"));
-const AdminMessages = lazy(() => import("./pages/admin/AdminMessages.tsx"));
-const AdminGallery = lazy(() => import("./pages/admin/AdminGallery.tsx"));
-const AdminFAQ = lazy(() => import("./pages/admin/AdminFAQ.tsx"));
-const AdminAnimations = lazy(() => import("./pages/admin/AdminAnimations.tsx"));
-const AdminSettings = lazy(() => import("./pages/admin/AdminSettings.tsx"));
-const AdminSuppliers = lazy(() => import("./pages/admin/AdminSuppliers.tsx"));
-const AdminUsers = lazy(() => import("./pages/admin/AdminUsers.tsx"));
-const AdminAPI = lazy(() => import("./pages/admin/AdminAPI.tsx"));
-const AdminAITester = lazy(() => import("./pages/admin/AdminAITester.tsx"));
-const AdminChangelog = lazy(() => import("./pages/admin/AdminChangelog.tsx"));
-const AdminBlogAgent = lazy(() => import("./pages/admin/AdminBlogAgent.tsx"));
-const AdminNotes = lazy(() => import("./pages/admin/AdminNotes.tsx"));
-const AdminGithub = lazy(() => import("./pages/admin/AdminGithub.tsx"));
-const AdminDatabase = lazy(() => import("./pages/admin/AdminDatabase.tsx"));
-const AdminBrands = lazy(() => import("./pages/admin/AdminBrands.tsx"));
-const AdminServices = lazy(() => import("./pages/admin/AdminServices.tsx"));
-const AdminPages = lazy(() => import("./pages/admin/AdminPages.tsx"));
+const Hakkimizda = lazy(() => import("./pages/Hakkimizda"));
+const Hizmetler = lazy(() => import("./pages/Hizmetler"));
+const Galeri = lazy(() => import("./pages/Galeri"));
+const Iletisim = lazy(() => import("./pages/Iletisim"));
+const YedekParca = lazy(() => import("./pages/YedekParca"));
+const YedekParcaDetay = lazy(() => import("./pages/YedekParcaDetay"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogDetay = lazy(() => import("./pages/BlogDetay"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
+const SehirYedekParca = lazy(() => import("./pages/SehirYedekParca"));
+const KubaServis = lazy(() => import("./pages/seo/KubaServis"));
+const RksServis = lazy(() => import("./pages/seo/RksServis"));
+const MondialServis = lazy(() => import("./pages/seo/MondialServis"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
+const AdminPosts = lazy(() => import("./pages/admin/AdminPosts"));
+const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
+const AdminGallery = lazy(() => import("./pages/admin/AdminGallery"));
+const AdminFAQ = lazy(() => import("./pages/admin/AdminFAQ"));
+const AdminAnimations = lazy(() => import("./pages/admin/AdminAnimations"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminSuppliers = lazy(() => import("./pages/admin/AdminSuppliers"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminAPI = lazy(() => import("./pages/admin/AdminAPI"));
+const AdminAITester = lazy(() => import("./pages/admin/AdminAITester"));
+const AdminChangelog = lazy(() => import("./pages/admin/AdminChangelog"));
+const AdminBlogAgent = lazy(() => import("./pages/admin/AdminBlogAgent"));
+const AdminNotes = lazy(() => import("./pages/admin/AdminNotes"));
+const AdminGithub = lazy(() => import("./pages/admin/AdminGithub"));
+const AdminDatabase = lazy(() => import("./pages/admin/AdminDatabase"));
+const AdminBrands = lazy(() => import("./pages/admin/AdminBrands"));
+const AdminServices = lazy(() => import("./pages/admin/AdminServices"));
+const AdminServiceRepair = lazy(() => import("./pages/admin/AdminServiceRepair"));
+const AdminPages = lazy(() => import("./pages/admin/AdminPages"));
 
 const queryClient = new QueryClient();
 
@@ -123,6 +124,7 @@ const App = () => (
                 <Route path="/admin/urunler" element={<AdminProducts />} />
                 <Route path="/admin/markalar" element={<AdminBrands />} />
                 <Route path="/admin/hizmetler" element={<AdminServices />} />
+                <Route path="/admin/servis-tamir" element={<AdminServiceRepair />} />
                 <Route path="/admin/blog" element={<AdminPosts />} />
                 <Route path="/admin/blog-ajani" element={<AdminBlogAgent />} />
                 <Route path="/admin/notlar" element={<AdminNotes />} />

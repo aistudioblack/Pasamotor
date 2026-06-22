@@ -209,7 +209,7 @@ const YedekParcaDetay = () => {
             {/* Left Column: Images (Sticky Area) */}
             <div className="lg:col-span-5 lg:sticky lg:top-32 space-y-4">
               <div
-                className="relative aspect-square rounded-2xl overflow-hidden bg-white border border-border/80 flex items-center justify-center p-2 group shadow-sm cursor-zoom-in"
+                className="relative aspect-square rounded-2xl overflow-hidden bg-white border border-border/80 group shadow-sm cursor-zoom-in"
                 onClick={() =>
                   product?.images?.length ? setIsLightboxOpen(true) : null
                 }
@@ -232,7 +232,7 @@ const YedekParcaDetay = () => {
                       alt={product.title}
                       width={800}
                       height={800}
-                      className={`max-w-full max-h-full object-contain p-4 md:p-8 transition-all duration-700 ease-out group-hover:scale-105 ${isMainImageLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md"}`}
+                      className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${isMainImageLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md"}`}
                       loading="eager"
                       onLoad={() => setIsMainImageLoaded(true)}
                     />
@@ -307,7 +307,7 @@ const YedekParcaDetay = () => {
                   <div className="inline-flex flex-col gap-1 px-7 py-4 rounded-2xl bg-gradient-to-br from-slate-900 via-[#1c2230] to-slate-950 border border-slate-700/60 shadow-xl relative overflow-hidden group/price">
                     <div className="absolute top-0 left-0 w-[4px] h-full bg-primary" />
                     <span className="text-[11px] font-bold text-slate-400 tracking-widest uppercase mb-1">
-                      Kdv Dahil Fiyat
+                      Fiyat
                     </span>
                     <div className="flex items-baseline gap-2">
                       <span className="font-heading font-extrabold text-4xl md:text-5xl text-white tracking-tighter">

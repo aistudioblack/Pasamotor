@@ -7,6 +7,21 @@ import AdminLayout from "@/components/admin/AdminLayout";
 
 const changelogData = [
   {
+    version: "v3.3.0 - Otonom SEO Blog Ajanı & Supabase Servis Entegrasyonu",
+    date: "2026-06-20",
+    icon: SparklesIcon,
+    items: [
+      { type: "feature", text: "Otonom Blog Ajanı: Her gün saat 23:00'da çalışacak Vercel Cron entegrasyonu (vercel.json) yapıldı. Ajan, günde 3 adet özgün, yüksek SEO uyumlu blog yazısı tasarlar." },
+      { type: "feature", text: "Kopya İçerik Koruması: Yapay zeka asistanı, yeni konular bulurken mevcut veritabanındaki blog konularını dinamik olarak kontrol eder ve asla mükerrer/benzer içerik üretmez." },
+      { type: "feature", text: "Zengin İçerik & Resim Üretimi: Yazılar için H1, H2, H3 etiketleri içeren detaylı HTML makaleler üretilir, konuya özel İngilizce görsel promptları ile otomatik Imagen-3 görselleri üretilip güvenli bir şekilde Supabase Storage'a kaydedilir." },
+      { type: "feature", text: "Mobil Uyumlu Servis Tablosu: Servis ve Onarım İş Emirleri listesi tamamen yenilenerek masaüstünde yüksek okunabilirliğe sahip detaylı tablolara, mobilde ise akıcı dokunmatik kontrollere sahip kart lisesine dönüştürüldü." },
+      { type: "feature", text: "Gerçek Veritabanı Entegrasyonu: İş emirleri ve iş emri parçaları Supabase veritabanı (service_orders ve service_order_parts tabloları) üzerinden ilişkisel ve gerçek zamanlı olarak çalışacak şekilde kodlandı." },
+      { type: "feature", text: "Rol Tabanlı Durum Akışı & Silme: Ustaların 'Onarıma Başla / Güncelle' yetkisi, yöneticilerin ise 'İş Emri Kapat' ve 'İş Emrini Sil' izinlerine sahip olduğu güvenli bir akış denetim mekanizması kuruldu." },
+      { type: "feature", text: "Usta Takip Mekanizması: İş emri kabulünde kaydı hangi ustanın açtığını veya hangi ustaya atandığını takip etmek için dinamik bir 'Kabul Eden / Atanan Usta' alanı tanımlandı. Sistemdeki kayıtlı personelleri otomatik listeler veya elle usta adı yazılmasına olanak tanır." },
+      { type: "improvement", text: "Profesyonel Isimlendirmeler: Parça ve işçilik ekleme alanındaki labellar 'Sistem Parçası Ekle' ve 'Harici Parça / İşçilik' olarak daha kurumsal hale getirildi." }
+    ]
+  },
+  {
     version: "v3.2.2 - Blog Görseli Hataları Giderildi",
     date: "2026-06-10",
     icon: Activity,

@@ -13,7 +13,7 @@ const Footer = () => {
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-14 h-14 shrink-0 hover:scale-105 duration-300 transition-transform">
-                  <img src={logo} alt="Paşa Motor Logo" className="object-contain w-full h-full" referrerPolicy="no-referrer"  loading="lazy" decoding="async" />
+                  <img src={logo} alt="Paşa Motor Logo" width={56} height={56} className="object-contain w-full h-full" referrerPolicy="no-referrer"  loading="lazy" decoding="async" />
                 </div>
                 <div>
                   <h3 className="font-heading font-extrabold text-lg tracking-tight text-foreground leading-none">

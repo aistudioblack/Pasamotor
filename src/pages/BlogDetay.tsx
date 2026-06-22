@@ -494,6 +494,17 @@ const BlogDetay = () => {
                             </a>
                           );
                         }
+                        const isInternal = typeof props.href === 'string' && props.href.startsWith("/");
+                        if (isInternal) {
+                          const { href, ...rest } = props;
+                          // If there's no custom class, apply the standard link utility class
+                          const cName = rest.className || "text-primary hover:underline font-medium transition-colors";
+                          return (
+                            <Link to={href || "#"} className={cName} {...rest}>
+                              {children}
+                            </Link>
+                          );
+                        }
                         return <a className="text-primary hover:underline font-medium" {...props}>{children}</a>;
                       },
                       hr: ({node, ...props}) => <hr className="mt-12 mb-10 border-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" {...props} />,

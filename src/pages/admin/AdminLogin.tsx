@@ -17,9 +17,13 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    dbClient.auth.getSession().then(({ data: { session } }) => {
+    dbClient.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.warn("Session check fail:", error.message);
+        dbClient.auth.signOut();
+      }
       if (session) navigate("/admin");
-    });
+    }).catch(() => {});
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {

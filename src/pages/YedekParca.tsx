@@ -795,7 +795,7 @@ const YedekParca = () => {
                               width={240}
                               height={176}
                               referrerPolicy="no-referrer"
-                              className="max-w-full max-h-full w-auto h-auto object-contain p-4 transition-transform duration-500 hover:scale-110 mix-blend-multiply"
+                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                               loading="lazy"
                             />
                           ) : (

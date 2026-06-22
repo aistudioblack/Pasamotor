@@ -227,6 +227,35 @@ CREATE TABLE IF NOT EXISTS public.pricing_rules (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- service_orders
+CREATE TABLE IF NOT EXISTS public.service_orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plate TEXT NOT NULL,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT,
+  vehicle_brand TEXT,
+  vehicle_model TEXT,
+  km TEXT,
+  complaint TEXT,
+  status TEXT DEFAULT 'Açık',
+  mechanic TEXT,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- service_order_parts
+CREATE TABLE IF NOT EXISTS public.service_order_parts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID REFERENCES public.service_orders(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES public.products(id) ON DELETE SET NULL,
+  name TEXT NOT NULL,
+  price NUMERIC DEFAULT 0,
+  quantity INTEGER DEFAULT 1,
+  is_custom BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ai_logs
 CREATE TABLE IF NOT EXISTS public.ai_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -269,6 +298,8 @@ ALTER TABLE public.sync_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.supplier_products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.product_mappings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pricing_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.service_orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.service_order_parts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_audit_logs ENABLE ROW LEVEL SECURITY;
 
@@ -301,6 +332,8 @@ CREATE POLICY "Auth Full Access jobs" ON public.sync_jobs FOR ALL TO authenticat
 CREATE POLICY "Auth Full Access supp_prod" ON public.supplier_products FOR ALL TO authenticated USING (true);
 CREATE POLICY "Auth Full Access prod_maps" ON public.product_mappings FOR ALL TO authenticated USING (true);
 CREATE POLICY "Auth Full Access price_rule" ON public.pricing_rules FOR ALL TO authenticated USING (true);
+CREATE POLICY "Auth Full Access service_orders" ON public.service_orders FOR ALL TO authenticated USING (true);
+CREATE POLICY "Auth Full Access service_order_parts" ON public.service_order_parts FOR ALL TO authenticated USING (true);
 CREATE POLICY "Auth Full Access ailogs" ON public.ai_logs FOR ALL TO authenticated USING (true);
 CREATE POLICY "Auth Full Access audit" ON public.admin_audit_logs FOR ALL TO authenticated USING (true);
 

@@ -65,6 +65,16 @@ export const runAutoSync = async () => {
     }
 
     for (const supplier of suppliers) {
+      if (!supplier.sync_interval_minutes || supplier.sync_interval_minutes <= 0) continue;
+      
+      const lastSyncAtDate = supplier.last_sync_at ? new Date(supplier.last_sync_at) : new Date(0);
+      const minutesSinceLastSync = (new Date().getTime() - lastSyncAtDate.getTime()) / (1000 * 60);
+      
+      if (minutesSinceLastSync < supplier.sync_interval_minutes) {
+        console.log(`[AutoSync] Skipping ${supplier.name}. Synced ${Math.round(minutesSinceLastSync)} mins ago, interval is ${supplier.sync_interval_minutes} mins.`);
+        continue;
+      }
+
       try {
         console.log(`[AutoSync] Processing supplier: ${supplier.name} (${supplier.id})`);
         
@@ -104,7 +114,9 @@ export const runAutoSync = async () => {
           try {
             const text = await loginRes.clone().text();
             if (text && text.trim().startsWith("{")) loginData = JSON.parse(text);
-          } catch (e) { }
+          } catch (e) {
+            console.error("FCS Login Parse Error:", e);
+          }
 
           if (loginData && loginData.Redirect === false) throw new Error(loginData.Message || "FCS Login failed");
           

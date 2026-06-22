@@ -35,8 +35,8 @@ const SehirYedekParca = () => {
       />
       
       <JsonLd 
-        type="LocalBusiness" 
         data={{
+          "@type": "LocalBusiness",
           name: "Paşa Motor - Türkiye Geneli Kargo",
           description: city.seoDescription,
           url: `${origin}/sehir/${city.slug}`,

@@ -107,10 +107,38 @@ const AdminSuppliers = () => {
       .select("*")
       .order("created_at", { ascending: false });
     
-    const mapped = ((data as any[]) || []).map((s: any) => ({
+    let mapped = ((data as any[]) || []).map((s: any) => ({
       ...s,
       api_key: s.api_key || s.field_mapping?.api_key || null
     }));
+
+    try {
+      const { data: recentJobs } = await dbClient
+        .from("sync_jobs")
+        .select("supplier_id, started_at, job_type")
+        .eq("status", "success")
+        .order("started_at", { ascending: false });
+
+      if (recentJobs && recentJobs.length > 0) {
+        mapped = mapped.map((s: any) => {
+          const supplierJobs = recentJobs.filter((j: any) => j.supplier_id === s.id);
+          const latestSync = supplierJobs[0]?.started_at || null;
+          
+          const fullImportJobs = supplierJobs.filter((j: any) => j.job_type === "full_import" || j.job_type === "full");
+          const latestFull = fullImportJobs[0]?.started_at || null;
+
+          return {
+            ...s,
+            last_sync_at: s.last_sync_at || latestSync,
+            last_full_import_at: s.last_full_import_at || latestFull || (latestSync ? latestSync : s.last_full_import_at),
+            is_initialized: s.is_initialized || !!latestSync
+          };
+        });
+      }
+    } catch (e) {
+      console.warn("Failed to overlay sync timestamps from sync_jobs map:", e);
+    }
+
     setItems(mapped);
     setLoading(false);
   };

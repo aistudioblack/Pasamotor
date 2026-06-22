@@ -1,6 +1,8 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useEffect, useState } from "react";
 import { dbClient } from "@/lib/db-client";
+import { supabase } from "@/lib/supabase-client";
+import GoogleSeoDashboard from "@/components/admin/GoogleSeoDashboard";
 import {
   Package,
   FileText,
@@ -69,7 +71,6 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const load = async () => {
-      const { supabase } = await import('@/lib/supabase-client');
       
       const [products, posts, messages, gallery, unread, recentMsgs, recentPostsRes, activeSnap, passiveSnap, lowStockSnap, outOfStockSnap] =
         await Promise.all([
@@ -212,7 +213,7 @@ const AdminDashboard = () => {
         for (const post of postsToInject) {
           const { data: existing } = await dbClient.from('posts').select('id').eq('slug', post.slug);
           if (!existing || existing.length === 0) {
-            await dbClient.from('posts').insert(post);
+            await dbClient.from('posts').insert(post as any);
           }
         }
       } catch (e) {
@@ -331,6 +332,9 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Google SEO & Analytics Dashboards */}
+        <GoogleSeoDashboard />
 
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
           {/* Recent messages */}

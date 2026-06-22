@@ -1,4 +1,14 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/generate-blog",
+      "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/sync",
+      "schedule": "*/5 * * * *"
+    }
+  ],
   "outputDirectory": "dist",
   "buildCommand": "npm run build",
   "trailingSlash": false,

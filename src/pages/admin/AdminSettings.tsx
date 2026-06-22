@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { dbClient } from "@/lib/db-client";
 import { useToast } from "@/hooks/use-toast";
-import { KeyRound, Loader2, Sparkles, Eye, EyeOff } from "lucide-react";
+import { KeyRound, Loader2, Sparkles, Eye, EyeOff, Server } from "lucide-react";
 
 // Basit şifreleme/obfuscation yardımcı fonksiyonları
 const encryptKey = (key: string): string => {
@@ -29,11 +29,9 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(false);
 
   // AI ve Arama Sağlayıcısı Ayarları
-  const [aiProvider, setAiProvider] = useState<"system" | "together" | "openrouter" | "groq" | "gemini" | "huggingface" | "qwen">("system");
+  const [aiProvider, setAiProvider] = useState<"system" | "openrouter" | "groq" | "gemini" | "huggingface" | "qwen" | "manus" | "persorai">("system");
   const [orApiKey, setOrApiKey] = useState("");
   const [showOrApiKey, setShowOrApiKey] = useState(false);
-  const [tgApiKey, setTgApiKey] = useState("");
-  const [showTgApiKey, setShowTgApiKey] = useState(false);
   const [groqApiKey, setGroqApiKey] = useState("");
   const [showGroqApiKey, setShowGroqApiKey] = useState(false);
   const [geminiApiKey, setGeminiApiKey] = useState("");
@@ -42,6 +40,18 @@ const AdminSettings = () => {
   const [showHfApiKey, setShowHfApiKey] = useState(false);
   const [qwenApiKey, setQwenApiKey] = useState("");
   const [showQwenApiKey, setShowQwenApiKey] = useState(false);
+  const [manusApiKey, setManusApiKey] = useState("");
+  const [showManusApiKey, setShowManusApiKey] = useState(false);
+  const [persoraiApiKey, setPersoraiApiKey] = useState("");
+  const [showPersoraiApiKey, setShowPersoraiApiKey] = useState(false);
+  const [persoraiModel, setPersoraiModel] = useState("claude-opus-4-7");
+
+  // Özel API Sağlayıcıları
+  const [customProviders, setCustomProviders] = useState<{ id: string, name: string, apiKey: string, baseUrl: string, defaultModel: string }[]>([]);
+  const [showAddCustomProvider, setShowAddCustomProvider] = useState(false);
+  const [editingCustomProviderId, setEditingCustomProviderId] = useState<string | null>(null);
+  const [newCustomProvider, setNewCustomProvider] = useState({ name: "", apiKey: "", baseUrl: "", defaultModel: "" });
+  const [showCustomApiKeys, setShowCustomApiKeys] = useState<{[key: string]: boolean}>({});
 
   useEffect(() => {
     const savedProvider = localStorage.getItem("ai_provider") as any;
@@ -49,6 +59,11 @@ const AdminSettings = () => {
       setAiProvider(savedProvider);
     } else {
       localStorage.setItem("ai_provider", "system");
+    }
+
+    const savedManus = localStorage.getItem("manus_api_key");
+    if (savedManus) {
+      setManusApiKey(decryptKey(savedManus));
     }
 
     const savedOr = localStorage.getItem("or_api_key");
@@ -83,16 +98,29 @@ const AdminSettings = () => {
       localStorage.setItem("qwen_api_key", encryptKey(defaultQwenKey));
     }
 
-    const savedTg = localStorage.getItem("tg_api_key");
-    if (savedTg) {
-      setTgApiKey(decryptKey(savedTg));
+    const savedPersorai = localStorage.getItem("persorai_api_key");
+    if (savedPersorai) {
+      setPersoraiApiKey(decryptKey(savedPersorai));
     } else {
-      // Varsayılan together key tanımlama
-      const defaultKey = import.meta.env.VITE_DEFAULT_TG_KEY || "";
-      if (defaultKey) {
-        setTgApiKey(defaultKey);
-        localStorage.setItem("tg_api_key", encryptKey(defaultKey));
+      const defaultPersoraiKey = "psr-1364cf17e1ef3ac503bf245407cdf03ebebf6e2d813b293b";
+      setPersoraiApiKey(defaultPersoraiKey);
+      localStorage.setItem("persorai_api_key", encryptKey(defaultPersoraiKey));
+    }
+
+    const savedPersoraiModel = localStorage.getItem("persorai_model") || "claude-opus-4-7";
+    setPersoraiModel(savedPersoraiModel);
+
+    // Custom providers load
+    try {
+      const savedCustomProviders = localStorage.getItem("custom_ai_providers");
+      if (savedCustomProviders) {
+        const parsed = JSON.parse(savedCustomProviders);
+        // Decrypt api keys
+        const decrypted = parsed.map((p: any) => ({ ...p, apiKey: decryptKey(p.apiKey) }));
+        setCustomProviders(decrypted);
       }
+    } catch(e) {
+      console.warn("Failed to parse custom providers", e);
     }
   }, []);
 
@@ -105,6 +133,12 @@ const AdminSettings = () => {
         localStorage.removeItem("or_api_key");
       } else {
         localStorage.setItem("or_api_key", encryptKey(orApiKey.trim()));
+      }
+
+      if (!manusApiKey.trim()) {
+        localStorage.removeItem("manus_api_key");
+      } else {
+        localStorage.setItem("manus_api_key", encryptKey(manusApiKey.trim()));
       }
 
       if (!groqApiKey.trim()) {
@@ -131,11 +165,12 @@ const AdminSettings = () => {
         localStorage.setItem("qwen_api_key", encryptKey(qwenApiKey.trim()));
       }
 
-      if (!tgApiKey.trim()) {
-        localStorage.removeItem("tg_api_key");
+      if (!persoraiApiKey.trim()) {
+        localStorage.removeItem("persorai_api_key");
       } else {
-        localStorage.setItem("tg_api_key", encryptKey(tgApiKey.trim()));
+        localStorage.setItem("persorai_api_key", encryptKey(persoraiApiKey.trim()));
       }
+      localStorage.setItem("persorai_model", persoraiModel);
 
       toast({ 
         title: "Başarılı", 
@@ -144,6 +179,59 @@ const AdminSettings = () => {
     } catch (err: any) {
       toast({ title: "Hata", description: "Ayarlar kaydedilemedi.", variant: "destructive" });
     }
+  };
+
+  const handleDeleteCustomProvider = (id: string) => {
+    const updated = customProviders.filter(p => p.id !== id);
+    setCustomProviders(updated);
+    
+    // Save to local storage
+    const encryptedForSave = updated.map(p => ({ ...p, apiKey: encryptKey(p.apiKey) }));
+    localStorage.setItem("custom_ai_providers", JSON.stringify(encryptedForSave));
+    
+    // Switch away if active
+    if (aiProvider === id) {
+      setAiProvider("system");
+      localStorage.setItem("ai_provider", "system");
+    }
+    toast({ title: "Başarılı", description: "Özel sağlayıcı silindi." });
+  };
+
+  const handleAddCustomProvider = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCustomProvider.name || !newCustomProvider.apiKey) {
+      toast({ title: "Hata", description: "İsim ve API Key zorunludur.", variant: "destructive" });
+      return;
+    }
+    
+    let updated;
+    if (editingCustomProviderId) {
+      updated = customProviders.map(p => p.id === editingCustomProviderId ? { ...newCustomProvider, id: editingCustomProviderId } : p);
+      toast({ title: "Başarılı", description: "Özel sağlayıcı güncellendi." });
+    } else {
+      const newProvider = {
+        ...newCustomProvider,
+        id: `custom-${customProviders.length}-${Date.now()}`
+      };
+      updated = [...customProviders, newProvider];
+      toast({ title: "Başarılı", description: "Özel sağlayıcı eklendi." });
+    }
+    
+    setCustomProviders(updated);
+    
+    // Save
+    const encryptedForSave = updated.map(p => ({ ...p, apiKey: encryptKey(p.apiKey) }));
+    localStorage.setItem("custom_ai_providers", JSON.stringify(encryptedForSave));
+    
+    setNewCustomProvider({ name: "", apiKey: "", baseUrl: "", defaultModel: "" });
+    setShowAddCustomProvider(false);
+    setEditingCustomProviderId(null);
+  };
+
+  const handleEditClick = (provider: any) => {
+    setNewCustomProvider({ name: provider.name, apiKey: provider.apiKey, baseUrl: provider.baseUrl || "", defaultModel: provider.defaultModel || "" });
+    setEditingCustomProviderId(provider.id);
+    setShowAddCustomProvider(true);
   };
 
   const validate = (): string | null => {
@@ -280,13 +368,17 @@ const AdminSettings = () => {
                 onChange={(e) => setAiProvider(e.target.value as any)}
                 className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
+                <option value="persorai">PersorAI (Yeni Premium Yapay Zeka - Claude Opus 4.7 - API Key Gerekir)</option>
                 <option value="system">Yerleşik Sistem Yapay Zekası (Google Gemini - Ücretsiz, Hızlı & Kota Sınırı Yok)</option>
+                <option value="manus">Manus AI Ajan Platformu (Kolektif Ortak Akıl - API Key Gerekir)</option>
                 <option value="groq">Groq AI (Maksimum Hız - API Key Gerekir)</option>
                 <option value="gemini">Google Gemini Yönlendirmeli (Kendi API Anahtarınız - API Key Gerekir)</option>
                 <option value="qwen">Qwen AI Sunucusu (Özel - API Key Gerekir)</option>
                 <option value="openrouter">OpenRouter AI (Alternatif Sağlayıcı - API Key Gerekir)</option>
                 <option value="huggingface">Hugging Face AI (Alternatif Sağlayıcı - API Key Gerekir)</option>
-                <option value="together">Together AI (Yedek Sağlayıcı - API Key Gerekir)</option>
+                {customProviders.map(p => (
+                  <option key={p.id} value={p.id}>✨ Özel Sağlayıcı: {p.name}</option>
+                ))}
               </select>
             </div>
 
@@ -299,30 +391,6 @@ const AdminSettings = () => {
                 <p className="text-[10px] text-purple-300/80 font-sans italic">
                   * API Anahtarı girmeniz, ödeme yapmanız veya kredi yüklemeniz gerekmez. Tamamen ücretsiz ve sınırsızdır.
                 </p>
-              </div>
-            ) : aiProvider === "together" ? (
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Together AI API Key</label>
-                <div className="relative">
-                  <input
-                    type={showTgApiKey ? "text" : "password"}
-                    placeholder="tgp_v1_..."
-                    value={tgApiKey}
-                    onChange={(e) => setTgApiKey(e.target.value)}
-                    className="w-full pl-4 pr-10 py-2.5 rounded-lg bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-purple-200"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowTgApiKey(!showTgApiKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showTgApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                <div className="flex justify-between items-center text-[10px] text-muted-foreground mt-1.5">
-                  <p>Boş bırakırsanız sistem varsayılan anahtarı dener.</p>
-                  <a href="https://api.together.ai/settings/api-keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">API Key Al &rarr;</a>
-                </div>
               </div>
             ) : aiProvider === "groq" ? (
               <div>
@@ -419,6 +487,75 @@ const AdminSettings = () => {
                   <p>Qwen.privateinstance.com (Varsayılandır)</p>
                 </div>
               </div>
+            ) : aiProvider === "manus" ? (
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">Manus AI API Key (sk_manus_...)</label>
+                <div className="relative">
+                  <input
+                    type={showManusApiKey ? "text" : "password"}
+                    placeholder="sk_manus_..."
+                    value={manusApiKey}
+                    onChange={(e) => setManusApiKey(e.target.value)}
+                    className="w-full pl-4 pr-10 py-2.5 rounded-lg bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-purple-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowManusApiKey(!showManusApiKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showManusApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-muted-foreground mt-1.5">
+                  <p>Manus AI Kolektif Ortak Akıl ve Çoklu Ajan Entegrasyonu için.</p>
+                  <a href="https://manus.im" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Manus AI &rarr;</a>
+                </div>
+              </div>
+            ) : aiProvider === "persorai" ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1.5 block">PersorAI API Key (psr-...)</label>
+                  <div className="relative">
+                    <input
+                      type={showPersoraiApiKey ? "text" : "password"}
+                      placeholder="psr-..."
+                      value={persoraiApiKey}
+                      onChange={(e) => setPersoraiApiKey(e.target.value)}
+                      className="w-full pl-4 pr-10 py-2.5 rounded-lg bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-purple-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPersoraiApiKey(!showPersoraiApiKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPersoraiApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] text-muted-foreground mt-1.5">
+                    <p>Yeni Nesil Claude Opus 4.7 ve Opus Vision Yapay Zekaları için.</p>
+                    <a href="https://persorai.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PersorAI &rarr;</a>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1.5 block">Aktif Yapay Zeka Modeli</label>
+                  <select
+                    value={persoraiModel}
+                    onChange={(e) => setPersoraiModel(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    <option value="claude-opus-4-7">Claude Opus 4.7 (Anthropic - Ultra Gelişmiş Editör)</option>
+                    <option value="claude-opus-4-7-vision">Claude Opus 4.7 Vision (Anthropic - Çoklu Modal)</option>
+                  </select>
+                </div>
+              </div>
+            ) : customProviders.find(p => p.id === aiProvider) ? (
+              <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 space-y-2">
+                <span className="font-bold text-foreground block font-sans">
+                  {customProviders.find(p => p.id === aiProvider)?.name}
+                </span>
+                <p className="text-xs text-muted-foreground">Bu sağlayıcının yapılandırmasını "Özel API Sağlayıcıları" bölümünden düzenleyebilirsiniz.</p>
+              </div>
             ) : (
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">OpenRouter API Key (sk-or-v1-...)</label>
@@ -453,9 +590,116 @@ const AdminSettings = () => {
             </button>
           </form>
         </div>
+        
+        {/* Özel API Sağlayıcıları Yönetimi */}
+        <div className="glass-card rounded-2xl p-6 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Server className="w-5 h-5 text-primary" />
+              <h2 className="font-heading font-semibold text-foreground">Özel API Sağlayıcıları </h2>
+            </div>
+            <button 
+              onClick={() => setShowAddCustomProvider(!showAddCustomProvider)}
+              className="text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium border border-primary/20"
+            >
+              {showAddCustomProvider ? "İptal" : "+ Yeni Sağlayıcı Tanımla"}
+            </button>
+          </div>
+          
+          {showAddCustomProvider && (
+            <form onSubmit={handleAddCustomProvider} className="space-y-4 mb-6 p-4 rounded-xl bg-muted/50 border border-border">
+              <div>
+                <label className="text-xs font-medium text-foreground block mb-1">Sağlayıcı Adı</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Örn: Benim Özel Sunucum"
+                  value={newCustomProvider.name}
+                  onChange={e => setNewCustomProvider({...newCustomProvider, name: e.target.value})}
+                  className="w-full px-3 py-2 text-sm rounded bg-background border border-border focus:ring-1 focus:ring-primary focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground block mb-1">Base URL (Opsiyonel)</label>
+                <input 
+                  type="url" 
+                  placeholder="Örn: https://api.my-custom-llm.com/v1"
+                  value={newCustomProvider.baseUrl}
+                  onChange={e => setNewCustomProvider({...newCustomProvider, baseUrl: e.target.value})}
+                  className="w-full px-3 py-2 text-sm rounded bg-background border border-border focus:ring-1 focus:ring-primary focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground block mb-1">API Key</label>
+                <input 
+                  type="password" 
+                  required
+                  placeholder="Bearer token veya API anahtarı"
+                  value={newCustomProvider.apiKey}
+                  onChange={e => setNewCustomProvider({...newCustomProvider, apiKey: e.target.value})}
+                  className="w-full px-3 py-2 text-sm font-mono rounded bg-background border border-border focus:ring-1 focus:ring-primary focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground block mb-1">Standart Model Adı (Opsiyonel)</label>
+                <input 
+                  type="text" 
+                  placeholder="Örn: llama-3-70b-instruct"
+                  value={newCustomProvider.defaultModel}
+                  onChange={e => setNewCustomProvider({...newCustomProvider, defaultModel: e.target.value})}
+                  className="w-full px-3 py-2 text-sm font-mono rounded bg-background border border-border focus:ring-1 focus:ring-primary focus:outline-none"
+                />
+              </div>
+              <button 
+                type="submit"
+                className="w-full py-2 bg-foreground text-background text-sm font-medium rounded hover:bg-foreground/90 transition-colors"
+              >
+                {editingCustomProviderId ? "Değişiklikleri Kaydet" : "Kaydet ve Listeye Ekle"}
+              </button>
+            </form>
+          )}
 
-
-
+          {customProviders.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">Henüz özel bir API sağlayıcı eklemediniz. İsterseniz OpenAI uyumlu (Custom Base URL) veya farklı bir yapay zeka servisini buraya tanımlayabilirsiniz.</p>
+          ) : (
+            <div className="space-y-3">
+              {customProviders.map(p => (
+                <div key={p.id} className="p-3 rounded border border-border flex items-center justify-between group">
+                  <div className="space-y-0.5 max-w-[70%]">
+                    <p className="font-medium text-sm text-foreground">{p.name}</p>
+                    {p.baseUrl && <p className="text-[10px] font-mono text-muted-foreground truncate">{p.baseUrl}</p>}
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-[10px] font-mono text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded">
+                        {showCustomApiKeys[p.id] ? p.apiKey : "••••••••••••••••••••••••"}
+                      </p>
+                      <button 
+                        type="button" 
+                        onClick={() => setShowCustomApiKeys(prev => ({...prev, [p.id]: !prev[p.id]}))}
+                        className="text-muted-foreground hover:text-foreground p-0.5"
+                      >
+                        {showCustomApiKeys[p.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => handleEditClick(p)}
+                      className="text-xs text-primary hover:bg-primary/10 px-2 py-1 rounded"
+                    >
+                      Düzenle
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteCustomProvider(p.id)}
+                      className="text-xs text-destructive hover:bg-destructive/10 px-2 py-1 rounded"
+                    >
+                      Sil
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
       </div>
     </AdminLayout>

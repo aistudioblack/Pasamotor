@@ -29,6 +29,8 @@ const Header = () => {
               alt="Paşa Motor"
               loading="eager"
               decoding="sync"
+              width={160}
+              height={56}
               className="h-11 w-auto md:h-14 object-contain drop-shadow-xl"
               style={{ mixBlendMode: "screen" }}
               initial={{ opacity: 0, x: -20 }}

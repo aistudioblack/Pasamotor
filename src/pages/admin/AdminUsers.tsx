@@ -50,20 +50,64 @@ const AdminUsers = () => {
     loadUsers();
   }, []);
 
+  // Role states
+  const roleOptions = [
+    { value: 'admin', label: 'Admin (Tam Yetki)' },
+    { value: 'senior_manager', label: 'Senior Manager (Kıdemli Yönetici)' },
+    { value: 'manager', label: 'Yönetici (Servis Kapatma vb.)' },
+    { value: 'mechanic', label: 'Mekanik Ustası (Saha / Mobil Erişim)' },
+    { value: 'editor', label: 'İçerik Editörü' },
+    { value: 'user', label: 'Normal Kullanıcı (Sınırlı Yetki)' }
+  ];
+
+  const mapAppRoleToDbRole = (appRole: string): 'admin' | 'moderator' | 'user' => {
+    if (appRole === 'admin' || appRole === 'senior_manager') return 'admin';
+    if (appRole === 'manager' || appRole === 'editor') return 'moderator';
+    return 'user';
+  };
+
   const handleCreateUser = async (e: any) => {
     e.preventDefault();
     try {
-       const { error } = await supabase.auth.signUp({
+       const { data, error } = await supabase.auth.signUp({
          email: form.email,
          password: form.password
        });
        if (error) throw error;
-       toast({ title: "Başarılı", description: "Admin oluşturuldu!" });
+       
+       if (data?.user) {
+         const dbRole = mapAppRoleToDbRole(form.role);
+         // Create or update user row with correct safe type for 'role' and specialized name representing exact application role
+         const { error: upsertError } = await supabase.from('users').upsert({ 
+           id: data.user.id, 
+           email: form.email, 
+           role: dbRole,
+           name: form.role // Here we store the exact, fine-grained application role
+         });
+         if (upsertError) throw upsertError;
+       }
+       
+       toast({ title: "Başarılı", description: "Kullanıcı oluşturuldu!" });
        setShowModal(false);
        setForm({ email: '', password: '', role: 'admin' });
        loadUsers();
     } catch (error: any) {
        toast({ title: "Hata", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleUpdateRole = async (id: string, newRole: string) => {
+    try {
+      const dbRole = mapAppRoleToDbRole(newRole);
+      const { error } = await supabase.from('users').update({ 
+        role: dbRole,
+        name: newRole // Save exact role to name column
+      }).eq('id', id);
+      if (error) throw error;
+      toast({ title: "Başarılı", description: "Kullanıcı rolü güncellendi." });
+      loadUsers();
+    } catch (error: any) {
+      toast({ title: "Hata", description: `Rol güncellenirken hata oluştu: ${error.message}`, variant: "destructive" });
     }
   };
 
@@ -175,7 +219,7 @@ const AdminUsers = () => {
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/95 transition-colors">
            <Plus className="w-4 h-4" />
-           Yeni Yönetici Ekle
+           Yeni Kullanıcı Ekle
         </button>
       </div>
 
@@ -189,44 +233,65 @@ const AdminUsers = () => {
                </tr>
             </thead>
             <tbody>
-               {users.map((u) => (
-                  <tr key={u.id} className="border-t border-border hover:bg-muted/30 transition-colors">
-                     <td className="p-4 font-medium">{u.email}</td>
-                     <td className="p-4">
-                        <span className="px-2.5 py-1 rounded bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">{u.role || 'user'}</span>
-                     </td>
-                     <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {u.email !== "ahmetcafoglu@hotmail.com" ? (
-                            <>
-                              <button 
-                                onClick={() => {
-                                  setSelectedUser(u);
-                                  setNewPassword("");
-                                  setConfirmPassword("");
-                                  setShowPassword(false);
-                                  setShowPasswordModal(true);
-                                }}
-                                className="p-2 text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors duration-200" 
-                                title="Şifre Değiştir"
+               {users.map((u) => {
+                  const userRole = (u.name && ['admin', 'senior_manager', 'manager', 'mechanic', 'editor', 'user'].includes(u.name)) 
+                    ? u.name 
+                    : (u.role || 'user');
+                    
+                  return (
+                     <tr key={u.id} className="border-t border-border hover:bg-muted/30 transition-colors">
+                        <td className="p-4 font-medium">{u.email}</td>
+                        <td className="p-4">
+                           {u.email !== "ahmetcafoglu@hotmail.com" ? (
+                              <select 
+                                value={userRole}
+                                onChange={(e) => handleUpdateRole(u.id, e.target.value)}
+                                className="px-2.5 py-1 rounded bg-muted text-foreground text-xs font-semibold uppercase tracking-wider outline-none border border-border"
                               >
-                                <Key className="w-4 h-4" />
-                              </button>
-                              <button 
-                                onClick={() => handleDelete(u.id, u.email)} 
-                                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors duration-200" 
-                                title="Kullanıcıyı Sil"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-xs text-muted-foreground font-medium bg-muted px-2.5 py-1 rounded border border-border">Süper Yetkili (Dokunulamaz)</span>
-                          )}
-                        </div>
-                     </td>
-                  </tr>
-               ))}
+                                <option value="admin">Admin</option>
+                                <option value="senior_manager">Senior Manager</option>
+                                <option value="manager">Yönetici</option>
+                                <option value="mechanic">Mekanik Ustası</option>
+                                <option value="editor">Editör</option>
+                                <option value="user">Kullanıcı</option>
+                              </select>
+                           ) : (
+                              <span className="px-2.5 py-1 rounded bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">Super Admin</span>
+                           )}
+                        </td>
+                        <td className="p-4 text-right">
+                           <div className="flex items-center justify-end gap-2">
+                             {u.email !== "ahmetcafoglu@hotmail.com" ? (
+                               <>
+                                 <button 
+                                   onClick={() => {
+                                     setSelectedUser(u);
+                                     setNewPassword("");
+                                     setConfirmPassword("");
+                                     setShowPassword(false);
+                                     setShowPasswordModal(true);
+                                   }}
+                                   className="p-2 text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors duration-200" 
+                                   title="Şifre Değiştir"
+                                 >
+                                   <Key className="w-4 h-4" />
+                                 </button>
+                                 <button 
+                                   onClick={() => handleDelete(u.id, u.email)} 
+                                   className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors duration-200" 
+                                   title="Kullanıcıyı Sil"
+                                 >
+                                   <Trash2 className="w-4 h-4" />
+                                 </button>
+                               </>
+                             ) : (
+                               <span className="text-xs text-muted-foreground font-medium bg-muted px-2.5 py-1 rounded border border-border">Süper Yetkili (Dokunulamaz)</span>
+                             )}
+                           </div>
+                        </td>
+                     </tr>
+                  );
+               })}
                {users.length === 0 && (
                   <tr>
                      <td colSpan={3} className="p-8 text-center text-muted-foreground">Henüz kayıtlı kullanıcı yok. Sistemi varsayılan verilerle test ediyorsunuz.</td>
@@ -241,12 +306,24 @@ const AdminUsers = () => {
            <div className="glass-card w-full max-w-md p-6 rounded-2xl shadow-2xl border border-border">
               <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-foreground">
                 <Lock className="w-6 h-6 text-primary" />
-                Yeni Yönetici Ekle
+                Yeni Kullanıcı Ekle
               </h2>
               <form onSubmit={handleCreateUser} className="space-y-4">
                  <div>
                     <label className="block text-sm font-medium mb-1">Email</label>
                     <input type="email" required className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:ring-2 focus:ring-primary/20 outline-none" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                 </div>
+                 <div>
+                    <label className="block text-sm font-medium mb-1">Rol / Yetki</label>
+                    <select 
+                      className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:ring-2 focus:ring-primary/20 outline-none" 
+                      value={form.role} 
+                      onChange={e => setForm({...form, role: e.target.value})}
+                    >
+                       {roleOptions.map(opt => (
+                         <option key={opt.value} value={opt.value}>{opt.label}</option>
+                       ))}
+                    </select>
                  </div>
                  <div>
                     <label className="block text-sm font-medium mb-1">Şifre</label>

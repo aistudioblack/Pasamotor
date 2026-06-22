@@ -2,7 +2,7 @@ import { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Terminal, Database, Send, Image as ImageIcon, MessageSquare, Code, Loader2, KeyRound, Clock, AlertCircle, CheckCircle2 } from "lucide-react";
 
-type Provider = "gemini" | "pollinations" | "huggingface" | "openrouter" | "puter" | "groq" | "qwen";
+type Provider = "gemini" | "pollinations" | "huggingface" | "openrouter" | "puter" | "groq" | "qwen" | "manus";
 type ApiType = "text" | "image";
 
 const GEMINI_MODELS = [
@@ -157,6 +157,24 @@ const AdminAITester = () => {
           const data = await response.json();
           if (data.error) throw new Error(data.error.message || "Groq Hatası");
           setResult({ text: data.choices?.[0]?.message?.content });
+        } else if (provider === "manus") {
+          if (!apiKey) throw new Error("API Anahtarı gerekli");
+          
+          const response = await fetch(`https://api.manus.im/v1/chat/completions`, {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({ 
+              model: "manus-agent-pro",
+              messages: [{ role: "user", content: prompt }] 
+            })
+          });
+          
+          const data = await response.json();
+          if (data.error) throw new Error(data.error.message || "Manus AI Hatası");
+          setResult({ text: data.choices?.[0]?.message?.content });
         } else if (provider === "qwen") {
           if (!apiKey) throw new Error("API Anahtarı gerekli");
           
@@ -283,6 +301,7 @@ const AdminAITester = () => {
                   {apiType === "text" && (
                      <>
                        <option value="pollinations">Pollinations.ai (Ücretsiz / Keysiz)</option>
+                       <option value="manus">Manus AI Ajan Platformu (API Key Gerekli)</option>
                        <option value="gemini">Google Gemini (API Key Gerekli)</option>
                        <option value="openrouter">OpenRouter (API Key Gerekli / Ücretsiz Modeller)</option>
                        <option value="groq">Groq (Maksimum Hız / Ücretsiz Katman)</option>
@@ -337,6 +356,7 @@ const AdminAITester = () => {
                   <div className="flex justify-between items-center text-[10px] text-muted-foreground mt-1">
                     <p>Bu deneme için tarayıcıda geçici olarak kullanılır.</p>
                     {provider === "gemini" && <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">API Key Al &rarr;</a>}
+                    {provider === "manus" && <a href="https://manus.im" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Manus AI &rarr;</a>}
                     {provider === "openrouter" && <a href="https://openrouter.ai/settings/keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">API Key Al &rarr;</a>}
                     {provider === "groq" && <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">API Key Al &rarr;</a>}
                     {provider === "huggingface" && <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">API Key Al &rarr;</a>}

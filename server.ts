@@ -73,7 +73,8 @@ function getGeminiClient(): GoogleGenAI {
 }
 
 async function generateWithPollinations(prompt: string, isJson: boolean): Promise<string> {
-  const models = ['openai', 'mistral', 'qwen', 'llama'];
+  // Optimizasyon: qwen, llama ve deepseek modellerini en başa alarak 429 hüsranını azaltıyoruz.
+  const models = ['qwen', 'llama', 'deepseek', 'mistral', 'openai', 'unity'];
   let lastError: Error | null = null;
   
   const systemPrompt = isJson 
@@ -101,9 +102,18 @@ async function generateWithPollinations(prompt: string, isJson: boolean): Promis
         throw new Error(`Pollinations HTTP error for model ${modelName}: ${res.status}`);
       }
       
-      const content = await res.text();
+      let content = await res.text();
       if (!content || content.trim().length === 0) {
         throw new Error(`Pollinations returned an empty response for model ${modelName}.`);
+      }
+
+      // JSON formatında markdown kod blokları (` ```json ... ``` `) varsa bunları temizle
+      if (isJson) {
+        content = content.trim();
+        if (content.startsWith("```")) {
+          // Kod bloğu başlangıcını satır bazlı veya regex ile temizle
+          content = content.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```$/, "").trim();
+        }
       }
       
       console.log(`[AI Engine] Pollinations AI ("${modelName}") successful!`);
@@ -117,10 +127,7 @@ async function generateWithPollinations(prompt: string, isJson: boolean): Promis
 
   // Eğer tüm modeller başarısız olduysa
   console.error("[AI Engine] All Pollinations AI models failed.");
-  if (isJson) {
-    return "[]";
-  }
-  throw new Error(`Yapay zeka sistemleri şu anda yoğun veya bağlantı koptu. Son hata: ${lastError?.message || "Bilinmiyor"}`);
+  throw new Error(`Yapay zeka yerleşik havuzu ve yedek kanalları şu anda yoğun veya kotası dolmuş durumda. Son hata: ${lastError?.message || "Bilinmiyor"}`);
 }
 
 async function generateWithGemini(
@@ -196,6 +203,21 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json({ limit: "1gb" })); // Support large JSON payloads for bulk imports up to 1GB
 app.use(express.urlencoded({ limit: "1gb", extended: true }));
+
+// Passive AutoSync Trigger
+let lastAutoSyncAttempt = 0;
+app.use((req, res, next) => {
+  const now = Date.now();
+  // Only attempt triggering every 1 minutes to reduce overhead
+  if (now - lastAutoSyncAttempt > 1 * 60 * 1000) {
+    lastAutoSyncAttempt = now;
+    // We don't await this, it runs in the background
+    import("./src/lib/syncEngine").then(({ runAutoSync }) => {
+      runAutoSync().catch(err => console.error("Passive AutoSync Background Error:", err));
+    }).catch(err => console.error("Could not load syncEngine:", err));
+  }
+  next();
+});
 
 // ==========================================
   // Paşa Motor API Endpoints
@@ -706,38 +728,70 @@ ${compatibilityHtml}
   app.post("/api/ai/generate-image", async (req, res) => {
     try {
       const { prompt } = req.body;
+      console.log("Generating image with prompt:", prompt);
       
-      const openAiKey = process.env.OPENAI_API_KEY;
-      if (openAiKey) {
-        // Use DALL-E 3 if API key available
-        const doDalle = await fetch("https://api.openai.com/v1/images/generations", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${openAiKey}`
-          },
-          body: JSON.stringify({
-            model: "dall-e-3",
+      const geminiKey = process.env.GEMINI_API_KEY;
+      if (geminiKey) {
+        try {
+          const ai = new GoogleGenAI({ apiKey: geminiKey });
+          const result = await ai.models.generateImages({
+            model: 'imagen-3.0-generate-002',
             prompt: prompt,
-            n: 1,
-            size: "1024x1024"
-          })
-        });
-        
-        if (doDalle.ok) {
-          const dalleData = await doDalle.json();
-          if (dalleData.data && dalleData.data.length > 0) {
-            return res.json({ image: dalleData.data[0].url });
+            config: {
+                numberOfImages: 1,
+                outputMimeType: 'image/jpeg',
+                aspectRatio: '16:9', // good for blog covers
+            }
+          });
+          if (result.generatedImages && result.generatedImages.length > 0) {
+              const base64Data = result.generatedImages[0].image.imageBytes;
+              console.log("Imagen 3 image generated successfully.");
+              
+              const buffer = Buffer.from(base64Data, "base64");
+              const adminClient = getSupabaseAdmin();
+              
+              let uploadedUrl = null;
+              if (adminClient) {
+                 await adminClient.auth.signInWithPassword({
+                   email: 'aistudioblack@gmail.com',
+                   password: 'PassWord123!'
+                 }).catch(() => {});
+                 
+                 try {
+                     await adminClient.storage.createBucket('product-images', { public: true });
+                 } catch(err) { /* ignore */ }
+                 
+                 const fileName = `generated-${Date.now()}-${Math.floor(Math.random() * 1000)}.jpg`;
+                 const { data, error: uploadError } = await adminClient.storage.from('product-images').upload(fileName, buffer, {
+                   contentType: "image/jpeg",
+                   upsert: true,
+                 });
+                 if (!uploadError) {
+                   const { data: { publicUrl } } = adminClient.storage.from('product-images').getPublicUrl(fileName);
+                   uploadedUrl = publicUrl;
+                 } else {
+                     console.error("Supabase image upload error:", uploadError);
+                 }
+              }
+              
+              if (uploadedUrl) {
+                return res.json({ image: uploadedUrl });
+              } else {
+                console.log("Returning base64 as fallback due to Supabase upload failure.");
+                return res.json({ image: `data:image/jpeg;base64,${base64Data}` });
+              }
           }
+        } catch(e) {
+             console.error("Imagen fallback error:", e);
         }
       }
       
       // Fallback to Pollinations AI (Flux)
-      const cleanPrompt = prompt.replace(/[^a-zA-Z0-9,\s]/g, '').substring(0, 800);
+      const cleanPrompt = prompt.replace(/[^\w\s,.-]/g, '').substring(0, 800);
       const seed = Math.floor(Math.random() * 1000000);
       const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1024&height=576&model=flux&nologo=true&seed=${seed}`;
       
-      // We don't download it automatically here, frontend expects the url:
+      console.log("Returning Pollinations fallback url:", imageUrl);
       res.json({ image: imageUrl });
     } catch (error: any) {
       console.error("API AI Generate Image error:", error);
@@ -1145,6 +1199,142 @@ KURALLAR:
     }
   });
 
+  app.get("/api/cron/sync", async (req, res) => {
+    try {
+      if (process.env.CRON_SECRET && req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      console.log("[Cron] Starting automated supplier sync...");
+      const { runAutoSync } = await import("./src/lib/syncEngine");
+      const result = await runAutoSync();
+      res.json({ success: true, result });
+    } catch (error: any) {
+      console.error("Cron AutoSync Error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // GET Blog Agent Cron Job Endpoint (Runs every day at 23:00 via Vercel Cron)
+  app.get("/api/cron/generate-blog", async (req, res) => {
+    try {
+      if (process.env.CRON_SECRET && req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      console.log("[Cron] Starting automated daily blog generation...");
+      
+      const adminClient = getSupabaseAdmin();
+      if (!adminClient) {
+        return res.status(500).json({ error: "Supabase yöneticisi yapılandırılamadı." });
+      }
+
+      // Fetch recent post titles to avoid duplicates
+      const { data: existingPosts, error: fetchError } = await adminClient
+        .from('posts')
+        .select('title')
+        .order('created_at', { ascending: false })
+        .limit(100);
+        
+      const existingTitles = existingPosts && existingPosts.length > 0 
+        ? existingPosts.map(p => p.title).join(", ") 
+        : "Henüz blok yazısı yok.";
+
+      // Prepare Prompt
+      const prompt = `
+Sen profesyonel bir motosiklet ve yedek parça SEO uzmanı blog yazarısın. Paşa Motor markası için GÜNLÜK 3 ADET yüksek SEO uyumlu blog yazısı üretmelisin.
+Hedef Kitle: Motosiklet kullanıcıları, motosiklet tamircileri, parça arayanlar.
+
+ŞARTLAR:
+1. Daha önce şu konularda yazılar yazıldı, BUNLARA BENZEMEYEN yepyeni, ilgi çekici ve aranma hacmi yüksek 3 farklı konu bulmalısın. Yazılmış konular: [${existingTitles}]
+2. Her blog yazısı SEO kurallarına uygun, H1, H2, H3 etiketleri, madde imleri içeren HTML formatında olmalıdır. En az 400-500 kelime uzunluğunda olmalıdır. "content" alanında direkt HTML vermelisin (HTML blok Markdown işaretleri koyma).
+3. Kapak görseli için (cover_image_prompt) gerçekçi, yüksek kaliteli, konuyu anlatan İNGİLİZCE bir resim oluşturma promptu (örn: "A high quality close up photography of motorcycle engine parts, cinematic lighting, 4k") yaz.
+4. Çıktı sadece geçerli bir JSON dizisi (Array) olmalıdır. Herhangi bir ekstra açıklama, markdown bloğu ekleme.
+5. JSON formatı aşağıdaki gibi olmalıdır:
+
+[
+  {
+    "title": "Mükemmel Başlık (50-70 karakter)",
+    "slug": "mukemmel-baslik-seo",
+    "meta_title": "Mükemmel Başlık | Paşa Motor",
+    "meta_description": "Arama motorlarında çıkacak ilgi çekici açıklama (150-160 karakter).",
+    "excerpt": "Blog anasayfasında görünecek 2 cümlelik giriş veya özet.",
+    "content": "<h2>Motor Bakımı Neden Önemli?</h2><p>Motorunuzun uzun ömürlü olması için...</p><ul><li>Yağ değişimi</li></ul>...",
+    "cover_image_prompt": "English text for generating image"
+  }
+]
+`;
+
+      const aiText = await generateText(prompt, true, false);
+      let postsToInsert: any[] = [];
+      try {
+        postsToInsert = JSON.parse(aiText);
+      } catch (e) {
+        console.error("[Cron] JSON parse failed:", aiText);
+        return res.status(500).json({ error: "Yapay zeka geçerli JSON üretemedi." });
+      }
+
+      if (!Array.isArray(postsToInsert) || postsToInsert.length === 0) {
+         return res.status(500).json({ error: "Yapay zeka geçerli bir içerik dizisi oluşturamadı." });
+      }
+
+      const insertedPosts = [];
+      const ai = getGeminiClient();
+
+      for (const post of postsToInsert) {
+        let coverImageUrl = "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=1200&auto=format&fit=crop"; 
+        
+        try {
+           if (post.cover_image_prompt) {
+              const imgResult = await ai.models.generateImages({
+                 model: 'imagen-3.0-generate-002',
+                 prompt: post.cover_image_prompt,
+                 config: { numberOfImages: 1, outputMimeType: 'image/jpeg', aspectRatio: '16:9' }
+              });
+              if (imgResult.generatedImages && imgResult.generatedImages.length > 0) {
+                 const base64Data = imgResult.generatedImages[0].image.imageBytes;
+                 const buffer = Buffer.from(base64Data, "base64");
+                 try { await adminClient.storage.createBucket('product-images', { public: true }); } catch(err){}
+                 const fileName = `blog-${Date.now()}-${Math.floor(Math.random() * 1000)}.jpg`;
+                 const { error: uploadError } = await adminClient.storage.from('product-images').upload(fileName, buffer, {
+                    contentType: "image/jpeg",
+                    upsert: true,
+                 });
+                 if (!uploadError) {
+                    const { data: { publicUrl } } = adminClient.storage.from('product-images').getPublicUrl(fileName);
+                    coverImageUrl = publicUrl;
+                 }
+              }
+           }
+        } catch (e) {
+           console.error("[Cron] Image generation failed for post:", post.title, e);
+        }
+
+        const { data: inserted, error: insertError } = await adminClient.from('posts').insert({
+          title: post.title,
+          slug: post.slug,
+          meta_title: post.meta_title || post.title,
+          meta_description: post.meta_description || post.excerpt,
+          excerpt: post.excerpt,
+          content: post.content,
+          cover_image: coverImageUrl,
+          is_published: true,
+          published_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }).select().single();
+
+        if (!insertError && inserted) {
+          insertedPosts.push(inserted.id);
+        }
+      }
+
+      return res.json({ success: true, message: `Successfully generated and inserted ${insertedPosts.length} posts.`, posts: insertedPosts });
+    } catch (error: any) {
+      console.error("[Cron] Error generating daily blogs:", error);
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
   // GET SEO Sitemap Cron Job Endpoint
   app.get("/api/seo/cron/sitemap", async (req, res) => {
     try {
@@ -1254,14 +1444,19 @@ KURALLAR:
 
   async function serveSEOInjectedHtml(req: any, res: any, customTitle?: string, customDesc?: string, customImage?: string, canonicalUrl?: string) {
     try {
-      const pathsToTry = [
-        path.join(getDirname(), "index.html"),
-        path.join(getDirname(), "../index.html"),
-        path.join(getDirname(), "../dist/client/index.html"),
-        path.join(getDirname(), "../dist/index.html"),
-        path.join(process.cwd(), "dist", "client", "index.html"),
+      const pathsToTry = process.env.NODE_ENV === "production" ? [
         path.join(process.cwd(), "dist", "index.html"),
+        path.join(process.cwd(), "dist", "client", "index.html"),
+        path.join(getDirname(), "index.html"),
+        path.join(getDirname(), "client/index.html"),
+        path.join(getDirname(), "../dist/index.html"),
+        path.join(getDirname(), "../dist/client/index.html"),
         path.join(process.cwd(), "index.html"),
+      ] : [
+        path.join(process.cwd(), "index.html"),
+        path.join(getDirname(), "index.html"),
+        path.join(process.cwd(), "dist", "index.html"),
+        path.join(process.cwd(), "dist", "client", "index.html"),
       ];
       let targetPath = "";
       for (const p of pathsToTry) {
