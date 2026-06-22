@@ -34,15 +34,23 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
       "node_modules/**",
       ".git/**",
       "dist/**",
-      ".env",
-      "build/**",
-      "package-lock.json"
+      ".env"
     ],
     nodir: true,
     cwd: process.cwd()
   });
 
-  const branch = "main";
+  // Get the default branch
+  let branch = "main";
+  try {
+    const repoInfo = await octokit.repos.get({
+      owner,
+      repo
+    });
+    branch = repoInfo.data.default_branch || "main";
+  } catch (e: any) {
+    console.warn("Varsayılan dal alınamadı, 'main' kullanılacak:", e.message);
+  }
   
   // Get repository references
   let baseTree = "";
