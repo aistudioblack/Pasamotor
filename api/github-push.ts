@@ -62,14 +62,64 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     }
   }
 
+  // .gitignore dosyasını okuyup dinamik ignore listesi oluşturma
+  const defaultIgnore = [
+    "node_modules/**",
+    "**/node_modules/**",
+    ".git/**",
+    "**/.git/**",
+    "dist/**",
+    "**/dist/**",
+    ".env*",
+    "**/.env*",
+    "test-*.mjs",
+    "test-*.js",
+    "test-*.ts",
+    "scripts/create-admin.ts",
+    "**/scripts/create-admin.ts",
+    "firebase-applet-config.json",
+    "firebase-blueprint.json"
+  ];
+
+  const gitignorePatterns: string[] = [...defaultIgnore];
+  try {
+    const gitignorePath = path.join(process.cwd(), ".gitignore");
+    if (fs.existsSync(gitignorePath)) {
+      const gitignoreContent = fs.readFileSync(gitignorePath, "utf-8");
+      const lines = gitignoreContent.split(/\r?\n/);
+      for (const line of lines) {
+        const trimmed = line.trim();
+        // Boş satırları veya yorumları atla
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        
+        // !.env.example gibi negation'ları atla
+        if (trimmed.startsWith("!")) continue;
+
+        // Glob formatına dönüştürme
+        let pattern = trimmed;
+        if (pattern.startsWith("/")) {
+          pattern = pattern.substring(1);
+        }
+        
+        if (pattern.endsWith("/")) {
+          gitignorePatterns.push(`${pattern}**`);
+          gitignorePatterns.push(`**/${pattern}**`);
+        } else {
+          gitignorePatterns.push(pattern);
+          gitignorePatterns.push(`**/${pattern}`);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Dinamik .gitignore okunurken hata oluştu, varsayılan listeyle devam ediliyor:", err);
+  }
+
+  // Benzersiz elemanlardan oluşan ignore listesi
+  const finalIgnore = Array.from(new Set(gitignorePatterns));
+
   // Get all files
   const files = await glob("**/*", {
-    ignore: [
-      "node_modules/**",
-      ".git/**",
-      "dist/**",
-      ".env"
-    ],
+    ignore: finalIgnore,
     nodir: true,
     cwd: process.cwd()
   });
