@@ -1,0 +1,8 @@
+{
+  "name": "Paşa Motor - İstanbul Fatih Motosiklet Yetkili Servis",
+  "description": "İstanbul Fatih'te TVS, Hero, Falcon ve Işıldar markalarına profesyonel yetkili servis, satış ve orijinal yedek parça hizmeti sunan Paşa Motor web sitesi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

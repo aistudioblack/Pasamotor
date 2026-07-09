@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/webp" href="/src/assets/pasa-motor-logo.webp" />
+    
+    <!-- SEO & Meta Tags -->
+    <!--app-head-->
+    <title>Paşa Motor | Yedek Parça & Yetkili Servis</title>
+    <meta name="description" content="Paşa Motor - Türkiye'nin en kapsamlı TVS, Hero, Falcon, Işıldar yetkili servisi ve motosiklet yedek parça merkezi." />
+    <meta name="keywords" content="Motosiklet yedek parça, Fatih motosiklet yedek parça, İstanbul motosiklet yetkili servis, TVS motor servis fatih, Hero yetkili servis, fatih motosiklet tamircisi civarı yakını, Falcon yetkili servis, Işıldar yetkili servis civarı, Paşa Motor" />
+    <meta name="author" content="Paşa Motor" />
+    <link rel="canonical" href="https://pasamotor.com.tr/" />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pasamotor.com.tr/" />
+    <meta property="og:title" content="Paşa Motor | Yedek Parça & Yetkili Servis" />
+    <meta property="og:description" content="İstanbul Fatih motosiklet tutkunları için en kaliteli yedek parçalar ve yetkili motosiklet servisi. TVS, Hero, Falcon yetkili servis bölgesinde." />
+    <meta property="og:site_name" content="Paşa Motor" />
+    
+    <!-- Geo Tags for Local SEO (Turkey) -->
+    <meta name="geo.region" content="TR-34" />
+    <meta name="geo.placename" content="Fatih, İstanbul, Türkiye" />
+    <meta name="language" content="Turkish" />
+    
+    <!-- LocalBusiness Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MotorcycleRepair",
+      "name": "Paşa Motor - Yetkili Servis ve Yedek Parça",
+      "url": "https://pasamotor.com.tr/",
+      "logo": "https://pasamotor.com.tr/favicon.png",
+      "image": "https://pasamotor.com.tr/favicon.png",
+      "description": "İstanbul Fatih bölgesi motosiklet yetkili servis ve yedek parça platformu. TVS, Hero, Falcon, Işıldar resmi yetkilisi.",
+      "telephone": "+90 534 899 68 17",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Kızılelma Cad. No:66/A Kocamustafapaşa",
+        "addressLocality": "İstanbul",
+        "addressRegion": "Fatih",
+        "postalCode": "34098",
+        "addressCountry": "TR"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 41.0051,
+        "longitude": 28.9328
+      },
+      "makesOffer": [
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "TVS Motosiklet Yetkili Servis ve Yedek Parça"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Hero Motosiklet Yetkili Servis ve Yedek Parça"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Falcon Motosiklet Yetkili Servis ve Yedek Parça"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Işıldar Motosiklet Yetkili Servis ve Yedek Parça"}}
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Fatih, İstanbul"
+      },
+      "openingHours": "Mo-Sa 09:00-19:00",
+      "priceRange": "$$"
+    }
+    </script>
+    
+    <meta name="theme-color" content="#ffffff" />
+    
+    <!-- Preconnect & DNS Prefetch to domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    
+    <!-- Optimized Google Fonts with font-display swap and async load -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Russo+One&display=swap&subset=latin,latin-ext" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Russo+One&display=swap&subset=latin,latin-ext" rel="stylesheet" /></noscript>
+    
+    <!-- Leaflet Map CSS via CDN (Deferred for performance) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'" crossorigin="" />
+    <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" /></noscript>
+
+    <!-- Google tag (gtag.js) Deferred -->
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-DVYLWTWBSW');
+      
+      // Load gtag after initial paint
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var script = document.createElement('script');
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DVYLWTWBSW';
+          script.async = true;
+          script.onerror = function() {
+            console.warn('Analytics (GTM) ad-blocker veya izleme koruması nedeniyle engellendi. Bu durum site işleyişini etkilemez.');
+          };
+          document.head.appendChild(script);
+        }, 3000); // 3 second delay to ensure LCP and TBT are optimal
+      });
+    </script>
+    <!-- Preload LCP Images (Managed by Vite now) -->
+    <link rel="preload" href="/src/assets/hero-bg.webp" as="image" type="image/webp" fetchpriority="high" />
+    <link rel="preload" href="/src/assets/pasa-motor-logo.webp" as="image" type="image/webp" fetchpriority="high" />
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

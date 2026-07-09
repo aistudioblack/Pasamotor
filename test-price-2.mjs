@@ -1,0 +1,1 @@
+import { createClient } from '@supabase/supabase-js'; async function run() { const sbUrl = process.env.VITE_SUPABASE_URL; const sbKey = process.env.VITE_SUPABASE_ANON_KEY; const supabase = createClient(sbUrl, sbKey); const {data} = await supabase.from('products').select('*').eq('sku', 'MCC2377'); console.log(data); } run();

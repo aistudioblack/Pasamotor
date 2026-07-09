@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Sitemap: https://pasamotor.com.tr/sitemap.xml
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: GeminiBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /

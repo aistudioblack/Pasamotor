@@ -1,0 +1,27 @@
+# Paşa Motor - Bilgi Dosyası
+
+Türkiye'nin en kapsamlı motosiklet yetkili servisi ve yedek parça merkezi.
+Adres: Kızılelma Cad. No:66/A Kocamustafapaşa, Fatih, İstanbul
+WhatsApp: wa.me/905348996817
+
+## Markalar
+Servis verdiğimiz markalar:
+- TVS
+- Hero
+- Falcon
+- Işıldar
+- Kuba
+- Mondial
+- RKS
+- Honda
+- Yamaha
+- CFMOTO
+
+## Sayfalarımız
+- Anasayfa: /
+- Hakkımızda: /hakkimizda
+- Hizmetler: /hizmetler
+- Yedek Parça: /yedek-parca
+- Blog: /blog
+- Galeri: /galeri
+- İletişim: /iletisim

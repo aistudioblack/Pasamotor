@@ -1,0 +1,772 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2026 Modern Map Interface Styling */
+.map-container-wrapper {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #f1f5f9 !important;
+}
+
+[class*="ymaps-2-1-"][class*="-map"] {
+  width: 100% !important;
+  height: 100% !important;
+  filter: saturate(1.1) contrast(1.02);
+}
+
+/* Hide branding for ultra-clean UI */
+.ymaps-2-1-79-copyrights-promo,
+.ymaps-2-1-79-copyright__wrap,
+.ymaps-2-1-79-map-copyrights-promo {
+  display: none !important;
+}
+
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #f1f5f9 !important;
+  outline: none !important;
+  z-index: 1 !important;
+}
+
+.leaflet-tile-pane {
+  filter: saturate(1.15) contrast(1.02) brightness(1.02);
+}
+
+.leaflet-container img {
+  max-width: none !important;
+  max-height: none !important;
+  border: none !important;
+}
+
+.leaflet-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-top, .leaflet-bottom {
+  z-index: 2 !important;
+}
+
+/* Premium Apple-style Popups */
+.apple-popup .leaflet-popup-content-wrapper {
+  padding: 0 !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.18) !important;
+  margin-bottom: 8px;
+}
+
+.apple-popup .leaflet-popup-content {
+  margin: 0 !important;
+  padding: 12px 16px !important;
+  width: auto !important;
+}
+
+.apple-popup .leaflet-popup-tip-container {
+  display: none !important;
+}
+
+.leaflet-control-attribution {
+  font-size: 8px !important;
+  background: transparent !important;
+  opacity: 0.3 !important;
+}
+
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+}
+
+
+@layer base {
+  :root {
+    --background: 220 20% 7%;
+    --foreground: 0 0% 95%;
+
+    --card: 220 18% 10%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 220 18% 10%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 0 85% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 80% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 215 80% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 0 85% 55%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --glass-bg: 220 18% 10% / 0.6;
+    --glass-border: 220 15% 25% / 0.3;
+    --gradient-primary: linear-gradient(135deg, hsl(0 85% 55%), hsl(215 80% 55%));
+    --gradient-hero: linear-gradient(180deg, hsl(220 20% 7% / 0) 0%, hsl(220 20% 7% / 0.85) 60%, hsl(220 20% 7%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 18% 12%), hsl(220 18% 8%));
+    --shadow-glow-red: 0 0 40px hsl(0 85% 55% / 0.3);
+    --shadow-glow-blue: 0 0 40px hsl(215 80% 55% / 0.3);
+
+    --sidebar-background: 220 18% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 0 85% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 0 85% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+/* Glass morphism utility */
+@layer components {
+  .glass {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .glass-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-red {
+    box-shadow: var(--shadow-glow-red);
+  }
+
+  .glow-blue {
+    box-shadow: var(--shadow-glow-blue);
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* ============================================================
+   Logo Animations — 20 variants. Selected via admin panel.
+   All transform/opacity based, GPU friendly.
+   ============================================================ */
+
+/* --- ÇILGIN ANIMASYONLAR --- */
+
+/* 5. Öfkeli Piston (Çılgın Devir) */
+@keyframes logo-engine-rage {
+  0%, 100% { transform: scale(1) translate(0, 0) rotate(0deg); filter: brightness(1) drop-shadow(0 0 0px #ef4444); }
+  5%, 25%, 45%, 65%, 85% { transform: scale(1.12) translate(-3px, -8px) rotate(-1.5deg); filter: brightness(1.6) drop-shadow(0 0 12px rgba(239, 68, 68, 0.8)); }
+  15%, 35%, 55%, 75%, 95% { transform: scale(1.08) translate(3px, 6px) rotate(1.5deg); filter: brightness(1.4) drop-shadow(0 0 8px rgba(249, 115, 22, 0.7)); }
+}
+.animate-logo-engine-rage { animation: logo-engine-rage 0.6s linear 1; }
+
+/* 6. Drift Kralı (Viraj Savrulması) */
+@keyframes logo-drift-king {
+  0% { transform: scale(1) translateX(0) skewX(0); filter: drop-shadow(0 0 0px rgba(0,0,0,0)); }
+  15% { transform: scale(0.95) translateX(-40px) skewX(-15deg) rotate(-8deg); filter: drop-shadow(15px 5px 10px rgba(0,0,0,0.4)); }
+  30% { transform: scale(1.05) translateX(50px) skewX(20deg) rotate(12deg); filter: drop-shadow(-20px 8px 15px rgba(239,68,68,0.3)); }
+  50% { transform: scale(1.1) translateX(0) skewX(-8deg) rotate(-5deg); filter: drop-shadow(0px 10px 20px rgba(249,115,22,0.4)); }
+  75% { transform: scale(1.02) translateX(0) skewX(4deg) rotate(2deg); }
+  100% { transform: scale(1) translateX(0) skewX(0) rotate(0); }
+}
+.animate-logo-drift-king { animation: logo-drift-king 2s cubic-bezier(0.175, 0.885, 0.32, 1.255) 1; }
+
+/* 7. Jöleli Amortisör */
+@keyframes logo-jelly-impact {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.25, 0.7) translateY(15px); }
+  35% { transform: scale(0.75, 1.3) translateY(-25px); }
+  55% { transform: scale(1.15, 0.85) translateY(10px); }
+  75% { transform: scale(0.9, 1.1) translateY(-5px); }
+  90% { transform: scale(1.03, 0.97) translateY(2px); }
+  100% { transform: scale(1) translateY(0); }
+}
+.animate-logo-jelly-impact { animation: logo-jelly-impact 1.2s ease-in-out 1; }
+
+/* 8. Hiper Uzay Geçişi */
+@keyframes logo-warp-jump {
+  0% { transform: scale(1) skewX(0) rotateY(0); filter: brightness(1) contrast(1); }
+  30% { transform: scale(1.3, 0.8) translateY(10px) skewX(5deg); }
+  45% { transform: scale(0.01, 3.5) translateY(-200px) skewY(30deg); filter: brightness(3) contrast(2) blur(2px); opacity: 0; }
+  46% { transform: scale(0.01, 3.5) translateY(200px) skewY(-30deg); filter: brightness(3) contrast(2) blur(2px); opacity: 0; }
+  70% { transform: scale(0.8, 1.4) translateY(-15px) skewX(-10deg); filter: brightness(1.5); opacity: 1; }
+  85% { transform: scale(1.1, 0.9) translateY(5px); }
+  100% { transform: scale(1) skewX(0) rotateY(0); }
+}
+.animate-logo-warp-jump { animation: logo-warp-jump 1.8s cubic-bezier(0.77, 0, 0.175, 1) 1; }
+
+/* 9. Siber Glitch (Neon Arıza) */
+@keyframes logo-neon-glitch {
+  0%, 100% { transform: translate(0, 0) skew(0deg); filter: brightness(1) drop-shadow(0 0 0px transparent); }
+  10% { transform: translate(-3px, 2px) skew(-5deg); filter: brightness(1.8) drop-shadow(2px 0px 0px #ef4444) drop-shadow(-2px 0px 0px #3b82f6); }
+  20% { transform: translate(2px, -3px) skew(3deg); filter: brightness(1.1); }
+  30% { transform: translate(-1px, -1px) skew(-1deg); filter: brightness(1.5) drop-shadow(-2px 0px 0px #ef4444) drop-shadow(2px 0px 0px #10b981); }
+  40% { transform: translate(3px, 3px) skew(7deg); filter: brightness(0.7); }
+  50% { transform: translate(-3px, -2px) skew(-8deg); filter: brightness(2) drop-shadow(3px -1px 0px #ef4444) drop-shadow(-3px 1px 0px #3b82f6); }
+  60% { transform: translate(0, 0) skew(0deg); }
+  70% { transform: translate(2px, -2px) skew(4deg); filter: brightness(1.6); }
+  80% { transform: translate(-2px, 1px) skew(-2deg); }
+  90% { transform: translate(1px, -1px) skew(1deg); filter: brightness(1.3); }
+}
+.animate-logo-neon-glitch { animation: logo-neon-glitch 1s linear 1; }
+
+/* 1. Motor Yağı Temizliği */
+@keyframes logo-oil-cleanse {
+  0%   { filter: brightness(1) sepia(0); transform: rotate(0deg); }
+  20%  { filter: brightness(0.2) sepia(1) hue-rotate(-50deg) saturate(3); transform: rotate(0deg); }
+  60%  { filter: brightness(0.2) sepia(1) hue-rotate(-50deg) saturate(3); transform: rotate(1080deg); }
+  80%  { filter: brightness(1.5) sepia(0); transform: rotate(1080deg); }
+  100% { filter: brightness(1) sepia(0); transform: rotate(1080deg); }
+}
+.animate-logo-oil-cleanse { animation: logo-oil-cleanse 3s cubic-bezier(0.25, 1, 0.5, 1) 1; }
+
+/* 2. Kontağı Çevir (Marş) */
+@keyframes logo-engine-start {
+  0%   { transform: scale(1) translateX(0); filter: brightness(1); }
+  10%, 20%, 30%, 40% { transform: scale(1.02) translateX(4px); filter: brightness(0.8); }
+  15%, 25%, 35%, 45% { transform: scale(1.02) translateX(-4px); filter: brightness(1.2); }
+  50%  { transform: scale(1.15) translateY(-10px); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255,100,0,0.5)); }
+  75%  { transform: scale(1.05) translateY(0); filter: brightness(1); }
+  100% { transform: scale(1) translateX(0); filter: brightness(1); }
+}
+.animate-logo-engine-start { animation: logo-engine-start 2.5s ease-in-out 1; }
+
+/* 3. Egzoz Ateşi */
+@keyframes logo-exhaust-fire {
+  0%, 100% { filter: drop-shadow(0 0 0px #ff5500); transform: translateX(0); }
+  20% { filter: drop-shadow(-30px 10px 20px #ff2200); transform: translateX(10px); }
+  30% { filter: drop-shadow(-50px 20px 40px #ff8800) drop-shadow(-80px 30px 50px #ffef00); transform: translateX(15px) rotate(5deg); }
+  50% { filter: drop-shadow(-20px 5px 15px #ff0000); transform: translateX(5px) rotate(-2deg); }
+}
+.animate-logo-exhaust-fire { animation: logo-exhaust-fire 1.5s cubic-bezier(0.1, 0.8, 0.3, 1) 1; }
+
+/* 4. Patinaj & Duman */
+@keyframes logo-tire-spin {
+  0% { transform: rotate(0deg) skewX(0deg); filter: blur(0); }
+  10% { transform: rotate(30deg) skewX(-10deg); filter: blur(0); }
+  20%, 40%, 60% { transform: rotate(-5deg) skewX(5deg) translateY(-5px); filter: blur(1px) drop-shadow(10px -10px 20px rgba(100,100,100,0.8)); }
+  30%, 50%, 70% { transform: rotate(5deg) skewX(-5deg) translateY(0); filter: blur(2px) drop-shadow(-10px -10px 30px rgba(200,200,200,0.9)); }
+  80% { transform: translateX(50px) skewX(-20deg) scale(0.9); filter: blur(5px) opacity(0); }
+  81% { transform: translateX(-50px) scale(0.9); filter: blur(5px) opacity(0); }
+  100% { transform: translateX(0) scale(1); filter: blur(0) opacity(1); }
+}
+.animate-logo-tire-spin { animation: logo-tire-spin 2s ease-in-out 1; }
+
+/* 5. Tek Teker */
+@keyframes logo-wheelie-ride {
+  0%   { transform: rotate(0deg) translateY(0); }
+  15%  { transform: rotate(-45deg) translateY(-40px); }
+  50%  { transform: rotate(-35deg) translateY(-30px); }
+  85%  { transform: rotate(5deg) translateY(5px); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+.animate-logo-wheelie-ride { animation: logo-wheelie-ride 2.5s ease-out 1; transform-origin: bottom right; }
+
+/* 6. Gece Sürüşü (Far) */
+@keyframes logo-night-rider {
+  0% { filter: brightness(1); }
+  10%, 30% { filter: brightness(0.1); }
+  40% { filter: brightness(0.1) drop-shadow(0 0 50px #fff); }
+  45% { filter: brightness(0.1); }
+  50%, 100% { filter: brightness(1.2) drop-shadow(0 -10px 30px rgba(200, 230, 255, 0.8)); }
+}
+.animate-logo-night-rider { animation: logo-night-rider 3s ease-in-out 1; }
+
+/* 7. Zincir Şaklaması */
+@keyframes logo-chain-whip {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  20% { transform: translateY(-20px) scaleY(1.3); }
+  40% { transform: translateY(30px) scaleY(0.7); }
+  60% { transform: translateY(-10px) scaleY(1.1); }
+  80% { transform: translateY(5px) scaleY(0.9); }
+}
+.animate-logo-chain-whip { animation: logo-chain-whip 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1; }
+
+/* 8. Piston Hareketi */
+@keyframes logo-piston-pump {
+  0%, 100% { transform: translateY(0); }
+  12%, 37%, 62%, 87% { transform: translateY(-40px); }
+  25%, 50%, 75% { transform: translateY(0); }
+}
+.animate-logo-piston-pump { animation: logo-piston-pump 1.2s cubic-bezier(0.4, 0, 0.6, 1) 1; }
+
+/* 9. Kask Vizörü */
+@keyframes logo-helmet-visor {
+  0% { clip-path: inset(0 0 0 0); filter: brightness(1); }
+  20% { clip-path: inset(0 0 40% 0); filter: brightness(1); }
+  40%, 60% { clip-path: inset(0 0 0 0); filter: brightness(0.8) drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+  80% { clip-path: inset(0 0 20% 0); filter: brightness(1); }
+  100% { clip-path: inset(0 0 0 0); filter: brightness(1); }
+}
+.animate-logo-helmet-visor { animation: logo-helmet-visor 2s ease-in-out 1; }
+
+/* Shared base for all logo animations */
+[class*="animate-logo-"] {
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-logo-"] {
+    animation: none !important;
+  }
+}
+
+/* Animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out both;
+}
+
+/* Stagger children animations */
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+
+/* Mobile improvements */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Admin form input utility */
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+}
+.input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+}
+
+/* ============================================================
+   Premium Article & Prose Styling
+   ============================================================ */
+.pasa-article {
+  font-family: inherit;
+  color: hsl(var(--foreground) / 0.85);
+  line-height: 1.8;
+  font-size: 1.125rem;
+}
+
+.pasa-article.text-sm {
+  font-size: 0.95rem;
+}
+.pasa-article.text-sm p, .pasa-article.text-sm li {
+  font-size: 0.95rem;
+}
+
+.pasa-article.text-lg {
+  font-size: 1.25rem;
+}
+.pasa-article.text-lg p, .pasa-article.text-lg li {
+  font-size: 1.25rem;
+}
+
+.pasa-article.text-xl {
+  font-size: 1.45rem;
+}
+.pasa-article.text-xl p, .pasa-article.text-xl li {
+  font-size: 1.45rem;
+}
+
+.pasa-article h1,
+.pasa-article h2,
+.pasa-article h3,
+.pasa-article h4 {
+  color: hsl(var(--foreground));
+  font-family: var(--font-heading);
+  letter-spacing: -0.025em;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.pasa-article h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  padding-bottom: 0.75rem;
+}
+
+.pasa-article h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.pasa-article p {
+  margin-bottom: 1.75rem;
+}
+
+.pasa-article strong {
+  color: hsl(var(--foreground));
+  font-weight: 700;
+}
+
+.pasa-article a {
+  color: hsl(var(--primary));
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.pasa-article a:hover {
+  border-bottom-color: hsl(var(--primary));
+}
+
+.pasa-article ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 2rem;
+  margin-top: 1.5rem;
+}
+
+.pasa-article ul li {
+  position: relative;
+  padding-left: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.pasa-article ul li::before {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  top: 0.6rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background-color: hsl(var(--primary));
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.6);
+}
+
+.pasa-article ol {
+  padding-left: 1.5rem;
+  margin-bottom: 2rem;
+  list-style-type: decimal;
+}
+
+.pasa-article ol li {
+  margin-bottom: 0.75rem;
+  padding-left: 0.5rem;
+}
+
+.pasa-article ol li::marker {
+  color: hsl(var(--primary));
+  font-weight: 700;
+}
+
+.pasa-article blockquote {
+  border-left: 4px solid hsl(var(--primary));
+  background: linear-gradient(90deg, hsl(var(--primary) / 0.1), transparent);
+  padding: 1.5rem 2rem;
+  margin: 2.5rem 0;
+  border-radius: 0 1rem 1rem 0;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: hsl(var(--foreground) / 0.9);
+}
+
+.pasa-article img {
+  border-radius: 1.5rem;
+  margin: 3rem auto;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+  border: 1px solid hsl(var(--border) / 0.5);
+  display: block;
+}
+
+.pasa-article hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(var(--border)), transparent);
+  margin: 4rem 0;
+}
+
+.pasa-article table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 2.5rem 0;
+  background: hsl(var(--background) / 0.5);
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+}
+
+.pasa-article thead th {
+  background: hsl(var(--muted) / 0.8);
+  font-weight: 700;
+  text-align: left;
+  padding: 1rem 1.25rem;
+  color: hsl(var(--foreground));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.pasa-article tbody td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.pasa-article tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pasa-article tbody tr:hover td {
+  background: hsl(var(--muted) / 0.3);
+}
+
+.pasa-article code {
+  background: hsl(var(--muted));
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.875em;
+  color: hsl(var(--primary));
+}
+
+/* Fix CTA box coloring inside article */
+.pasa-article .cta-box p, 
+.pasa-article .cta-box h3 {
+  margin-bottom: auto !important;
+}
+
+.cta-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  margin-top: 36px;
+  margin-bottom: 36px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, rgba(13, 14, 18, 0.98) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  text-align: center;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 768px) {
+  .cta-box {
+    flex-direction: row;
+    text-align: left;
+    gap: 24px;
+  }
+}
+
+.cta-box p, .cta-box h1, .cta-box h2, .cta-box h3 {
+  margin: 0 !important;
+}
+
+.prose a.btn,
+.prose a.btn-primary,
+.prose a[class*="btn-primary"],
+.cta-box a:not(.btn-whatsapp):not([class*="btn-whatsapp"]):not([href*="wa.me"]),
+.cta-box .btn-primary,
+.cta-box a[class*="btn-primary"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 14px 28px !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  background-color: #ef4444 !important; /* Kırmızı */
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25) !important;
+  white-space: nowrap !important;
+}
+
+.prose a.btn:hover,
+.prose a.btn-primary:hover,
+.prose a[class*="btn-primary"]:hover,
+.cta-box a:not(.btn-whatsapp):not([class*="btn-whatsapp"]):not([href*="wa.me"]):hover,
+.cta-box .btn-primary:hover,
+.cta-box a[class*="btn-primary"]:hover {
+  background-color: hsl(0, 85%, 45%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 22px rgba(239, 68, 68, 0.45) !important;
+}
+
+.cta-box .btn-whatsapp,
+.cta-box a[class*="btn-whatsapp"],
+.cta-box a[href*="wa.me"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 14px 28px !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  background-color: #25D366 !important; /* WhatsApp Yeşil */
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25) !important;
+  white-space: nowrap !important;
+}
+
+.cta-box .btn-whatsapp:hover,
+.cta-box a[class*="btn-whatsapp"]:hover,
+.cta-box a[href*="wa.me"]:hover {
+  background-color: #1ebd57 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 22px rgba(37, 211, 102, 0.45) !important;
+}
+
+/* Specific overrides to prevent Tailwind Prose from hijacking text-color of button components to red */
+.prose .cta-box a,
+.prose .cta-box a:hover,
+.prose a.btn-primary,
+.prose a.btn-whatsapp,
+.prose a[class*="btn-primary"],
+.prose a[class*="btn-whatsapp"],
+.prose a[class*="bg-indigo-"],
+.prose a[class*="bg-emerald-"],
+.prose a.text-white,
+.prose a[class*="text-white"],
+.cta-box a,
+.cta-box a:hover {
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
