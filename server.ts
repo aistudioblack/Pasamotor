@@ -2099,7 +2099,23 @@ Hedef Kitle: Motosiklet kullanıcıları, motosiklet tamircileri, parça arayanl
         return res.status(400).json({ error: "Missing 'title' or 'content' in request body." });
       }
       
-      const slug = cleanStr(title);
+      const generateSlug = (text: string) => {
+        return text
+          .toString()
+          .toLowerCase()
+          .trim()
+          .replace(/ğ/g, 'g')
+          .replace(/ü/g, 'u')
+          .replace(/ş/g, 's')
+          .replace(/ı/g, 'i')
+          .replace(/ö/g, 'o')
+          .replace(/ç/g, 'c')
+          .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+          .replace(/\s+/g, '-') // collapse whitespace and replace by -
+          .replace(/-+/g, '-'); // collapse dashes
+      };
+      
+      const slug = generateSlug(title);
       
       const { data, error } = await supabaseAdminInstance
         .from('posts')
@@ -2131,6 +2147,96 @@ Hedef Kitle: Motosiklet kullanıcıları, motosiklet tamircileri, parça arayanl
       
     } catch (error: any) {
       console.error("POST /api/external/draft-blog error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // GET /api/external/posts
+  // Used by external agents to list and review existing blog posts for SEO and thumbnail analysis
+  app.get("/api/external/posts", async (req, res) => {
+    try {
+      const apiKey = req.headers.authorization;
+      const expectedKey = process.env.EXTERNAL_DRAFT_API_KEY;
+      
+      if (!expectedKey || apiKey !== `Bearer ${expectedKey}`) {
+        return res.status(401).json({ error: "Unauthorized. Invalid or missing API key." });
+      }
+
+      // Allow fetching single post by slug if provided as query param, else fetch all
+      const slugQuery = req.query.slug as string;
+      
+      let query = supabaseAdminInstance.from('posts').select('id, title, slug, excerpt, content, meta_title, meta_description, cover_image, is_published, created_at').order('created_at', { ascending: false });
+      
+      if (slugQuery) {
+        query = query.eq('slug', slugQuery);
+      }
+
+      const { data, error } = await query;
+        
+      if (error) throw error;
+      
+      return res.status(200).json({ 
+        success: true, 
+        posts: data
+      });
+      
+    } catch (error: any) {
+      console.error("GET /api/external/posts error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // PUT /api/external/posts/:slug
+  // Used by external agents to update existing blog posts (e.g., adding thumbnails, improving SEO)
+  app.put("/api/external/posts/:slug", async (req, res) => {
+    try {
+      const apiKey = req.headers.authorization;
+      const expectedKey = process.env.EXTERNAL_DRAFT_API_KEY;
+      
+      if (!expectedKey || apiKey !== `Bearer ${expectedKey}`) {
+        return res.status(401).json({ error: "Unauthorized. Invalid or missing API key." });
+      }
+
+      const { slug } = req.params;
+      const updateData = req.body;
+      
+      // Prevent updating id or slug directly unless explicitly handled, usually we just update content, meta, cover_image
+      const allowedFields = ['title', 'excerpt', 'content', 'meta_title', 'meta_description', 'cover_image', 'is_published'];
+      const payload: any = {};
+      
+      for (const field of allowedFields) {
+        if (updateData[field] !== undefined) {
+          payload[field] = updateData[field];
+        }
+      }
+
+      if (Object.keys(payload).length === 0) {
+        return res.status(400).json({ error: "No valid fields to update provided." });
+      }
+      
+      const { data, error } = await supabaseAdminInstance
+        .from('posts')
+        .update(payload)
+        .eq('slug', slug)
+        .select('id, title, slug, cover_image, is_published')
+        .single();
+        
+      if (error) {
+         return res.status(500).json({ error: error.message });
+      }
+      
+      if (!data) {
+         return res.status(404).json({ error: "Post not found." });
+      }
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: "Blog post updated successfully.",
+        post: data
+      });
+      
+    } catch (error: any) {
+      console.error("PUT /api/external/posts error:", error);
       res.status(500).json({ error: error.message });
     }
   });
