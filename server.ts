@@ -897,6 +897,27 @@ ${compatibilityHtml}
     }
   });
 
+  app.get("/api/admin/site-content/:page_key", requireAdmin, async (req, res) => {
+    try {
+      const { page_key } = req.params;
+      const adminClient = getSupabaseAdmin();
+      if (!adminClient) {
+        return res.status(500).json({ error: "Database client not initialized" });
+      }
+      const { data, error } = await adminClient
+        .from("site_content")
+        .select("*")
+        .eq("page_key", page_key)
+        .maybeSingle();
+
+      if (error) throw error;
+      return res.json(data || null);
+    } catch (e: any) {
+      console.error(`Error fetching admin site_content for ${req.params.page_key}:`, e);
+      return res.status(500).json({ error: e.message });
+    }
+  });
+
   // POST site-content by page_key (Admin proxy to bypass RLS/grant issues)
   app.post("/api/admin/site-content/:page_key", requireAdmin, async (req, res) => {
     try {
