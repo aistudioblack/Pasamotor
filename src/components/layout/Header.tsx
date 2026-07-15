@@ -74,6 +74,7 @@ const Header = () => {
                   <Link
                     key={link.path}
                     to={link.path}
+                    aria-current={active ? "page" : undefined}
                     className={`relative px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-tight transition-all duration-200 ${
                       active
                         ? "bg-primary text-primary-foreground shadow-[0_2px_10px_hsl(0_85%_55%/0.35)]"
@@ -128,6 +129,7 @@ const Header = () => {
                 <Link
                   key={link.path}
                   to={link.path}
+                  aria-current={location.pathname === link.path ? "page" : undefined}
                   onClick={() => setIsOpen(false)}
                   className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     location.pathname === link.path

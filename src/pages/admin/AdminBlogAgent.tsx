@@ -44,6 +44,8 @@ const humanRefineContent = (html: string): string => {
   // Temizleme: "—" karakterleri "-" ile değiştirilir, "'" ve "’" karakterleri temizlenir
   refined = refined.replace(/—/g, "-");
   refined = refined.replace(/’/g, "").replace(/‘/g, "").replace(/'/g, "");
+  // Yapay zeka izlerini temizleme
+  refined = refined.replace(/\*\*/g, "").replace(/\*/g, "");
   
   // Array of common AI conversational fillers
   const fillers = [
@@ -386,28 +388,16 @@ JSON listesi olarak { "recommendations": [ { "keyword": "ornek", "reason": "nede
     const provider = secureStorage.getItem("ai_provider") || "system";
     secureStorage.setItem("ai_provider", provider);
 
-    // Varsayılan Groq api key'ini otomatik kaydet
-    const savedGroq = secureStorage.getItem("groq_api_key");
-    if (!savedGroq) {
-      secureStorage.setItem("groq_api_key", btoa(encodeURIComponent(import.meta.env.VITE_DEFAULT_GROQ_KEY || "")));
-    }
-
-    // Varsayılan PersorAI api key'ini otomatik kaydet
-    const savedPersorai = secureStorage.getItem("persorai_api_key");
-    if (!savedPersorai) {
-      secureStorage.setItem("persorai_api_key", btoa(encodeURIComponent("psr-1364cf17e1ef3ac503bf245407cdf03ebebf6e2d813b293b")));
-    }
-
     const savedOr = secureStorage.getItem("or_api_key");
 
     if (provider === "system") {
       setApiKey("system_key");
     } else if (provider === "groq") {
       const currentGroqKey = secureStorage.getItem("groq_api_key") || "";
-      setApiKey(currentGroqKey ? decryptKey(currentGroqKey) : (import.meta.env.VITE_DEFAULT_GROQ_KEY || ""));
+      setApiKey(currentGroqKey ? decryptKey(currentGroqKey) : "");
     } else if (provider === "persorai") {
       const currentPersoraiKey = secureStorage.getItem("persorai_api_key") || "";
-      setApiKey(currentPersoraiKey ? decryptKey(currentPersoraiKey) : "psr-1364cf17e1ef3ac503bf245407cdf03ebebf6e2d813b293b");
+      setApiKey(currentPersoraiKey ? decryptKey(currentPersoraiKey) : "");
     } else {
       setApiKey(savedOr ? decryptKey(savedOr) : null);
     }
@@ -1508,14 +1498,16 @@ Output ONLY the raw image generation prompt without any conversational text, quo
         });
       }
 
+      const cleanText = (txt: string) => txt ? txt.replace(/—/g, "-") : "";
+
       const payload = {
-        title: article.title.trim(),
+        title: cleanText(article.title.trim()),
         slug: finalSlug,
-        excerpt: article.excerpt.trim() || null,
-        content: fullHtml.trim(),
+        excerpt: cleanText(article.excerpt.trim()) || null,
+        content: cleanText(fullHtml.trim()),
         cover_image: generatedCoverUrl || null,
-        meta_title: article.title.trim().slice(0, 60),
-        meta_description: article.excerpt.trim().slice(0, 155),
+        meta_title: cleanText(article.title.trim().slice(0, 60)),
+        meta_description: cleanText(article.excerpt.trim().slice(0, 155)),
         is_published: false,
         published_at: null
       };

@@ -120,8 +120,9 @@ MAKALE YAZIMINDA UYULMASI ZORUNLU KURALLAR (MARKDOWN FORMATI):
 - Makale sonuna mutlaka WhatsApp iletişim linkini şu şekilde Markdown ile ekle: [WhatsApp Destek Hattı](https://wa.me/905348996817)
 
 5. METİN BİÇİMLENDİRME:
-- Gereksiz bold (**) kullanma. Sadece çok önemli teknik terimleri veya vurguları **bold** yap.
-- *, **, ~~, \` gibi yapay zeka karakterlerini yalnızca yeri geldiğinde, geçerli bir Markdown vurgusu yapmak için kullan.
+- YAZILARDA ASLA ÇİFT YILDIZ (**) VEYA YAPAY ZEKA İZİ BIRAKAN KARAKTERLER KULLANMA. Blog içeriklerinde asla yapay zeka izleri olmamalıdır.
+- Vurgu yapmak için tire (-) kullanabilir veya HTML <strong> etiketi kullanabilirsin, ancak ** KESİNLİKLE YASAKTIR.
+- *, **, ~~, \` gibi yapay zeka karakterlerini asla kullanma.
 
 MAKALE MODEL BİLGİ PLANI:
 Önerilen Başlık: "${title}"

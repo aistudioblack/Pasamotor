@@ -63,9 +63,13 @@ export default function AdminGithub() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const response = await adminFetch("/api/site-content/github_settings");
-        if (!response.ok) throw new Error("Ayarlar yüklenemedi.");
-        const data = await response.json();
+        const { data, error } = await dbClient
+          .from("site_content")
+          .select("*")
+          .eq("page_key", "github_settings")
+          .maybeSingle();
+
+        if (error) throw error;
 
         if (data) {
           setDocId(data.id);

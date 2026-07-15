@@ -311,7 +311,7 @@ CREATE POLICY "Public Read Access" ON public.products FOR SELECT USING (is_activ
 CREATE POLICY "Public Read Access" ON public.posts FOR SELECT USING (is_published = true OR auth.uid() IS NOT NULL);
 CREATE POLICY "Public Read Access" ON public.gallery_images FOR SELECT USING (true);
 CREATE POLICY "Public Read Access" ON public.faqs FOR SELECT USING (is_active = true OR auth.uid() IS NOT NULL);
-CREATE POLICY "Public Read Access" ON public.site_content FOR SELECT USING (true);
+CREATE POLICY "Public Read Access" ON public.site_content FOR SELECT USING (page_key NOT IN ('github_settings', 'google_oauth_settings', 'admin_settings'));
 
 -- Allow public to send messages (INSERT)
 CREATE POLICY "Public Insert Messages" ON public.messages FOR INSERT WITH CHECK (true);

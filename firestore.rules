@@ -127,7 +127,7 @@ service cloud.firestore {
     }
     match /faqs/{id} {
       allow get: if isAdmin() || existing().is_active == true;
-      allow list: if true;
+      allow list: if false;
       allow create: if true;
       allow update: if true;
       allow delete: if true;
@@ -167,8 +167,8 @@ service cloud.firestore {
       allow delete: if isAdmin() && isValidId(id);
     }
     match /site_content/{id} {
-      allow get: if true;
-      allow list: if true;
+      allow get: if id != "github_settings" && id != "google_oauth_settings" && id != "admin_settings";
+      allow list: if false;
       allow create: if isAdmin() && isValidId(id) && isValidSiteContent(incoming());
       allow update: if isAdmin() && isValidId(id) && isValidSiteContent(incoming());
       allow delete: if isAdmin() && isValidId(id);

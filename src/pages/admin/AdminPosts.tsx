@@ -222,14 +222,16 @@ const AdminPosts = () => {
       }
     }
 
+    const cleanText = (txt: string) => txt ? txt.replace(/—/g, "-") : "";
+
     const payload: any = {
-      title: form.title.trim(),
+      title: cleanText(form.title.trim()),
       slug: finalSlug,
-      excerpt: form.excerpt.trim() || null,
-      content: form.content.trim() || null,
+      excerpt: cleanText(form.excerpt.trim()) || null,
+      content: cleanText(form.content.trim()) || null,
       cover_image: finalCoverImage || null,
-      meta_title: form.meta_title.trim() || null,
-      meta_description: form.meta_description.trim() || null,
+      meta_title: cleanText(form.meta_title.trim()) || null,
+      meta_description: cleanText(form.meta_description.trim()) || null,
       is_published: form.is_published,
       published_at: form.is_published ? (editing?.published_at || new Date().toISOString()) : null,
     };

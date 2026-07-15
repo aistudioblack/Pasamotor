@@ -72,11 +72,17 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     "**/dist/**",
     ".env*",
     "**/.env*",
-    "test-*.mjs",
+    "*.mjs",
+    "**/*.mjs",
+    "*test*.js",
     "test-*.js",
     "test-*.ts",
-    "scripts/create-admin.ts",
-    "**/scripts/create-admin.ts",
+    "check-*.mjs",
+    "reset-*.mjs",
+    "check-users.mjs",
+    "reset-super-admin.mjs",
+    "scripts/**",
+    "**/scripts/**",
     "firebase-applet-config.json",
     "firebase-blueprint.json"
   ];
@@ -121,7 +127,8 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
   const files = await glob("**/*", {
     ignore: finalIgnore,
     nodir: true,
-    cwd: process.cwd()
+    cwd: process.cwd(),
+    dot: true
   });
 
   // Get the default branch
@@ -204,7 +211,7 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     const filePath = path.join(process.cwd(), file);
     // read as base64 for images etc, utf-8 for text
     const ext = path.extname(file).toLowerCase();
-    const isBinary = [".png", ".jpg", ".jpeg", ".gif", ".ico", ".webp", ".svg", ".eot", ".ttf", ".woff", ".woff2"].includes(ext);
+    const isBinary = [".png", ".jpg", ".jpeg", ".gif", ".ico", ".webp", ".svg", ".eot", ".ttf", ".woff", ".woff2", ".mp3", ".mp4", ".pdf", ".zip", ".webm"].includes(ext);
     
     let content = "";
     let encoding: "utf-8" | "base64" = "utf-8";

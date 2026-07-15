@@ -1,0 +1,31 @@
+node_modules/
+build/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+firebase-applet-config.json
+firebase-blueprint.json
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env*.local
+
+# Scripts with sensitive data
+scripts/create-admin.ts
+scripts/
+*.mjs
+check-users.mjs
+reset-super-admin.mjs
+test-*.mjs
+test-*.js
+test-*.ts
+check-*.mjs
+reset-*.mjs
+
+# Build outputs
+dist/
+dist-ssr/

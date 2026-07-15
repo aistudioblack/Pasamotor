@@ -43,6 +43,10 @@ export default defineConfig(({ command, isSsrBuild }) => ({
           // Admin — tamamen ayrı bundle (ziyaretçi indirmez)
           if (id.includes('/pages/admin/')) return 'admin';
           if (id.includes('@google/genai')) return 'admin';
+          if (id.includes('recharts')) return 'charts';
+          
+          // Icons
+          if (id.includes('lucide-react')) return 'icons';
 
           // Supabase — ayrı chunk
           if (id.includes('@supabase')) return 'supabase';

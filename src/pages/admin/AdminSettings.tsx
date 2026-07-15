@@ -66,13 +66,6 @@ const AdminSettings = () => {
     const savedGroq = secureStorage.getItem("groq_api_key");
     if (savedGroq) {
       setGroqApiKey(decryptKey(savedGroq));
-    } else {
-      // Varsayılan anahtar çevresel değişkenden alınmalı
-      const defaultGroqKey = import.meta.env.VITE_DEFAULT_GROQ_KEY || "";
-      if (defaultGroqKey) {
-        setGroqApiKey(defaultGroqKey);
-        secureStorage.setItem("groq_api_key", encryptKey(defaultGroqKey));
-      }
     }
     
     const savedGemini = secureStorage.getItem("gemini_api_key");
@@ -84,10 +77,6 @@ const AdminSettings = () => {
     const savedPersorai = secureStorage.getItem("persorai_api_key");
     if (savedPersorai) {
       setPersoraiApiKey(decryptKey(savedPersorai));
-    } else {
-      const defaultPersoraiKey = "psr-1364cf17e1ef3ac503bf245407cdf03ebebf6e2d813b293b";
-      setPersoraiApiKey(defaultPersoraiKey);
-      secureStorage.setItem("persorai_api_key", encryptKey(defaultPersoraiKey));
     }
 
     const savedPersoraiModel = secureStorage.getItem("persorai_model") || "claude-opus-4-7";

@@ -706,9 +706,6 @@ ${compatibilityHtml}
       const base64Data = file.replace(/^data:image\/\w+;base64,/, "");
       const buffer = Buffer.from(base64Data, "base64");
 
-      const fs = require('fs');
-      const path = require('path');
-
       const destAssets = path.join(process.cwd(), 'src/assets/images/blog-cover-images');
       const destNewAssets = path.join(process.cwd(), 'src/assets/blog-cover-images');
       const destPublic = path.join(process.cwd(), 'public/images/blog-cover-images');
@@ -717,15 +714,24 @@ ${compatibilityHtml}
       if (!fs.existsSync(destNewAssets)) fs.mkdirSync(destNewAssets, { recursive: true });
       if (!fs.existsSync(destPublic)) fs.mkdirSync(destPublic, { recursive: true });
 
-      const assetPath = path.join(destAssets, fileName);
-      const newAssetPath = path.join(destNewAssets, fileName);
-      const publicPath = path.join(destPublic, fileName);
+      // Uzantıyı mutlaka .webp yapalım
+      const nameWithoutExt = path.parse(fileName).name;
+      const webpFileName = `${nameWithoutExt}.webp`;
 
-      fs.writeFileSync(assetPath, buffer);
-      fs.writeFileSync(newAssetPath, buffer);
-      fs.writeFileSync(publicPath, buffer);
+      const assetPath = path.join(destAssets, webpFileName);
+      const newAssetPath = path.join(destNewAssets, webpFileName);
+      const publicPath = path.join(destPublic, webpFileName);
 
-      const url = `/images/blog-cover-images/${fileName}`;
+      // sharp ile gelen görseli optimize edip webp formatına dönüştürüyoruz (asla kırık/bozuk olmayacak şekilde)
+      await sharp(buffer)
+        .resize(1200, 675, { fit: 'cover' })
+        .webp({ quality: 85 })
+        .toFile(assetPath);
+
+      fs.copyFileSync(assetPath, publicPath);
+      fs.copyFileSync(assetPath, newAssetPath);
+
+      const url = `/images/blog-cover-images/${webpFileName}`;
       res.json({ url });
     } catch (error: any) {
       console.error("Local Image Save error:", error);
@@ -868,6 +874,11 @@ ${compatibilityHtml}
   app.get("/api/site-content/:page_key", async (req, res) => {
     try {
       const { page_key } = req.params;
+      
+      const sensitiveKeys = ["github_settings", "google_oauth_settings", "admin_settings"];
+      if (sensitiveKeys.includes(page_key)) {
+        return res.status(403).json({ error: "Access denied to sensitive configuration" });
+      }
       const adminClient = getSupabaseAdmin();
       if (!adminClient) {
         return res.status(500).json({ error: "Database client not initialized" });
@@ -1697,6 +1708,7 @@ Hedef kelime: ${topic.keyword}
 Kurallar:
 - Minimum 1200 kelime
 - H2 ve H3 başlıklar kullan (## ve ### ile)
+- YAZILARDA ASLA ÇİFT YILDIZ (**) VEYA YAPAY ZEKA İZİ BIRAKAN KARAKTERLER KULLANMA. Vurgu için sadece HTML <strong> veya tire (-) kullan.
 - Her H2 altında gerçek teknik bilgi ver
 - İçeriğin %30'unda {{CTA_WHATSAPP}} yaz
 - İçeriğin %60'ında {{CTA_KATALOG}} yaz
@@ -1727,14 +1739,17 @@ Kurallar:
 
       if (!content) throw new Error('Makale üretilemedi');
 
+      const cleanContent = content.replace(/—/g, "-");
+      const cleanTitle = topic.title ? topic.title.replace(/—/g, "-") : "";
+
       const slug = topic.keyword.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-ğüşıöçĞÜŞİÖÇ]/g, '');
 
       const adminClient = getSupabaseAdmin();
       const { error: dbError } = await adminClient.from('posts').insert({
-        title: topic.title,
+        title: cleanTitle,
         slug: `${slug}-${Date.now()}`,
-        content,
-        meta_title: topic.title.substring(0, 60),
+        content: cleanContent,
+        meta_title: cleanTitle.substring(0, 60),
         meta_description: `${topic.keyword} rehberi. İstanbul Fatih yetkili servis. Türkiye geneline kargo. WhatsApp: 0534 899 68 17`.substring(0, 155),
         is_published: false,
         category: topic.brand || 'rehber',
@@ -1804,7 +1819,8 @@ Hedef Kitle: Motosiklet kullanıcıları, motosiklet tamircileri, parça arayanl
 
 ŞARTLAR:
 1. Daha önce şu konularda yazılar yazıldı, BUNLARA BENZEMEYEN yepyeni, ilgi çekici ve aranma hacmi yüksek 3 farklı konu bulmalısın. Yazılmış konular: [${existingTitles}]
-2. Her blog yazısı SEO kurallarına uygun, H1, H2, H3 etiketleri, madde imleri içeren HTML formatında olmalıdır. En az 400-500 kelime uzunluğunda olmalıdır. "content" alanında direkt HTML vermelisin (HTML blok Markdown işaretleri koyma).
+2. Her blog yazısı SEO kurallarına uygun, H1, H2, H3 etiketleri, madde imleri içeren HTML formatında olmalıdır. En az 400-500 kelime uzunluğunda olmalıdır. "content" alanında direkt HTML vermelisin (HTML blok Markdown işaretleri koyma). 
+    ÖNEMLİ: Blog içeriklerinde asla yapay zeka izleri olmamalıdır. ASLA çift yıldız (**) veya \` gibi Markdown karakterlerini KULLANMA. Vurgulamak istediğin yerlerde sadece HTML <strong> etiketi veya tire (-) kullan.
 3. Kapak görseli için (cover_image_prompt) gerçekçi, yüksek kaliteli, konuyu anlatan İNGİLİZCE bir resim oluşturma promptu (örn: "A high quality close up photography of motorcycle engine parts, cinematic lighting, 4k") yaz. 
    ÖNEMLİ GÖRSEL KURALI: Eğer içerik "Arıza, Kronik Sorun, Tamir, Ayar" gibi TEKNİK bir konuysa prompt'un sonuna "with 'Pasa Motor' text subtly visible in the background or on a clean workshop sign" ekle. Eğer sadece inceleme, genel bakım ise KESİNLİKLE yazı, watermark, logo veya insan eli olmamalıdır ("strictly no human hands, no text, no watermark, no logos").
 4. Çıktı sadece geçerli bir JSON dizisi (Array) olmalıdır. Herhangi bir ekstra açıklama, markdown bloğu ekleme.
@@ -1852,29 +1868,73 @@ Hedef Kitle: Motosiklet kullanıcıları, motosiklet tamircileri, parça arayanl
               if (imgResult.generatedImages && imgResult.generatedImages.length > 0) {
                  const base64Data = imgResult.generatedImages[0].image.imageBytes;
                  const buffer = Buffer.from(base64Data, "base64");
-                 try { await adminClient.storage.createBucket('product-images', { public: true }); } catch(err){}
-                 const fileName = `blog-${Date.now()}-${Math.floor(Math.random() * 1000)}.jpg`;
-                 const { error: uploadError } = await adminClient.storage.from('product-images').upload(fileName, buffer, {
-                    contentType: "image/jpeg",
-                    upsert: true,
-                 });
-                 if (!uploadError) {
-                    const { data: { publicUrl } } = adminClient.storage.from('product-images').getPublicUrl(fileName);
-                    coverImageUrl = publicUrl;
-                 }
+                 
+                 // Dosya adını belirle (Türkçe karakterlerden arındırarak)
+                 const cleanSlug = (post.slug || post.title || "blog").toLowerCase()
+                   .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+                   .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+                   .replace(/[^a-z0-9]/g, '-')
+                   .replace(/-+/g, '-')
+                   .replace(/^-|-$/g, '')
+                   .slice(0, 35) || "blog";
+
+                 const fileName = `blog-auto-${cleanSlug}-${Date.now()}.webp`;
+                 
+                 const destAssets = path.join(process.cwd(), 'src/assets/images/blog-cover-images');
+                 const destNewAssets = path.join(process.cwd(), 'src/assets/blog-cover-images');
+                 const destPublic = path.join(process.cwd(), 'public/images/blog-cover-images');
+
+                 if (!fs.existsSync(destAssets)) fs.mkdirSync(destAssets, { recursive: true });
+                 if (!fs.existsSync(destNewAssets)) fs.mkdirSync(destNewAssets, { recursive: true });
+                 if (!fs.existsSync(destPublic)) fs.mkdirSync(destPublic, { recursive: true });
+
+                 const assetPath = path.join(destAssets, fileName);
+                 const newAssetPath = path.join(destNewAssets, fileName);
+                 const publicPath = path.join(destPublic, fileName);
+
+                 const width = 1200;
+                 const height = 675;
+
+                 const svgBanner = Buffer.from(`
+                   <svg width="${width}" height="${height}">
+                     <g transform="translate(40, 40)">
+                       <rect width="360" height="52" rx="10" fill="rgba(15, 23, 42, 0.88)" stroke="#FBBF24" stroke-width="2" />
+                       <text x="20" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="900" fill="#FBBF24" letter-spacing="0.5">PAŞA MOTOR</text>
+                       <text x="165" y="31" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#E5E7EB" font-weight="600">| Fatih / İstanbul</text>
+                     </g>
+                   </svg>
+                 `);
+
+                 await sharp(buffer)
+                   .resize(width, height, { fit: 'cover' })
+                   .composite([{ input: svgBanner, top: 0, left: 0 }])
+                   .webp({ quality: 85 })
+                   .toFile(assetPath);
+
+                 fs.copyFileSync(assetPath, publicPath);
+                 fs.copyFileSync(assetPath, newAssetPath);
+
+                 coverImageUrl = `/images/blog-cover-images/${fileName}`;
               }
            }
         } catch (e) {
            console.error("[Cron] Image generation failed for post:", post.title, e);
         }
 
+        const cleanVal = (txt: string) => txt ? txt.replace(/—/g, "-").replace(/\*\*/g, "").replace(/\*/g, "") : "";
+        const cleanTitle = cleanVal(post.title);
+        const cleanExcerpt = cleanVal(post.excerpt);
+        const cleanContent = cleanVal(post.content);
+        const cleanMetaTitle = cleanVal(post.meta_title || post.title);
+        const cleanMetaDesc = cleanVal(post.meta_description || post.excerpt);
+
         const { data: inserted, error: insertError } = await adminClient.from('posts').insert({
-          title: post.title,
+          title: cleanTitle,
           slug: post.slug,
-          meta_title: post.meta_title || post.title,
-          meta_description: post.meta_description || post.excerpt,
-          excerpt: post.excerpt,
-          content: post.content,
+          meta_title: cleanMetaTitle,
+          meta_description: cleanMetaDesc,
+          excerpt: cleanExcerpt,
+          content: cleanContent,
           cover_image: coverImageUrl,
           is_published: true,
           published_at: new Date().toISOString(),
@@ -1993,6 +2053,63 @@ Hedef Kitle: Motosiklet kullanıcıları, motosiklet tamircileri, parça arayanl
       }
     } catch (error: any) {
       console.error("POST /api/seo/notify-url error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ==========================================
+  // EXTERNAL AUTOMATION API (Webhooks)
+  // ==========================================
+  
+  // POST /api/external/draft-blog
+  // Used by external agents (Manus, Make, n8n) to create draft blog posts
+  app.post("/api/external/draft-blog", async (req, res) => {
+    try {
+      const apiKey = req.headers.authorization;
+      const expectedKey = process.env.EXTERNAL_DRAFT_API_KEY;
+      
+      if (!expectedKey || apiKey !== `Bearer ${expectedKey}`) {
+        return res.status(401).json({ error: "Unauthorized. Invalid or missing API key." });
+      }
+
+      const { title, excerpt, content, meta_title, meta_description, cover_image } = req.body;
+      
+      if (!title || !content) {
+        return res.status(400).json({ error: "Missing 'title' or 'content' in request body." });
+      }
+      
+      const slug = cleanStr(title);
+      
+      const { data, error } = await supabaseAdminInstance
+        .from('posts')
+        .insert({
+          title,
+          slug,
+          excerpt: excerpt || '',
+          content,
+          meta_title: meta_title || title,
+          meta_description: meta_description || excerpt || '',
+          cover_image: cover_image || null,
+          is_published: false // ALWAYS SAVE AS DRAFT
+        })
+        .select('id, title, slug')
+        .single();
+        
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation (slug exists)
+          return res.status(409).json({ error: "A post with this title/slug already exists.", slug });
+        }
+        throw error;
+      }
+      
+      return res.status(201).json({ 
+        success: true, 
+        message: "Draft blog post created successfully.",
+        post: data
+      });
+      
+    } catch (error: any) {
+      console.error("POST /api/external/draft-blog error:", error);
       res.status(500).json({ error: error.message });
     }
   });
