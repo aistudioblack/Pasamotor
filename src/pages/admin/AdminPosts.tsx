@@ -36,6 +36,7 @@ const AdminPosts = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft" | "auto">("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const filteredItems = items.filter((p) => {
     const matchesSearch = 
@@ -46,9 +47,9 @@ const AdminPosts = () => {
     const isAuto = (p as any).is_auto_generated;
     
     if (statusFilter === "all") return matchesSearch;
-    if (statusFilter === "published") return matchesSearch && p.is_published && !isAuto;
+    if (statusFilter === "published") return matchesSearch && p.is_published;
     if (statusFilter === "draft") return matchesSearch && !p.is_published && !isAuto;
-    if (statusFilter === "auto") return matchesSearch && isAuto;
+    if (statusFilter === "auto") return matchesSearch && isAuto && !p.is_published;
     return matchesSearch;
   });
 
@@ -60,6 +61,22 @@ const AdminPosts = () => {
   };
 
   useEffect(() => { load(); }, []);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    const visibleIds = filteredItems.map(p => p.id);
+    const allSelected = visibleIds.every(id => selectedIds.includes(id));
+    if (allSelected) {
+      setSelectedIds(prev => prev.filter(id => !visibleIds.includes(id)));
+    } else {
+      setSelectedIds(prev => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
 
   const openNew = () => { setEditing(null); setForm(emptyForm); setOpen(true); };
 
@@ -93,6 +110,117 @@ const AdminPosts = () => {
       });
     } catch (e) {
       console.warn("notify-search-engines failed:", e);
+    }
+  };
+
+  const bulkPingSearchEngines = async (slugs: string[]) => {
+    try {
+      const urls = slugs.map(slug => `/blog/${slug}`);
+      await adminFetch("/api/seo/notify-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: urls })
+      });
+    } catch (e) {
+      console.warn("bulk notify-search-engines failed:", e);
+    }
+  };
+
+  const publishSingle = async (p: Post) => {
+    toast({ title: "Yayınlanıyor..." });
+    const { error } = await dbClient
+      .from("posts")
+      .update({
+        is_published: true,
+        published_at: new Date().toISOString()
+      })
+      .eq("id", p.id);
+
+    if (error) {
+      toast({ title: "Hata", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Yayınlandı", description: `"${p.title}" başarıyla yayınlandı.` });
+      await pingSearchEngines(p.slug);
+      toast({ title: "Arama motorlarına bildirildi", description: "Google, Bing ve IndexNow'a ping gönderildi." });
+      load();
+    }
+  };
+
+  const bulkPublish = async () => {
+    if (selectedIds.length === 0) return;
+    setLoading(true);
+    
+    const postsToPublish = items.filter(p => selectedIds.includes(p.id) && !p.is_published);
+    
+    if (postsToPublish.length === 0) {
+      toast({ title: "Bilgi", description: "Seçilen yazılar zaten yayında veya yayınlanacak taslak bulunamadı." });
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await dbClient
+      .from("posts")
+      .update({
+        is_published: true,
+        published_at: new Date().toISOString()
+      })
+      .in("id", postsToPublish.map(p => p.id));
+
+    if (error) {
+      toast({ title: "Hata", description: "Toplu yayınlama başarısız: " + error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Yayınlandı", description: `${postsToPublish.length} yazı başarıyla yayınlandı.` });
+      
+      const slugs = postsToPublish.map(p => p.slug);
+      toast({ title: "Arama motorlarına bildiriliyor...", description: "Ping işlemleri arka planda devam ediyor." });
+      await bulkPingSearchEngines(slugs);
+      toast({ title: "Arama motorlarına bildirildi", description: `${slugs.length} yazı için Google, Bing ve IndexNow pingleri gönderildi.` });
+      
+      setSelectedIds([]);
+      load();
+    }
+  };
+
+  const bulkDraft = async () => {
+    if (selectedIds.length === 0) return;
+    setLoading(true);
+    
+    const postsToDraft = items.filter(p => selectedIds.includes(p.id) && p.is_published);
+    
+    if (postsToDraft.length === 0) {
+      toast({ title: "Bilgi", description: "Seçilen yazılar zaten taslak durumunda." });
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await dbClient
+      .from("posts")
+      .update({
+        is_published: false,
+        published_at: null
+      })
+      .in("id", postsToDraft.map(p => p.id));
+
+    if (error) {
+      toast({ title: "Hata", description: "İşlem başarısız: " + error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Taslağa Çekildi", description: `${postsToDraft.length} yazı taslağa çekildi.` });
+      setSelectedIds([]);
+      load();
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`Seçilen ${selectedIds.length} yazıyı silmek istediğinize emin misiniz?`)) return;
+    setLoading(true);
+    const { error } = await dbClient.from("posts").delete().in("id", selectedIds);
+    if (error) {
+      toast({ title: "Hata", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Silindi", description: "Seçilen yazılar başarıyla silindi." });
+      setSelectedIds([]);
+      load();
     }
   };
 
@@ -369,36 +497,116 @@ const AdminPosts = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredItems.map((p) => (
-              <div key={p.id} className="glass-card rounded-xl p-4 flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-medium text-foreground truncate">{p.title}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded shrink-0 ${(p as any).is_auto_generated ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20" : p.is_published ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>
-                      {(p as any).is_auto_generated ? "🤖 Otomatik — Onay Bekliyor" : p.is_published ? "Yayında" : "Taslak"}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-xs text-muted-foreground truncate">{p.excerpt || p.slug}</p>
-                    {p.created_at && <p className="text-[10px] text-muted-foreground/70">Tarih: {new Date(p.created_at).toLocaleString('tr-TR')}</p>}
-                  </div>
+            {/* Toplu İşlemler Paneli */}
+            <div className="flex items-center justify-between bg-card/40 border border-border/50 p-3.5 rounded-xl text-sm gap-3 flex-wrap backdrop-blur-sm">
+              <label className="flex items-center gap-2 cursor-pointer text-muted-foreground hover:text-foreground select-none">
+                <input 
+                  type="checkbox" 
+                  checked={filteredItems.length > 0 && filteredItems.every(p => selectedIds.includes(p.id))}
+                  onChange={toggleSelectAll}
+                  className="w-4 h-4 rounded border-border bg-muted text-primary focus:ring-primary accent-primary"
+                />
+                <span className="font-medium text-xs sm:text-sm">Tümünü Seç ({filteredItems.length})</span>
+              </label>
+              
+              {selectedIds.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap ml-auto animate-in fade-in slide-in-from-top-1 duration-200">
+                  <span className="text-xs text-primary font-semibold mr-1 bg-primary/10 px-2 py-1 rounded">{selectedIds.length} Seçildi</span>
+                  <button
+                    onClick={bulkPublish}
+                    className="px-2.5 py-1.5 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500/20 text-xs font-semibold flex items-center gap-1 transition-all border border-green-500/20"
+                    title="Seçilenleri Yayınla ve Arama Motorlarına Bildir"
+                  >
+                    <Radar className="w-3.5 h-3.5" />
+                    Yayınla & Ping
+                  </button>
+                  <button
+                    onClick={bulkDraft}
+                    className="px-2.5 py-1.5 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 text-xs font-semibold flex items-center gap-1 transition-all border border-yellow-500/20"
+                    title="Seçilenleri Taslağa Çek"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    Taslağa Çek
+                  </button>
+                  <button
+                    onClick={bulkDelete}
+                    className="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 text-xs font-semibold flex items-center gap-1 transition-all border border-red-500/20"
+                    title="Seçilenleri Sil"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Sil
+                  </button>
                 </div>
-                {p.is_published && (
-                  <>
-                    <button
-                      onClick={() => manualPing(p.slug)}
-                      title="Arama motorlarına bildir (sitemap + IndexNow)"
-                      className="p-2 rounded hover:bg-secondary/10 text-muted-foreground hover:text-secondary"
-                    >
-                      <Radar className="w-4 h-4" />
-                    </button>
-                    <a href={`/blog/${p.slug}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded hover:bg-muted text-muted-foreground"><Eye className="w-4 h-4" /></a>
-                  </>
-                )}
-                <button onClick={() => openEdit(p)} className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground"><Edit2 className="w-4 h-4" /></button>
-                <button onClick={() => remove(p.id)} className="p-2 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            ))}
+              )}
+            </div>
+
+            <div className="space-y-3">
+              {filteredItems.map((p) => {
+                const isAuto = (p as any).is_auto_generated;
+                const isPendingAuto = isAuto && !p.is_published;
+                
+                return (
+                  <div key={p.id} className="glass-card rounded-xl p-4 flex items-center gap-3 hover:border-border/80 transition-all">
+                    {/* Seçim Kutusu */}
+                    <input 
+                      type="checkbox" 
+                      checked={selectedIds.includes(p.id)}
+                      onChange={() => toggleSelect(p.id)}
+                      className="w-4 h-4 rounded border-border bg-muted text-primary focus:ring-primary accent-primary cursor-pointer shrink-0"
+                    />
+
+                    <div className="flex-1 min-w-0 ml-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className="font-medium text-foreground truncate max-w-[200px] sm:max-w-md md:max-w-xl">{p.title}</h3>
+                        <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded shrink-0 ${isPendingAuto ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20" : p.is_published ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>
+                          {isPendingAuto ? "🤖 Otomatik — Onay Bekliyor" : p.is_published ? "Yayında" : "Taslak"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-xs text-muted-foreground truncate">{p.excerpt || p.slug}</p>
+                        {p.created_at && <p className="text-[10px] text-muted-foreground/70">Tarih: {new Date(p.created_at).toLocaleString('tr-TR')}</p>}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                      {/* Tek Tıkla Yayınla & Ping Gönder */}
+                      {!p.is_published && (
+                        <button
+                          onClick={() => publishSingle(p)}
+                          title="Hızlı Yayınla & Arama Motorlarına Bildir (Ping)"
+                          className="px-2.5 py-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-500 text-xs font-semibold flex items-center gap-1 transition-all border border-green-500/20"
+                        >
+                          <Radar className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Yayınla</span>
+                        </button>
+                      )}
+
+                      {p.is_published && (
+                        <>
+                          <button
+                            onClick={() => manualPing(p.slug)}
+                            title="Arama motorlarına yeniden bildir (sitemap + IndexNow)"
+                            className="p-2 rounded hover:bg-secondary/10 text-muted-foreground hover:text-secondary"
+                          >
+                            <Radar className="w-4 h-4" />
+                          </button>
+                          <a href={`/blog/${p.slug}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded hover:bg-muted text-muted-foreground" title="Görüntüle">
+                            <Eye className="w-4 h-4" />
+                          </a>
+                        </>
+                      )}
+                      
+                      <button onClick={() => openEdit(p)} className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground" title="Düzenle">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => remove(p.id)} className="p-2 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive" title="Sil">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
