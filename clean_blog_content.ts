@@ -21,7 +21,7 @@ async function run() {
 
     let updatedCount = 0;
     for (const post of posts || []) {
-      let originalContent = post.content || "";
+      const originalContent = post.content || "";
       let cleanedContent = originalContent;
 
       // 1. "—" (em-dash) karakterlerini "-" (tire) ile değiştir
@@ -44,7 +44,7 @@ async function run() {
       }
 
       // Başlıktaki AI izlerini de temizleyelim
-      let originalTitle = post.title;
+      const originalTitle = post.title;
       let cleanedTitle = originalTitle;
       if (cleanedTitle.includes("—")) {
         cleanedTitle = cleanedTitle.replace(/—/g, " - ");

@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import type { Tables } from "@/lib/db-types";
 import { useRef } from "react";
 import { convertToWebP, getWebPFileName } from "@/lib/imageOptimization";
-import { generateBlogImage } from "@/lib/gemini-image";
 
 type Post = Tables<"posts">;
 
@@ -33,7 +32,6 @@ const AdminPosts = () => {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [generatingCover, setGeneratingCover] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -200,29 +198,17 @@ const AdminPosts = () => {
     setSaving(true);
     const finalSlug = form.slug.trim() || slugify(form.title);
 
-    let finalCoverImage = form.cover_image.trim();
-    if (!finalCoverImage) {
-      toast({ title: "🎨 Görsel üretiliyor..." });
-      const { url, error } = await generateBlogImage(
-        form.title,
-        editing?.id || Date.now().toString(),
-        form.content?.substring(0, 500)
-      );
+    const finalCoverImage = form.cover_image.trim();
 
-      if (url) {
-        finalCoverImage = url;
-        toast({ title: "✅ Görsel oluşturuldu" });
-      } else {
-        console.warn("Görsel üretilemedi:", error);
-        toast({
-          title: "⚠️ Görsel oluşturulamadı",
-          description: error || "Manuel görsel yükleyebilirsiniz",
-          variant: "destructive"
-        });
-      }
-    }
-
-    const cleanText = (txt: string) => txt ? txt.replace(/—/g, "-") : "";
+    const cleanText = (txt: string) => txt 
+      ? txt.replace(/—/g, "-")
+           .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+           .replace(/\*/g, "")
+           .replace(/“/g, '"')
+           .replace(/”/g, '"')
+           .replace(/’/g, "'")
+           .replace(/‘/g, "'")
+      : "";
 
     const payload: any = {
       title: cleanText(form.title.trim()),
@@ -329,7 +315,7 @@ const AdminPosts = () => {
         <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           <div>
             <h1 className="font-heading font-bold text-2xl text-foreground">Blog Yazıları</h1>
-            <p className="text-sm text-muted-foreground">Manuel veya AI ile yazı oluşturun</p>
+            <p className="text-sm text-muted-foreground">Manuel blog yazısı oluşturun ve yönetin</p>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={openNew} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90">
@@ -444,41 +430,6 @@ const AdminPosts = () => {
               <div>
                 <label className="text-xs text-muted-foreground flex justify-between items-center">
                   <span>Kapak Görseli URL</span>
-                  <button 
-                    type="button" 
-                    onClick={async () => {
-                      if (!form.title) {
-                        toast({ description: "Lütfen önce bir başlık girin.", variant: "destructive" });
-                        return;
-                      }
-                      try {
-                        setGeneratingCover(true);
-                        toast({ description: "Görsel üretiliyor...", duration: 3000 });
-                        
-                        const { url, error } = await generateBlogImage(
-                          form.title,
-                          editing?.id || Date.now().toString(),
-                          form.content?.substring(0, 500)
-                        );
-                        
-                        if (url) {
-                          setForm(prev => ({ ...prev, cover_image: url }));
-                          toast({ description: "Yapay zeka ile kapak görseli başarıyla üretildi" });
-                        } else {
-                          toast({ description: error || "Görsel üretilemedi", variant: "destructive" });
-                        }
-                      } catch (error) {
-                        toast({ description: "Görsel üretilirken hata oluştu", variant: "destructive" });
-                      } finally {
-                        setGeneratingCover(false);
-                      }
-                    }}
-                    disabled={generatingCover || !form.title}
-                    className="text-blue-500 hover:text-blue-400 font-medium flex items-center gap-1 bg-blue-500/10 px-2 py-0.5 rounded"
-                  >
-                    {generatingCover ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bot className="w-3 h-3" />}
-                    {generatingCover ? "Üretiliyor..." : "Yapay Zeka ile Üret"}
-                  </button>
                 </label>
                 <div className="mt-1 flex gap-2">
                   <input value={form.cover_image} onChange={(e) => setForm({ ...form, cover_image: e.target.value })} placeholder="https://..." className="flex-1 px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm" />

@@ -87,7 +87,6 @@ const navGroups = [
     icon: Wrench,
     items: [
       { to: "/admin/tedarikciler", label: "Tedarikçi Entegrasyonları", icon: Truck },
-      { to: "/admin/blog-ajani", label: "🤖 Blog Ajanı", icon: Sparkles },
       { to: "/admin/notlar", label: "Not Defteri", icon: StickyNote },
     ]
   },

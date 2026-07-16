@@ -45,7 +45,7 @@ const humanRefineContent = (html: string): string => {
   refined = refined.replace(/—/g, "-");
   refined = refined.replace(/’/g, "").replace(/‘/g, "").replace(/'/g, "");
   // Yapay zeka izlerini temizleme
-  refined = refined.replace(/\*\*([^\*]+)\*\*/g, "<strong>$1</strong>");
+  refined = refined.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   refined = refined.replace(/^\s*\*\s/gm, "- ");
   refined = refined.replace(/\*/g, "");
   // Array of common AI conversational fillers
