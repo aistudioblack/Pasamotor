@@ -392,7 +392,10 @@ const AdminPosts = () => {
                       {(p as any).is_auto_generated ? "🤖 Otomatik — Onay Bekliyor" : p.is_published ? "Yayında" : "Taslak"}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{p.excerpt || p.slug}</p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs text-muted-foreground truncate">{p.excerpt || p.slug}</p>
+                    {p.created_at && <p className="text-[10px] text-muted-foreground/70">Tarih: {new Date(p.created_at).toLocaleString('tr-TR')}</p>}
+                  </div>
                 </div>
                 {p.is_published && (
                   <>

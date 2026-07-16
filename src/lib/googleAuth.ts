@@ -54,21 +54,24 @@ export const initAuth = (
 
 export const saveTokenToSupabase = async (token: string, email: string): Promise<boolean> => {
   try {
-    const { error } = await dbClient.from('site_content').upsert({
-      page_key: 'google_oauth_settings',
-      title: 'Google OAuth Settings',
-      sections: {
-        accessToken: token,
-        email: email,
-        updated_at: new Date().toISOString()
-      }
+    const { adminFetch } = await import('./api-client');
+    const response = await adminFetch('/api/admin/site-content/google_oauth_settings', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: 'Google OAuth Settings',
+        sections: {
+          accessToken: token,
+          email: email,
+          updated_at: new Date().toISOString()
+        }
+      })
     });
-
-    if (error) {
-      console.error('Failed to save Google token to Supabase:', error);
+    
+    if (!response.ok) {
+      console.error('Failed to save Google token to Supabase via admin proxy');
       return false;
     }
-    console.log('Google Access Token successfully persisted to Supabase.');
+    console.log('Google Access Token successfully persisted to Supabase via admin proxy.');
     return true;
   } catch (err) {
     console.error('Error saving Google token to Supabase:', err);
@@ -78,16 +81,12 @@ export const saveTokenToSupabase = async (token: string, email: string): Promise
 
 export const loadTokenFromSupabase = async (): Promise<string | null> => {
   try {
-    const { data, error } = await dbClient
-      .from('site_content')
-      .select('sections')
-      .eq('page_key', 'google_oauth_settings')
-      .maybeSingle();
-
-    if (!error && data && data.sections) {
-      const sections = data.sections as any;
-      if (sections.accessToken) {
-        return sections.accessToken;
+    const { adminFetch } = await import('./api-client');
+    const response = await adminFetch('/api/admin/site-content/google_oauth_settings');
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.sections && data.sections.accessToken) {
+        return data.sections.accessToken;
       }
     }
   } catch (err) {
@@ -141,10 +140,5 @@ export const getAccessToken = async (): Promise<string | null> => {
 export const logout = async () => {
   await auth.signOut();
   cachedAccessToken = null;
-  try {
-    // Delete stored credentials on logout
-    await dbClient.from('site_content').delete().eq('page_key', 'google_oauth_settings');
-  } catch (err) {
-    console.error('Error removing Google token from Supabase during logout:', err);
-  }
+  // Let the token remain or be overwritten later, or handle it via a secure endpoint if needed.
 };

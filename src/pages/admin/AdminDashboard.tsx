@@ -232,7 +232,7 @@ const AdminDashboard = () => {
         console.error("Auto-inject failed", e);
       }
     };
-    injectSeoPosts();
+    // injectSeoPosts();
   }, []);
 
   return (

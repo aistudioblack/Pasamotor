@@ -42,11 +42,9 @@ export default function GoogleSeoDashboard() {
 
         // Fetch custom settings from Supabase if any to populate inputs across different browsers
         try {
-          const { data } = await dbClient
-            .from('site_content')
-            .select('sections')
-            .eq('page_key', 'google_oauth_settings')
-            .maybeSingle();
+          const { adminFetch } = await import("@/lib/api-client");
+          const response = await adminFetch("/api/admin/site-content/google_oauth_settings");
+          const data = response.ok ? await response.json() : null;
           if (data && data.sections) {
             const secs = data.sections as any;
             if (secs.gscSiteUrl && !secureStorage.getItem("gsc_site_url")) {
@@ -78,14 +76,14 @@ export default function GoogleSeoDashboard() {
     handleLog(`Google API manuel mülk/site parametreleri güncellendi (GSC: ${targetGsc.trim() || 'Oto'}, GA4: ${targetGa.trim() || 'Oto'}).`, "info");
     if (token) {
       try {
-        const { data: currentData } = await dbClient
-          .from('site_content')
-          .select('sections')
-          .eq('page_key', 'google_oauth_settings')
-          .maybeSingle();
+        const { adminFetch } = await import("@/lib/api-client");
+        const response = await adminFetch("/api/admin/site-content/google_oauth_settings");
+        const currentData = response.ok ? await response.json() : null;
 
         const currentSections = currentData?.sections as any || {};
-        await dbClient.from('site_content').upsert({
+        await adminFetch("/api/admin/site-content/google_oauth_settings", {
+          method: "POST",
+          body: JSON.stringify({
           page_key: 'google_oauth_settings',
           title: 'Google OAuth Settings',
           sections: {
@@ -94,7 +92,7 @@ export default function GoogleSeoDashboard() {
             ga4PropertyId: targetGa.trim(),
             updated_at: new Date().toISOString()
           }
-        });
+        })});
       } catch (err) {
         console.error("Failed saving overrides to Supabase:", err);
       }
@@ -161,7 +159,7 @@ export default function GoogleSeoDashboard() {
       setActiveAccountEmail(null);
       setGscData([]);
       setGaData([]);
-      await dbClient.from('site_content').delete().eq('page_key', 'google_oauth_settings');
+      await adminFetch("/api/admin/site-content/google_oauth_settings", { method: "DELETE" });
       toast({ title: "Hesap Ayrıldı", description: "Google bağlantıları Supabase ve Firebase üzerinden temizlendi.", variant: "default" });
       handleLog("Google Hesap bağlantısı admin tarafından koparıldı veritabanından silindi.", "warning");
     } catch (err) {
