@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { decrypt } from "./crypto_util";
 
 function getSetCookieSafe(headers: any): string[] {
   const getHeader = (name: string) => {
@@ -106,7 +107,7 @@ export const runAutoSync = async () => {
               "X-Requested-With": "XMLHttpRequest",
               "User-Agent": browserUA
             },
-            body: JSON.stringify({ "CustomerCode": supplier.user_code, "UserCode": supplier.user_code, "Password": supplier.password_encrypted, "LanguageId": 1, "Captcha": "", "NewPassword": "", "NewPasswordRepeat": "", "ChangePassword": false }),
+            body: JSON.stringify({ "CustomerCode": supplier.user_code, "UserCode": supplier.user_code, "Password": decrypt(supplier.password_encrypted), "LanguageId": 1, "Captcha": "", "NewPassword": "", "NewPasswordRepeat": "", "ChangePassword": false }),
           });
           if (!loginRes.ok) throw new Error("FCS Login Request Failed: " + loginRes.status);
           

@@ -24,8 +24,8 @@ const getDirname = () => {
 
 let supabaseServerInstance: any = null;
 function getSupabase() {
-  const sbUrl = process.env.VITE_SUPABASE_URL || '';
-  const sbKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+  const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!sbUrl || !sbKey) {
     return null;
   }
@@ -37,7 +37,7 @@ function getSupabase() {
 
 let supabaseAdminInstance: any = null;
 function getSupabaseAdmin() {
-  const sbUrl = process.env.VITE_SUPABASE_URL || '';
+  const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
   const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!sbUrl || !sbKey) {
     return null;
@@ -222,6 +222,8 @@ async function generateText(prompt: string, isJson: boolean = true, useSearch = 
 // Removed Firebase Admin implementation as part of clean up.
 
 
+import { encrypt, decrypt } from "./src/lib/crypto_util";
+
 const app = express();
 const PORT = 3000;
 
@@ -230,15 +232,33 @@ app.use(cors());
 app.use(express.json({ limit: "1gb" })); // Support large JSON payloads for bulk imports up to 1GB
 app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
-// Passive AutoSync Trigger removed to prevent server blocking during startup and health-checks
-
 // ==========================================
-  // Paşa Motor API Endpoints
-  // ==========================================
+// Paşa Motor API Endpoints
+// ==========================================
+
+app.post("/api/admin/supplier-password", requireAdmin, async (req, res) => {
+  try {
+    const { id, password } = req.body;
+    if (!id || !password) return res.status(400).json({ error: "Eksik parametre" });
+    
+    const admin = getSupabaseAdmin();
+    if (!admin) return res.status(500).json({ error: "DB bağlantısı hatası" });
+    
+    const encrypted = encrypt(password);
+    const { error } = await admin.from("suppliers").update({ password_encrypted: encrypted }).eq("id", id);
+    if (error) throw error;
+    
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
     app.post("/api/supplier/fcs-auth", requireAdmin, async (req, res) => {
     try {
-      const { userCode, password } = req.body || {};
+      const userCode = req.body?.userCode;
+      let password = req.body?.password;
+      password = decrypt(password);
       const getSetCookieSafe = (headers: Headers) => {
         if (typeof (headers as any).getSetCookie === "function") {
           try {

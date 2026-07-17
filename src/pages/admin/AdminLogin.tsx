@@ -16,6 +16,8 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
 
   useEffect(() => {
     dbClient.auth.getSession().then(({ data: { session }, error }) => {
@@ -29,19 +31,42 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutUntil && Date.now() < lockoutUntil) {
+      toast({ 
+        title: "Erişim engellendi", 
+        description: `Çok fazla deneme yaptınız. Lütfen ${Math.ceil((lockoutUntil - Date.now()) / 1000)} saniye bekleyin.`, 
+        variant: "destructive" 
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await dbClient.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      setLoginAttempts(0);
       secureStorage.setItem(REMEMBER_KEY, remember ? "1" : "0");
       toast({ title: "Giriş başarılı", description: "Yönlendiriliyorsunuz..." });
       navigate("/admin");
     } catch (err: any) {
-      toast({
-        title: "Giriş başarısız",
-        description: err.message || "E-posta veya şifre hatalı.",
-        variant: "destructive",
-      });
+      const newAttempts = loginAttempts + 1;
+      setLoginAttempts(newAttempts);
+      
+      if (newAttempts >= 5) {
+        setLockoutUntil(Date.now() + 60000);
+        setLoginAttempts(0);
+        toast({
+          title: "Güvenlik Uyarısı",
+          description: "Çok fazla başarısız giriş denemesi. 1 dakika boyunca giriş yapamazsınız.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Giriş başarısız",
+          description: err.message || "E-posta veya şifre hatalı.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

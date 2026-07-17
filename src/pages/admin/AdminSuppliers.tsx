@@ -157,6 +157,7 @@ const AdminSuppliers = () => {
     setEditing(s);
     setForm({ 
       ...s,
+      password_encrypted: "", // Clear so it doesn't show encrypted hex, empty means no change
       api_key: s.api_key || (s.field_mapping as any)?.api_key || null
     });
     setShowForm(true);
@@ -171,14 +172,13 @@ const AdminSuppliers = () => {
       api_key: form.api_key?.trim() || null
     };
 
-    const payload = {
+    const payload: any = {
       name: form.name!.trim(),
       source_type: form.source_type || "xml",
       feed_url: form.feed_url?.trim() || null,
       portal_url: form.portal_url?.trim() || null,
       customer_code: form.customer_code?.trim() || null,
       user_code: form.user_code?.trim() || null,
-      password_encrypted: form.password_encrypted?.trim() || null,
       field_mapping: updatedMapping,
       sync_interval_minutes: Number(form.sync_interval_minutes) || 5,
       auto_sync_enabled: !!form.auto_sync_enabled,
@@ -186,10 +186,31 @@ const AdminSuppliers = () => {
       is_active: form.is_active !== false,
       notes: form.notes?.trim() || null,
     };
-    const { error } = editing
-      ? await dbClient.from("suppliers").update(payload).eq("id", editing.id)
-      : await dbClient.from("suppliers").insert(payload);
-    if (error) return toast.error(error.message);
+    
+    // Sifre degismemisse ayni birakmak icin hic gondermiyoruz. Eger sifre girilmisse asagida API uzerinden kaydedecegiz.
+    let supplierId = editing?.id;
+
+    if (editing) {
+      const { error } = await dbClient.from("suppliers").update(payload).eq("id", editing.id);
+      if (error) return toast.error(error.message);
+    } else {
+      const { data, error } = await dbClient.from("suppliers").insert(payload).select().single();
+      if (error) return toast.error(error.message);
+      supplierId = data.id;
+    }
+
+    if (form.password_encrypted && form.password_encrypted.trim().length > 0) {
+      try {
+        await adminFetch("/api/admin/supplier-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: supplierId, password: form.password_encrypted.trim() })
+        });
+      } catch (err: any) {
+        toast.error("Şifre kaydedilirken hata oluştu: " + err.message);
+      }
+    }
+
     toast.success("Kaydedildi");
     setShowForm(false);
     await load();
@@ -793,6 +814,7 @@ const AdminSuppliers = () => {
                           password_encrypted: e.target.value,
                         })
                       }
+                      placeholder={editing ? "Değiştirmek için yeni şifre girin (Boş = Değişmez)" : ""}
                       className="input pr-10"
                     />
                     <button
