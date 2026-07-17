@@ -44,14 +44,17 @@ const Iletisim = () => {
     }
     setSending(true);
     try {
-      const { error } = await dbClient.from("messages").insert({
-        name: form.name.trim(),
-        phone: form.phone.trim(),
-        subject: form.subject.trim(),
-        message: form.message.trim(),
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
       });
-      if (error) {
-        toast({ title: "Hata", description: "Mesaj gönderilemedi. Lütfen tekrar deneyin.", variant: "destructive" });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast({ title: "Hata", description: errorData.error || "Mesaj gönderilemedi. Lütfen tekrar deneyin.", variant: "destructive" });
       } else {
         toast({ title: "Mesajınız alındı!", description: "En kısa sürede size dönüş yapacağız." });
         setForm({ name: "", phone: "", subject: "", message: "" });

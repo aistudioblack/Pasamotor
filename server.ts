@@ -6,6 +6,7 @@ import path from "path";
 import cors from "cors";
 import fs from "fs";
 import sharp from "sharp";
+import { z } from "zod";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import { pushToGithubSdk } from "./api/github-push";
@@ -227,14 +228,72 @@ import { encrypt, decrypt } from "./src/lib/crypto_util";
 const app = express();
 const PORT = 3000;
 
+// Security: block access to dotfiles (like .env) and sensitive paths
+app.use((req, res, next) => {
+  // Allow .well-known for ACME challenges and .vite for dev server
+  if (req.path.includes('/.well-known/') || req.path.includes('/.vite/')) {
+    return next();
+  }
+  // Block any path that contains a dot followed by letters, if it's a hidden file
+  if (req.path.match(/(^|\/)\.[^\/\.]/g)) {
+    return res.status(404).send("Not found");
+  }
+  next();
+});
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ["https://pasamotor.com.tr", "http://localhost:3000"],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
+}));
 app.use(express.json({ limit: "1gb" })); // Support large JSON payloads for bulk imports up to 1GB
 app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
 // ==========================================
 // Paşa Motor API Endpoints
 // ==========================================
+
+import rateLimit from "express-rate-limit";
+
+// Rate limiter for contact form
+const contactLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 3, // limit each IP to 3 requests per windowMs
+  message: { error: "Çok fazla mesaj gönderdiniz, lütfen 1 dakika sonra tekrar deneyin." }
+});
+
+const contactSchema = z.object({
+  name: z.string().min(2, "Ad en az 2 karakter olmalı").max(100),
+  phone: z.string().regex(/^[\s0-9+()]{10,20}$/, "Geçerli bir telefon numarası girin"),
+  subject: z.string().min(3).max(200),
+  message: z.string().min(10, "Mesaj en az 10 karakter olmalı").max(2000),
+});
+
+app.post("/api/contact", contactLimiter, async (req, res) => {
+  try {
+    const validatedData = contactSchema.parse(req.body);
+    const { data, error } = await supabaseAdminInstance.from("messages").insert({
+      name: validatedData.name.trim(),
+      phone: validatedData.phone.trim(),
+      subject: validatedData.subject.trim(),
+      message: validatedData.message.trim(),
+    });
+
+    if (error) {
+      console.error("Supabase insert error:", error);
+      return res.status(500).json({ error: "Mesaj gönderilemedi." });
+    }
+
+    res.json({ success: true });
+  } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: err.errors[0].message });
+    }
+    console.error("Contact API Error:", err);
+    res.status(500).json({ error: "Sunucu hatası" });
+  }
+});
 
 app.post("/api/admin/supplier-password", requireAdmin, async (req, res) => {
   try {
@@ -1016,6 +1075,19 @@ ${compatibilityHtml}
       for (const url of urls) {
         if (!url || typeof url !== "string" || !url.startsWith("http")) {
           results.push({ url, status: "error", message: "Geçersiz veya eksik URL şeması" });
+          continue;
+        }
+
+        try {
+          const parsed = new URL(url);
+          const host = parsed.hostname;
+          const isInternal = /^127\.|^10\.|^172\.(1[6-9]|2[0-9]|3[0-1])\.|^192\.168\.|localhost/i.test(host);
+          if (isInternal) {
+             results.push({ url, status: "error", message: "İç ağ (Internal Network) istekleri güvenlik nedeniyle engellenmiştir." });
+             continue;
+          }
+        } catch (e) {
+          results.push({ url, status: "error", message: "URL parse edilemedi" });
           continue;
         }
 
@@ -2003,6 +2075,9 @@ KURALLAR:
       res.status(500).json({ error: error.message });
     }
   });
+
+  // Catch-all for unknown API routes to prevent info leakage
+  app.use("/api", (req, res) => res.status(404).json({ error: "Endpoint not found" }));
 
   // ==========================================
   // SEO Optimizer & Dynamic Prerender Engine

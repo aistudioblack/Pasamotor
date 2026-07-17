@@ -209,6 +209,14 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
 
   for (const file of files) {
     const filePath = path.join(process.cwd(), file);
+    
+    // Path Traversal Security Check (Zero Trust)
+    const normalizedPath = path.resolve(filePath);
+    if (!normalizedPath.startsWith(process.cwd())) {
+       console.warn(`[Security] Path Traversal Attempt Blocked: ${file}`);
+       continue;
+    }
+
     // read as base64 for images etc, utf-8 for text
     const ext = path.extname(file).toLowerCase();
     const isBinary = [".png", ".jpg", ".jpeg", ".gif", ".ico", ".webp", ".svg", ".eot", ".ttf", ".woff", ".woff2", ".mp3", ".mp4", ".pdf", ".zip", ".webm"].includes(ext);

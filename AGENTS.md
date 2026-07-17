@@ -8,3 +8,5 @@
   - Veritabanı veya komut çalıştırma işlemlerinde, parametreleri daima sanitize et.
   - Yapay zeka izlerini, gereksiz log/debug satırlarını ve sistem açıklarını belli edebilecek verbose hata mesajlarını (Stack Trace vs.) üretim ortamına yansıtma.
   - John Carmack, Bjarne Stroustrup gibi yüksek seviye yazılım mühendislerinin sadelik, hız ve güvenlik prensiplerini kod üretiminde ve mimari kararlarda uygula.
+  - Utku Şen'in "sast-skills" repolarındaki ofansif ve defansif güvenlik perspektifini entegre et. Gerekli durumlarda `.agents/skills` altındaki LLM SAST araçlarını çalıştırarak zafiyet taraması gerçekleştir.
+
