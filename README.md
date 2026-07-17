@@ -11,6 +11,10 @@ Türkiye'nin en gelişmiş motosiklet yetkili servis ve yedek parça yönetim pl
 - **GitHub & Deploy**: Kodları doğrudan panel üzerinden yönetin ve sunucuya aktarın.
 - **Sipariş Yönetimi**: Hizmet ve onarım durumlarının kolay takibi.
 
+## Change Log (Sürüm Notları)
+
+Geliştirmeler, hata düzeltmeleri ve güvenlik güncellemelerinin detaylı listesi için lütfen [CHANGELOG.md](CHANGELOG.md) dosyasını inceleyin.
+
 ## Tech Stack
 
 - React 18 & TypeScript

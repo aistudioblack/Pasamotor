@@ -3,6 +3,7 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
+import security from "eslint-plugin-security";
 
 export default [
   { ignores: ["dist", "**/*.js"] },
@@ -12,14 +13,16 @@ export default [
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: { ...globals.browser, ...globals.node },
     },
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      security,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      ...security.configs.recommended.rules,
       "react-refresh/only-export-components": ["off", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
