@@ -79,6 +79,7 @@ const AdminBrands = lazy(() => import("./pages/admin/AdminBrands"));
 const AdminServices = lazy(() => import("./pages/admin/AdminServices"));
 const AdminServiceRepair = lazy(() => import("./pages/admin/AdminServiceRepair"));
 const AdminPages = lazy(() => import("./pages/admin/AdminPages"));
+const AdminPopup = lazy(() => import("./pages/admin/AdminPopup"));
 
 const queryClient = new QueryClient();
 
@@ -131,6 +132,7 @@ const App = () => (
                 <Route path="/admin/blog-ajani" element={<AdminBlogAgent />} />
                 <Route path="/admin/notlar" element={<AdminNotes />} />
                 <Route path="/admin/sayfalar" element={<AdminPages />} />
+                <Route path="/admin/popup" element={<AdminPopup />} />
                 <Route path="/admin/mesajlar" element={<AdminMessages />} />
                 <Route path="/admin/galeri" element={<AdminGallery />} />
                 <Route path="/admin/faq" element={<AdminFAQ />} />

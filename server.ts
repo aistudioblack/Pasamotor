@@ -235,7 +235,7 @@ app.use((req, res, next) => {
     return next();
   }
   // Block any path that contains a dot followed by letters, if it's a hidden file
-  if (req.path.match(/(^|\/)\.[^\/\.]/g)) {
+  if (req.path.match(/(^|\/)\.[^/.]/g)) {
     return res.status(404).send("Not found");
   }
   next();
@@ -2559,7 +2559,7 @@ if (!isServerless) {
       });
     }
 
-    // Keep-alive loop to prevent Supabase from pausing (runs internal every 10 min)
+    // Keep-alive loop to prevent Supabase from pausing (runs every 10 min)
     const activeSupabase = getSupabase();
     if (activeSupabase) {
       setInterval(async () => {
@@ -2568,19 +2568,32 @@ if (!isServerless) {
            if (!supabase) return;
            const { error } = await supabase.from("products").select("id").limit(1);
            if (error) console.error("Internal Supabase Keep-Alive Ping Failed:", error.message);
-           else console.log("Internal Supabase Keep-Alive Ping Successful (Keeps DB awake).");
+           else console.log("Internal Supabase Keep-Alive Ping Successful.");
          } catch(e) {
            // ignore
          }
+      }, 10 * 60 * 1000); // 10 minutes
 
-         // Trigger background auto sync for suppliers (Runs every 24 hours to prevent high CPU / server blocking)
+      // Background supplier auto sync loop (runs every 2 minutes)
+      setInterval(async () => {
          try {
            const { runAutoSync } = await import("./src/lib/syncEngine");
            await runAutoSync();
          } catch(e) {
            console.error("Auto Sync Loop Failed:", e);
          }
-      }, 24 * 60 * 60 * 1000); // 24 hours
+      }, 2 * 60 * 1000); // Check every 2 minutes
+
+      // Trigger initial auto sync check 15 seconds after server startup
+      setTimeout(async () => {
+        try {
+          console.log("[AutoSync Startup] Triggering initial supplier sync check...");
+          const { runAutoSync } = await import("./src/lib/syncEngine");
+          await runAutoSync();
+        } catch(e) {
+          console.error("[AutoSync Startup] Error:", e);
+        }
+      }, 15000);
     }
 
     // Auto-update default 7 blog posts cover images in Supabase on startup - REMOVED

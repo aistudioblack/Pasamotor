@@ -7,6 +7,7 @@ import CTASection from "@/components/home/CTASection";
 import JsonLd, { motorcycleDealerSchema } from "@/components/seo/JsonLd";
 import SEO from "@/components/seo/SEO";
 import { useSEO } from "@/hooks/useSEO";
+import SitePopup from "@/components/common/SitePopup";
 
 const Index = () => {
   const seo = useSEO(
@@ -29,6 +30,7 @@ const Index = () => {
       <ServicesSection />
       <FAQ />
       <CTASection />
+      <SitePopup />
     </Layout>
   );
 };

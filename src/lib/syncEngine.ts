@@ -78,6 +78,7 @@ export const runAutoSync = async () => {
 
       try {
         console.log(`[AutoSync] Processing supplier: ${supplier.name} (${supplier.id})`);
+        const jobStartTime = new Date();
         
         let syncSuccess = false;
         let totalItems = 0;
@@ -217,7 +218,7 @@ export const runAutoSync = async () => {
           
           await supabase.from("suppliers").update({ 
             last_sync_at: new Date().toISOString(),
-            last_sync_status: "success"
+            updated_at: new Date().toISOString()
           }).eq("id", supplier.id);
           
           syncSuccess = true;
@@ -227,6 +228,7 @@ export const runAutoSync = async () => {
         }
 
         if (syncSuccess) {
+           const jobEndTime = new Date();
            await supabase.from("sync_jobs").insert({
             supplier_id: supplier.id,
             job_type: "sync_update",
@@ -237,7 +239,9 @@ export const runAutoSync = async () => {
             items_skipped: skippedItems,
             items_failed: failedItems,
             triggered_by: "cron",
-            started_at: new Date().toISOString()
+            started_at: jobStartTime.toISOString(),
+            finished_at: jobEndTime.toISOString(),
+            duration_ms: jobEndTime.getTime() - jobStartTime.getTime()
           });
           successCount++;
         }

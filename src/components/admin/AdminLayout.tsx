@@ -28,7 +28,8 @@ import {
   Server,
   Github,
   StickyNote,
-  Search
+  Search,
+  Megaphone
 } from "lucide-react";
 import logo from "@/assets/pasa-motor-logo.webp";
 
@@ -79,6 +80,7 @@ const navGroups = [
       { to: "/admin/faq", label: "Sıkça Sorulan Sorular", icon: HelpCircle },
       { to: "/admin/blog", label: "Blog Yazıları", icon: FileText },
       { to: "/admin/galeri", label: "Medya Galerisi", icon: ImageIcon },
+      { to: "/admin/popup", label: "Popup Duyurusu", icon: Megaphone },
       { to: "/admin/sayfalar", label: "Yasal Sayfalar", icon: FileText },
     ]
   },
