@@ -55,3 +55,29 @@ CREATE POLICY "Allow all site_content" ON public.site_content
   TO anon, authenticated, service_role
   USING (true)
   WITH CHECK (true);
+
+-- 3g. Supabase Storage (Görsel ve Dosya Yükleme RLS İzinleri)
+-- "new row violates row-level security policy" hatasını çözmek için Supabase SQL Editor'de çalıştırın:
+GRANT ALL ON TABLE storage.objects TO anon, authenticated, service_role;
+GRANT ALL ON TABLE storage.buckets TO anon, authenticated, service_role;
+
+-- product-images bucket'ını otomatik oluştur (yoksa)
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage nesneleri için tam erişim politikası
+DROP POLICY IF EXISTS "Allow All Storage Objects" ON storage.objects;
+CREATE POLICY "Allow All Storage Objects" ON storage.objects
+  FOR ALL
+  TO anon, authenticated, service_role
+  USING (true)
+  WITH CHECK (true);
+
+-- Storage bucket'ları için tam erişim politikası
+DROP POLICY IF EXISTS "Allow All Storage Buckets" ON storage.buckets;
+CREATE POLICY "Allow All Storage Buckets" ON storage.buckets
+  FOR ALL
+  TO anon, authenticated, service_role
+  USING (true)
+  WITH CHECK (true);

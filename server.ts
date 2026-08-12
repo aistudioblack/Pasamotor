@@ -37,13 +37,15 @@ function getSupabase() {
 }
 
 let supabaseAdminInstance: any = null;
+let supabaseAdminKeyUsed: string = '';
 function getSupabaseAdmin() {
   const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
   const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!sbUrl || !sbKey) {
     return null;
   }
-  if (!supabaseAdminInstance) {
+  if (!supabaseAdminInstance || supabaseAdminKeyUsed !== sbKey) {
+    supabaseAdminKeyUsed = sbKey;
     supabaseAdminInstance = createClient(sbUrl, sbKey, {
       auth: {
         autoRefreshToken: false,
