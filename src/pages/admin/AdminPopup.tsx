@@ -30,7 +30,7 @@ import {
 const DEFAULT_POPUP: PopupSettings = {
   is_active: true,
   badge: "PAŞA MOTOR DUYURUSU",
-  title: "TVS & Hero Yetkili Servis ve Orijinal Parça Merkezi",
+  title: "TVS & Falcon Yetkili Servis ve Orijinal Parça Merkezi",
   description: "İstanbul Fatih'te en güvenilir motosiklet yetkili servisi ve 2000+ orijinal yedek parça stoğuyla hizmetinizdeyiz. Hemen online randevu alın veya kataloğumuzu inceleyin!",
   image_url: "/src/assets/hero-bg.webp",
   button_text: "Yedek Parçaları İncele",
@@ -310,7 +310,7 @@ export default function AdminPopup() {
                     type="text"
                     value={settings.title}
                     onChange={(e) => setSettings({ ...settings, title: e.target.value })}
-                    placeholder="Örn: TVS & Hero Orijinal Parçalarda %15 İndirim!"
+                    placeholder="Örn: TVS & Falcon Orijinal Parçalarda %15 İndirim!"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-muted/50 border border-border/60 focus:border-primary focus:outline-none text-sm text-foreground font-heading font-bold"
                   />
                 </div>
@@ -358,9 +358,9 @@ export default function AdminPopup() {
                       onClick={() =>
                         setSettings((prev) => ({
                           ...prev,
-                          title: "TVS & Hero Orijinal Parçalarda Özel İndirim!",
+                          title: "TVS & Falcon Orijinal Parçalarda Özel İndirim!",
                           description:
-                            "İstanbul Fatih merkezimizde ve online mağazamızda fırsat haftası başladı!\n- TVS ve Hero tüm orijinal yedek parçalarda %15 indirim\n- Aynı gün kargo ve hızlı teslimat imkanı\n- **Kampanya Kodu:** PASA15",
+                            "İstanbul Fatih merkezimizde ve online mağazamızda fırsat haftası başladı!\n- TVS ve Falcon tüm orijinal yedek parçalarda %15 indirim\n- Aynı gün kargo ve hızlı teslimat imkanı\n- **Kampanya Kodu:** PASA15",
                         }))
                       }
                       className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-background hover:bg-primary/10 hover:text-primary border border-border/60 text-[11px] font-medium transition-colors"

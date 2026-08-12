@@ -113,7 +113,7 @@ const HeroSection = () => {
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } }}
             >
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              TVS - Hero - Falcon - Işıldar Yetkili Servis Bayi
+              TVS - Falcon - Işıldar Yetkili Servis Bayi
             </motion.div>
 
             <motion.h1 
@@ -129,7 +129,7 @@ const HeroSection = () => {
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-8"
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } } }}
             >
-              Fatih'te 4 markanın yetkili satış ve servis noktası. Motosiklet satışı, profesyonel servis ve orijinal yedek parça hizmetleri.
+              Fatih'te TVS, Falcon ve Işıldar markalarının yetkili satış ve servis noktası. Motosiklet satışı, profesyonel servis ve orijinal yedek parça hizmetleri.
             </motion.p>
 
             <motion.div 
@@ -158,7 +158,7 @@ const HeroSection = () => {
               variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.4 } } }}
             >
               {[
-                { value: "4", label: "Yetkili Marka" },
+                { value: "3", label: "Yetkili Marka" },
                 { value: "20+", label: "Yıllık Deneyim" },
                 { value: "1000+", label: "Mutlu Müşteri" },
               ].map((stat) => (

@@ -130,7 +130,6 @@ export function beautifyProduct(manufacturer: string, oemCode: string, rawName: 
     { key: "rapidox", name: "RapidoX" },
     { key: "rks", name: "RKS" },
     { key: "tvs", name: "TVS" },
-    { key: "hero", name: "Hero" },
     { key: "falcon", name: "Falcon" },
     { key: "isildar", name: "Işıldar" },
     { key: "ışıldar", name: "Işıldar" },

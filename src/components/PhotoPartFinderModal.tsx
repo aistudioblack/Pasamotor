@@ -95,7 +95,7 @@ export const PhotoPartFinderModal: React.FC<PhotoPartFinderModalProps> = ({
       setResult({
         partName: "Motosiklet Mekanik Parçası",
         brand: "TVS / Honda / Bajaj Orijinal Uyumluluk",
-        compatibleModels: ["TVS Apache RTR 200", "Honda PCX 125", "Hero Dash"],
+        compatibleModels: ["TVS Apache RTR 200", "Honda PCX 125", "Falcon Mexico 150"],
         searchKeyword: "balata debriyaj"
       });
     } finally {

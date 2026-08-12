@@ -31,7 +31,7 @@ const SehirYedekParca = () => {
       <SEO 
         title={city.seoTitle} 
         description={city.seoDescription} 
-        keywords={`${city.name} motosiklet yedek parça, ${city.name} tvs yedek parça, ${city.name} hero kargo parça, orijinal parçalar`}
+        keywords={`${city.name} motosiklet yedek parça, ${city.name} tvs yedek parça, ${city.name} hızlı kargo parça, orijinal parçalar`}
       />
       
       <JsonLd 
@@ -54,8 +54,8 @@ const SehirYedekParca = () => {
             name: "Motosiklet Yedek Parçaları",
             itemListElement: [
               { "@type": "Offer", name: "TVS Orijinal Parçalar" },
-              { "@type": "Offer", name: "Hero Orijinal Parçalar" },
-              { "@type": "Offer", name: "Falcon Orijinal Parçalar" }
+              { "@type": "Offer", name: "Falcon Orijinal Parçalar" },
+              { "@type": "Offer", name: "Işıldar Orijinal Parçalar" }
             ]
           },
           availableDeliveryMethod: "http://purl.org/goodrelations/v1#DeliveryModeShip"
@@ -136,7 +136,7 @@ const SehirYedekParca = () => {
                   <div className="bg-card border border-border p-4 rounded-xl flex flex-col gap-2">
                     <CheckCircle2 className="h-6 w-6 text-primary" />
                     <h4 className="font-semibold">Yetkili Servis</h4>
-                    <p className="text-sm text-muted-foreground">TVS, Hero, Falcon yetkili servis güvencesiyle hizmet.</p>
+                    <p className="text-sm text-muted-foreground">TVS, Falcon, Işıldar yetkili servis güvencesiyle hizmet.</p>
                   </div>
                   <div className="bg-card border border-border p-4 rounded-xl flex flex-col gap-2">
                     <Truck className="h-6 w-6 text-primary" />
@@ -162,10 +162,9 @@ const SehirYedekParca = () => {
               <p className="text-muted-foreground">Bu markaların tüm orijinal yedek parçalarını {city.name} adresinize sorunsuz ulaştırıyoruz.</p>
             </div>
             
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { name: "TVS Motor", link: "/yedek-parca", img: "/tvs-motor-logo.png" },
-                { name: "Hero Motor", link: "/yedek-parca", img: "/logo.png" }, // Using general logo as placeholder
                 { name: "Falcon", link: "/yedek-parca", img: "/falcon-motor-logo.png" },
                 { name: "Işıldar", link: "/yedek-parca", img: "/isildar-motor-logo.png" }
               ].map(brand => (

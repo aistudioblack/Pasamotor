@@ -33,7 +33,7 @@ const defaultServices: Service[] = [
   {
     iconName: "ShoppingBag",
     title: "Motosiklet Satışı",
-    description: "TVS, Hero, Falcon ve Işıldar markalarının en güncel modellerini showroom'umuzda inceleyebilirsiniz. Kredi ve taksit seçenekleri mevcuttur.",
+    description: "TVS, Falcon ve Işıldar markalarının en güncel modellerini showroom'umuzda inceleyebilirsiniz. Kredi ve taksit seçenekleri mevcuttur.",
     link: "/hizmetler",
   },
   {

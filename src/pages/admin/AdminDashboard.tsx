@@ -169,13 +169,13 @@ const AdminDashboard = () => {
             is_published: false
           },
           {
-            title: "Hero Dash 125 Marş Basmama Sorunu: Akü mü, Röle mi?",
-            slug: "hero-dash-125-mars-basmama-sorunu",
-            excerpt: "Hero Dash 125 scooterınız sabahları veya soğuk havalarda marş basmıyorsa bunun aküden mi yoksa marş panelinden mi kaynaklandığını öğrenin.",
-            content: `<h2>Hero Dash 125 Elektriksel Bakım İpuçları</h2>\n<p>Hero Dash 125, dayanıklılığıyla meşhur olsa da özellikle uzun süre kullanılmadığında veya kış aylarında marş basmama sorunu gösterebilmektedir. Sorunun ana kaynağı genellikle iki parçadır: <strong>Akü ve Marş Rölesi</strong>.</p>\n\n<h3>Arıza Tespiti Nasıl Yapılır?</h3>\n<p>Eğer kontağı açtığınızda göstergeler zayıf yanıyor ve 'tık tık' sesi geliyorsa akünüz bitmiş demektir. Ancak göstergeler canlı geldiği halde hiç ses yoksa sorun kuvvetle muhtemel marş rölesindedir. Orijinal <a href="/hero-motosiklet-yedek-parca">Hero yedek parçalarına</a> sitemiz üzerinden hemen ulaşabilirsiniz.</p>`,
+            title: "TVS Jupiter 125 Marş Basmama Sorunu: Akü mü, Röle mi?",
+            slug: "tvs-jupiter-125-mars-basmama-sorunu",
+            excerpt: "TVS Jupiter 125 scooterınız sabahları veya soğuk havalarda marş basmıyorsa bunun aküden mi yoksa marş panelinden mi kaynaklandığını öğrenin.",
+            content: `<h2>TVS Jupiter 125 Elektriksel Bakım İpuçları</h2>\n<p>TVS Jupiter 125, dayanıklılığıyla meşhur olsa da özellikle uzun süre kullanılmadığında veya kış aylarında marş basmama sorunu gösterebilmektedir. Sorunun ana kaynağı genellikle iki parçadır: <strong>Akü ve Marş Rölesi</strong>.</p>\n\n<h3>Arıza Tespiti Nasıl Yapılır?</h3>\n<p>Eğer kontağı açtığınızda göstergeler zayıf yanıyor ve 'tık tık' sesi geliyorsa akünüz bitmiş demektir. Ancak göstergeler canlı geldiği halde hiç ses yoksa sorun kuvvetle muhtemel marş rölesindedir. Orijinal <a href="/tvs-motosiklet-yedek-parca">TVS yedek parçalarına</a> sitemiz üzerinden hemen ulaşabilirsiniz.</p>`,
             cover_image: "",
-            meta_title: "Hero Dash 125 Marş Basmama Sorunu & Akü Bakımı",
-            meta_description: "Hero Dash 125 sabahları neden çalışmaz? Marş rölesi mi arızalı akü mü bitti? Fatih Hero yetkili servisinden teknik notlar.",
+            meta_title: "TVS Jupiter 125 Marş Basmama Sorunu & Akü Bakımı",
+            meta_description: "TVS Jupiter 125 sabahları neden çalışmaz? Marş rölesi mi arızalı akü mü bitti? Fatih TVS yetkili servisinden teknik notlar.",
             is_published: false
           },
           {
@@ -202,7 +202,7 @@ const AdminDashboard = () => {
             title: "Scooter Tahrik Kayışı Neden Kopar? (TVS Jupiter, RKS, Kuba)",
             slug: "scooter-tahrik-kayisi-neden-kopar",
             excerpt: "TVS Jupiter başta olmak üzere standart scooter CVT sistemlerinde kayış ömrü ve debriyaj bagası değiştirme süreçlerinin önemi.",
-            content: `<h2>Scooter CVT Performansını Korumak</h2>\n<p>Scooter'ların hareket kalbi olan varyatör ve tahrik kayışları, motosikletin hızlanmasını direkt etkiler. Tahrik kayışı her 10.000 km ile 12.000 km arasında muhakkak kontrol edilmeli ve erime-çatlama görüldüyse derhal değiştirilmelidir.</p>\n\n<h3>Varyatör Temizliği</h3>\n<p>Kayış kopma ihtimalini sıfıra indirmek ve gaz tepkimelerini canlandırmak için baga ağırlıklarını (roller weights) da kayışla beraber set olarak yenileyin. Satış sitemizdeki orijinal <a href="/tvs-motosiklet-yedek-parca">TVS</a>, Hero ve RKS kayışları güvenliğinizin en kritik parçasını oluşturur.</p>`,
+            content: `<h2>Scooter CVT Performansını Korumak</h2>\n<p>Scooter'ların hareket kalbi olan varyatör ve tahrik kayışları, motosikletin hızlanmasını direkt etkiler. Tahrik kayışı her 10.000 km ile 12.000 km arasında muhakkak kontrol edilmeli ve erime-çatlama görüldüyse derhal değiştirilmelidir.</p>\n\n<h3>Varyatör Temizliği</h3>\n<p>Kayış kopma ihtimalini sıfıra indirmek ve gaz tepkimelerini canlandırmak için baga ağırlıklarını (roller weights) da kayışla beraber set olarak yenileyin. Satış sitemizdeki orijinal <a href="/tvs-motosiklet-yedek-parca">TVS</a>, Falcon ve RKS kayışları güvenliğinizin en kritik parçasını oluşturur.</p>`,
             cover_image: "",
             meta_title: "Scooter Tahrik Kayışı ve Baga Bakımı",
             meta_description: "TVS Jupiter, RKS ve Kuba scooterlarında kayış kopması neden olur? Performansı düşüren debriyaj sorunlarına yetkili servis çözümleri.",

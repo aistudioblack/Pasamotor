@@ -21,7 +21,7 @@ import { Link } from "react-router-dom";
 import { BRANDS } from "@/data/brands";
 
 const services = [
-  { icon: ShoppingBag, title: "Motosiklet Satışı", desc: "TVS, Hero, Falcon ve Işıldar markalarının en güncel modellerini showroom'umuzda inceleyebilirsiniz. Kredi ve taksit seçenekleri mevcuttur." },
+  { icon: ShoppingBag, title: "Motosiklet Satışı", desc: "TVS, Falcon ve Işıldar markalarının en güncel modellerini showroom'umuzda inceleyebilirsiniz. Kredi ve taksit seçenekleri mevcuttur." },
   { icon: Wrench, title: "Motor Servisi", desc: "Periyodik bakım, motor revizyon, debriyaj, şanzıman ve genel mekanik onarım hizmetleri sunuyoruz." },
   { icon: Zap, title: "Elektrik & Elektronik", desc: "Aküden aydınlatmaya, CDI'den beyin arızalarına kadar tüm elektrik sorunlarını çözüyoruz." },
   { icon: Package, title: "Yedek Parça Satışı", desc: "Orijinal ve muadil yedek parçalar geniş stoğumuzda. Bulunmayan parçalar kısa sürede temin edilir." },
@@ -32,8 +32,8 @@ const services = [
 const Hizmetler = () => {
   const seo = useSEO(
     "hizmetler",
-    "Motosiklet Bakım & Onarım Fatih İstanbul — TVS Hero Yetkili Servis",
-    "Fatih İstanbul yetkili motosiklet servisi. TVS, Hero, Falcon, Işıldar bakım ve onarım. Orijinal parça garantisi. Randevu: 0534 899 68 17"
+    "Motosiklet Bakım & Onarım Fatih İstanbul — TVS Yetkili Servis",
+    "Fatih İstanbul yetkili motosiklet servisi. TVS, Falcon, Işıldar bakım ve onarım. Orijinal parça garantisi. Randevu: 0534 899 68 17"
   );
 
   return (

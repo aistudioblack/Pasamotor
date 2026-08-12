@@ -38,7 +38,7 @@ const Footer = () => {
 
             {/* Açıklama */}
             <p className="text-muted-foreground text-xs leading-relaxed">
-              Orijinal <strong className="text-foreground font-semibold">pasamotor.com.tr</strong> resmî platformumuzdur. İstanbul Fatih'te TVS, Hero, Falcon ve Işıldar yetkili teknik servis ve orijinal yedek parça tedarik noktası.
+              Orijinal <strong className="text-foreground font-semibold">pasamotor.com.tr</strong> resmî platformumuzdur. İstanbul Fatih'te TVS, Falcon ve Işıldar yetkili teknik servis ve orijinal yedek parça tedarik noktası.
             </p>
 
             {/* Yetkili Marka Etiketleri */}
@@ -49,7 +49,6 @@ const Footer = () => {
               <div className="flex flex-wrap gap-1.5">
                 {[
                   { name: "TVS", style: "border-red-500/20 text-red-600 dark:text-red-400 bg-red-500/5 hover:border-red-500" },
-                  { name: "Hero", style: "border-red-600/20 text-red-700 dark:text-red-500 bg-red-600/5 hover:border-red-600" },
                   { name: "Falcon", style: "border-stone-500/20 text-stone-600 dark:text-stone-400 bg-stone-50/5 hover:border-stone-500" },
                   { name: "Işıldar", style: "border-indigo-500/20 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 hover:border-indigo-500" },
                 ].map((brand) => (

@@ -52,7 +52,6 @@ const AdminBrands = () => {
           { id: "brand_mondial", name: "Mondial", desc: "Yaygın servis ağı ve uygun fiyatlı modeller" },
           { id: "brand_rks", name: "RKS", desc: "Performans ve şık tasarımlı motosikletler" },
           { id: "brand_tvs", name: "TVS", desc: "Hindistan'ın lider motosiklet üreticisi" },
-          { id: "brand_hero", name: "Hero", desc: "Dünyanın en büyük iki tekerlekli araç üreticisi" },
           { id: "brand_falcon", name: "Falcon", desc: "Güvenilir ve ekonomik motosikletler" },
           { id: "brand_isildar", name: "Işıldar", desc: "Kaliteli Türk motosiklet markası" },
           { id: "brand_vox", name: "Vox", desc: "Güvenlik, konfor ve şık tasarımı bir arada sunan seçkin motosiklet ve aksesuar markası" },

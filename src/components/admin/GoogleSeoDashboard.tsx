@@ -485,7 +485,7 @@ export default function GoogleSeoDashboard() {
                 <li className="flex items-start gap-2 border-b border-border/20 pb-1.5">
                   <span className="text-emerald-400 font-bold">2.</span>
                   <div>
-                    <strong className="text-amber-300">Akü Ömrü Nasıl Uzatılır? Hero Dash 125 Akü Değişimi</strong>
+                    <strong className="text-amber-300">Akü Ömrü Nasıl Uzatılır? TVS Jupiter 125 Akü Değişimi</strong>
                     <p className="text-muted-foreground text-[10px] mt-0.5">Motosiklet sahiplerinin kış performansını artıran teknik bakım tüyoları ve Castrol yağ tavsiyesi.</p>
                   </div>
                 </li>
@@ -513,7 +513,7 @@ export default function GoogleSeoDashboard() {
                   <span className="text-[10px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded font-mono font-bold uppercase">STOK YETERSİZ / TALEP YÜKSEK</span>
                 </div>
                 <div className="flex items-center justify-between p-1.5 rounded bg-muted/20 border border-border/10">
-                  <span className="text-foreground">12V Motosiklet Aküleri (Hero & Pulsar uyumlu)</span>
+                  <span className="text-foreground">12V Motosiklet Aküleri (TVS & Pulsar uyumlu)</span>
                   <span className="text-[10px] bg-amber-500/25 text-amber-300 px-2 py-0.5 rounded font-mono font-bold uppercase">TALEP ARTIŞI %42 (KRİTİK)</span>
                 </div>
                 <div className="flex items-center justify-between p-1.5 rounded bg-muted/20 border border-border/10">

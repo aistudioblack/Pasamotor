@@ -1326,7 +1326,7 @@ ${compatibilityHtml}
       const prompt = `Sen Paşa Motor kıdemli yedek parça uzmanısın. Yüklenen fotoğraftaki motosiklet veya scooter yedek parçasını incele. Aşağıdaki JSON formatında kesin ve sade bir analiz döndür:
 {
   "partName": "Parçanın genel adı (örneğin: Ön Fren Balatası, Varyatör Kayışı, Konjektör)",
-  "brand": "Tahmini marka (örneğin: TVS, Honda, Bajaj, Kuba, RKS, Hero veya Genel)",
+  "brand": "Tahmini marka (örneğin: TVS, Honda, Bajaj, Kuba, RKS veya Genel)",
   "compatibleModels": ["Uyumlu olabileceği 2-3 motosiklet modeli"],
   "confidence": "Yüksek / Orta",
   "searchKeyword": "Sitede arama yapmak için en uygun 2 kelimelik anahtar kelime (örneğin: fren balatası)"
@@ -2118,7 +2118,7 @@ KURALLAR:
       let html = fs.readFileSync(targetPath, "utf8");
 
       const title = customTitle || "Paşa Motor | Yedek Parça & Yetkili Servis";
-      const desc = customDesc || "İstanbul'un en güvenilir motosiklet yedek parça merkezi ve TVS, Hero, Falcon, Işıldar yetkili servisi.";
+      const desc = customDesc || "İstanbul'un en güvenilir motosiklet yedek parça merkezi ve TVS, Falcon, Işıldar yetkili servisi.";
       const image = customImage || "https://pasamotor.com.tr/src/assets/pasa-motor-logo.webp";
       const canonical = canonicalUrl || `https://pasamotor.com.tr${req.originalUrl}`;
 
@@ -2241,7 +2241,6 @@ KURALLAR:
         { loc: "https://pasamotor.com.tr/rks-motor-yetkili-servis", changefreq: "monthly", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/mondial-motor-yetkili-servis", changefreq: "monthly", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/tvs-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
-        { loc: "https://pasamotor.com.tr/hero-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/honda-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/yamaha-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/falcon-motosiklet-yedek-parca", changefreq: "monthly", priority: "0.9" },
@@ -2431,12 +2430,11 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
     });
 
     app.get("/hero-motosiklet-yedek-parca", (req, res) => {
-      return serveSEOInjectedHtml(
-        req, 
-        res, 
-        "Hero Motosiklet Yedek Parça | Orijinal Hero Parçaları - Paşa Motor", 
-        "Hero Xpulse, Dash, Hunk ve Pleasure yedek parçaları stoklarımızda. Garantili ve barkodlu %100 orijinal Hero motosiklet yedek parça mağazası."
-      );
+      return res.redirect(301, "/yedek-parca");
+    });
+
+    app.get("/marka/hero", (req, res) => {
+      return res.redirect(301, "/yedek-parca");
     });
 
     app.get("/honda-motosiklet-yedek-parca", (req, res) => {
@@ -2480,7 +2478,7 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
         req, 
         res, 
         "Hakkımızda | Paşa Motor Motosiklet Showroom & Servis", 
-        "Nihat KAN liderliğindeki Paşa Motor; İstanbul Fatih'te TVS, Hero, Falcon ve Işıldar yetkili bayisi ve teknik servis merkezidir."
+        "Nihat KAN liderliğindeki Paşa Motor; İstanbul Fatih'te TVS, Falcon ve Işıldar yetkili bayisi ve teknik servis merkezidir."
       );
     });
 
@@ -2534,7 +2532,7 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
         req, 
         res, 
         "Paşa Motor - İstanbul Fatih Motosiklet Yetkili Servis Bayi", 
-        "TVS, Hero, Falcon, Işıldar yetkili satış ve teknik servis noktası. En geniş orijinal yedek parça yelpazesi, profesyonel motosiklet ustaları ve modern servis ekipmanları."
+        "TVS, Falcon, Işıldar yetkili satış ve teknik servis noktası. En geniş orijinal yedek parça yelpazesi, profesyonel motosiklet ustaları ve modern servis ekipmanları."
       );
     });
   }

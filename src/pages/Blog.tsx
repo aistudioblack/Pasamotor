@@ -35,7 +35,7 @@ const Blog = () => {
   const seo = useSEO(
     "blog",
     "Motosiklet Blog — Bakım ve Yedek Parça Rehberleri | Paşa Motor",
-    "TVS, Hero, Honda, Yamaha bakım rehberleri ve yedek parça tavsiyeleri. Paşa Motor Fatih İstanbul uzman blogu."
+    "TVS, Falcon, Honda, Yamaha bakım rehberleri ve yedek parça tavsiyeleri. Paşa Motor Fatih İstanbul uzman blogu."
   );
 
   useEffect(() => {
@@ -134,7 +134,7 @@ const Blog = () => {
         title={seo.title}
         description={seo.description}
         canonical="/blog"
-        keywords="motosiklet blog, motor bakım ipuçları, motosiklet rehber, tvs hero falcon ışıldar"
+        keywords="motosiklet blog, motor bakım ipuçları, motosiklet rehber, tvs falcon ışıldar"
       />
       <JsonLd data={blogSchema} />
       <JsonLd

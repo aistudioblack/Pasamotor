@@ -50,7 +50,7 @@ try {
   console.warn("Session storage read failed:", e);
 }
 
-const BRANDS_LIST = ["Tümü", "TVS", "Hero", "Falcon", "Işıldar", "Vox", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"] as const;
+const BRANDS_LIST = ["Tümü", "TVS", "Falcon", "Işıldar", "Vox", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"] as const;
 
 const CATEGORIES_LIST = [
   { slug: "tumu", name: "Tüm Kategoriler" },
@@ -67,7 +67,6 @@ const YedekParca = () => {
   
   const brandMatchMap: Record<string, string> = {
     "/tvs-motosiklet-yedek-parca": "TVS",
-    "/hero-motosiklet-yedek-parca": "Hero",
     "/honda-motosiklet-yedek-parca": "HONDA",
     "/yamaha-motosiklet-yedek-parca": "YAMAHA",
     "/falcon-motosiklet-yedek-parca": "Falcon",
@@ -159,7 +158,8 @@ const YedekParca = () => {
         hasMoreData = false;
       }
     }
-    return allData;
+    const cleanData = allData.filter(p => p.brand?.toLowerCase() !== "hero" && !p.title?.toLowerCase().startsWith("hero "));
+    return cleanData;
   };
 
   const loadProducts = async (forceSync = false) => {
@@ -469,10 +469,10 @@ const YedekParca = () => {
   return (
     <Layout>
       <SEO
-        title="Motosiklet Yedek Parça — TVS Hero Falcon Orijinal | Paşa Motor"
-        description="2000+ orijinal motosiklet yedek parçası stokta. TVS, Hero, Falcon, Işıldar, Honda, Yamaha. Türkiye geneline kargo. Sipariş: 0534 899 68 17"
+        title="Motosiklet Yedek Parça — TVS Falcon Orijinal | Paşa Motor"
+        description="2000+ orijinal motosiklet yedek parçası stokta. TVS, Falcon, Işıldar, Honda, Yamaha. Türkiye geneline kargo. Sipariş: 0534 899 68 17"
         canonical="/yedek-parca"
-        keywords="motosiklet yedek parça, tvs yedek parça, hero orjinal parça, honda parça, akıllı parça arama, pasamotor, fatih motosiklet yedek parça"
+        keywords="motosiklet yedek parça, tvs yedek parça, falcon orjinal parça, honda parça, akıllı parça arama, pasamotor, fatih motosiklet yedek parça"
       />
       <JsonLd data={itemListSchema} />
       <JsonLd
@@ -495,7 +495,7 @@ const YedekParca = () => {
               Yedek Parça <span className="text-primary">Kataloğu</span>
             </h1>
             <p className="text-muted-foreground max-w-2xl text-sm md:text-base leading-relaxed">
-              TVS, Hero, Falcon, Honda, Bajaj ve Işıldar motosikletleri için orijinal ve yüksek kaliteli muadil parçalar. Akıllı filtreleri kullanarak 2000+ ürün arasından aradığınız parçayı saniyeler içinde bulun.
+              TVS, Falcon, Honda, Bajaj ve Işıldar motosikletleri için orijinal ve yüksek kaliteli muadil parçalar. Akıllı filtreleri kullanarak 2000+ ürün arasından aradığınız parçayı saniyeler içinde bulun.
             </p>
           </div>
 

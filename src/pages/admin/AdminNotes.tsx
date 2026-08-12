@@ -150,13 +150,13 @@ export default function AdminNotes() {
       {
         id: "def-1",
         title: "📌 Paşa Motor SEO Öncelikleri",
-        content: "1. Google arama sonuçlarında TVS, Hero ve Falcon anahtar kelimelerinde ilk 3 hedefleniyor.\n2. Orijinal parça sorgulamalarında blog makaleleri altından WhatsApp'a yönlendirme artırılacak.\n3. Yeni üretilen Apache RTR 200 blog yazılarının slug yapıları kontrol edilecek.",
+        content: "1. Google arama sonuçlarında TVS ve Falcon anahtar kelimelerinde ilk 3 hedefleniyor.\n2. Orijinal parça sorgulamalarında blog makaleleri altından WhatsApp'a yönlendirme artırılacak.\n3. Yeni üretilen Apache RTR 200 blog yazılarının slug yapıları kontrol edilecek.",
         category: "SEO & Blog",
         color: "purple",
         is_pinned: true,
         checklist: [
           { id: "c-1", text: "Özel şasi destek butonu WhatsApp linki güncellendi mi?", done: true },
-          { id: "c-2", text: "Motosiklet markalarından sadece TVS, Hero, Falcon, Işıldar kalacak şekilde ana sayfa sadeleştirildi mi?", done: true },
+          { id: "c-2", text: "Motosiklet markalarından sadece TVS, Falcon, Işıldar kalacak şekilde ana sayfa sadeleştirildi mi?", done: true },
           { id: "c-3", text: "Görsel yenileme sorunu için new window.Image() düzeltmesi yapıldı mı?", done: true }
         ],
         created_at: new Date().toISOString(),

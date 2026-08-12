@@ -23,17 +23,6 @@ export const BRANDS: Brand[] = [
     seoDescription: "İstanbul Fatih TVS yetkili servisi. Orijinal TVS yedek parça, periyodik bakım ve garanti hizmetleri. Türkiye geneline kargo. WhatsApp: 0534 899 68 17"
   },
   {
-    slug: "hero",
-    name: "Hero",
-    desc: "Dünyanın en büyük iki tekerlekli araç üreticisi",
-    isAuthorized: true,
-    badge: "Yetkili Servis",
-    popularParts: ["Fren Balatası", "Hava Filtresi", "Yağ Filtresi", "Zincir Dişli Seti", "Buji", "Varyatör Kayışı"],
-    popularModels: ["Dash 125", "Xpulse 200 4V", "Destini 125", "Ignitor 125"],
-    seoTitle: "Hero Motosiklet Yetkili Servis İstanbul — Paşa Motor",
-    seoDescription: "İstanbul Fatih Hero yetkili servisi. Orijinal Hero yedek parça ve profesyonel bakım. Türkiye geneline kargo. WhatsApp: 0534 899 68 17"
-  },
-  {
     slug: "falcon",
     name: "Falcon",
     desc: "Güvenilir ve ekonomik motosikletler",

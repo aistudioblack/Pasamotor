@@ -12,14 +12,17 @@ const MarkaDetay = () => {
   const brand = BRANDS.find(b => b.slug === slug);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  if (!brand) {
+  if (slug === "hero" || !brand) {
+    if (typeof window !== "undefined") {
+      window.location.replace("/yedek-parca");
+    }
     return (
       <Layout>
         <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
           <h1 className="text-3xl font-bold mb-4">Marka Bulunamadı</h1>
           <p className="text-muted-foreground mb-8">Aradığınız marka sistemimizde kayıtlı değil.</p>
-          <Link to="/" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-            Ana Sayfaya Dön
+          <Link to="/yedek-parca" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+            Yedek Parça Sayfasına Git
           </Link>
         </div>
       </Layout>

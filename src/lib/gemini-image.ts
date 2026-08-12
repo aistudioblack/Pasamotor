@@ -26,7 +26,7 @@ function buildImagePrompt(title: string, content?: string): string {
     englishDesc = "a professional male mechanic working on a blue Bajaj Pulsar NS200 motorcycle on a rear stand, focusing on the rear wheel, chain, and steel sprocket, wearing black nitrile gloves, using a metal wrench";
   } else if (t.includes("soğutma") || t.includes("radyatör") || t.includes("hararet") || t.includes("antifriz")) {
     englishDesc = "a mechanic servicing liquid cooling system, radiator, hoses, and coolant reservoir on a modern motorcycle in a repair shop";
-  } else if (t.includes("honda") || t.includes("yamaha") || t.includes("tvs") || t.includes("suzuki") || t.includes("hero")) {
+  } else if (t.includes("honda") || t.includes("yamaha") || t.includes("tvs") || t.includes("suzuki")) {
     englishDesc = "a professional mechanic performing maintenance on a modern sport motorcycle on a hydraulic lift, adjusting mechanical parts with a professional wrench";
   }
 

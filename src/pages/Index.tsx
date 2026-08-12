@@ -12,8 +12,8 @@ import SitePopup from "@/components/common/SitePopup";
 const Index = () => {
   const seo = useSEO(
     "index",
-    "TVS Hero Falcon Yetkili Servis & Yedek Parça | Paşa Motor",
-    "İstanbul Fatih'te hizmet veren TVS, Hero, Falcon ve Işıldar yetkili motosiklet servisi. 2000+ orijinal yedek parça stokta. Türkiye geneline kargo. WhatsApp: 0534 899 68 17"
+    "TVS Falcon Yetkili Servis & Yedek Parça | Paşa Motor",
+    "İstanbul Fatih'te hizmet veren TVS, Falcon ve Işıldar yetkili motosiklet servisi. 2000+ orijinal yedek parça stokta. Türkiye geneline kargo. WhatsApp: 0534 899 68 17"
   );
 
   return (
@@ -22,7 +22,7 @@ const Index = () => {
         title={seo.title}
         description={seo.description}
         canonical="/"
-        keywords="paşa motor, pasamotor.com.tr, pasamotor com tr, motosiklet İstanbul, fatih motosiklet, tvs yetkili servis, hero yetkili servis, falcon yetkili servis, ışıldar yetkili servis, motosiklet servis fatih, yedek parça istanbul, kocamustafapaşa motosiklet"
+        keywords="paşa motor, pasamotor.com.tr, pasamotor com tr, motosiklet İstanbul, fatih motosiklet, tvs yetkili servis, falcon yetkili servis, ışıldar yetkili servis, motosiklet servis fatih, yedek parça istanbul, kocamustafapaşa motosiklet"
       />
       <JsonLd data={motorcycleDealerSchema} />
       <HeroSection />

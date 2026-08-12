@@ -108,7 +108,6 @@ const App = () => (
                 <Route path="/iletisim" element={<Iletisim />} />
                 <Route path="/yedek-parca" element={<YedekParca />} />
                 <Route path="/tvs-motosiklet-yedek-parca" element={<YedekParca />} />
-                <Route path="/hero-motosiklet-yedek-parca" element={<YedekParca />} />
                 <Route path="/honda-motosiklet-yedek-parca" element={<YedekParca />} />
                 <Route path="/yamaha-motosiklet-yedek-parca" element={<YedekParca />} />
                 <Route path="/falcon-motosiklet-yedek-parca" element={<YedekParca />} />
