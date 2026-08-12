@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Sparkles, ArrowRight, BellRing, ChevronDown, ChevronUp } from "lucide-react";
 import { dbClient } from "@/lib/db-client";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 
 export interface PopupSettings {
   is_active: boolean;
@@ -233,14 +234,10 @@ export default function SitePopup() {
             {/* Optional Banner Image */}
             {popup.image_url && (
               <div className="relative w-full h-36 sm:h-48 md:h-56 shrink-0 overflow-hidden bg-neutral-950">
-                <img
-                  src={popup.image_url}
+                <ImageWithFallback
+                  src={popup.image_url.startsWith("/src/assets/") ? popup.image_url.replace("/src/assets/", "/") : popup.image_url}
                   alt={popup.title}
                   className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
-                  onError={(e) => {
-                    // Hide image if broken
-                    (e.target as HTMLElement).style.display = "none";
-                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/20 to-transparent" />
               </div>

@@ -22,6 +22,7 @@ import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
 import type { Tables } from "@/lib/db-types";
 import ProductImagePlaceholder from "@/components/ui/ProductImagePlaceholder";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 
 type Product = Tables<"products">;
 
@@ -227,7 +228,7 @@ const YedekParcaDetay = () => {
                         </div>
                       </div>
                     )}
-                    <img
+                    <ImageWithFallback
                       src={product.images[selectedImage]}
                       alt={product.title}
                       width={800}
@@ -235,6 +236,7 @@ const YedekParcaDetay = () => {
                       className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${isMainImageLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md"}`}
                       loading="eager"
                       onLoad={() => setIsMainImageLoaded(true)}
+                      fallbackIcon={<ProductImagePlaceholder brand={product.brand || "PAŞA MOTOR"} />}
                     />
                     <div className="absolute bottom-4 right-4 bg-black/60 text-white p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-md">
                       <Maximize2 className="w-5 h-5" />

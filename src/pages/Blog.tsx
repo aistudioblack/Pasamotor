@@ -8,6 +8,7 @@ import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCachedPosts, setCachedPosts } from "@/lib/blog-cache";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { getPostCoverImage } from "@/lib/blog-helpers";
 
 type Post = Tables<"posts">;
 
@@ -222,22 +223,16 @@ const Blog = () => {
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-2">
                     <div className="relative aspect-[16/10] lg:aspect-auto lg:min-h-[420px] overflow-hidden bg-muted">
-                      {featured.cover_image ? (
-                        <ImageWithFallback
-                          src={featured.cover_image}
-                          alt={featured.title}
-                          width={1200}
-                          height={800}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-                          loading="eager"
-                          decoding="sync"
-                          {...{ fetchpriority: "high" }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <BookOpen className="w-20 h-20 text-muted-foreground/20" />
-                        </div>
-                      )}
+                      <ImageWithFallback
+                        src={getPostCoverImage(featured)}
+                        alt={featured.title}
+                        width={1200}
+                        height={800}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                        loading="eager"
+                        decoding="sync"
+                        {...{ fetchpriority: "high" }}
+                      />
                       <span className="absolute top-5 left-5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold tracking-wide">
                         ÖNE ÇIKAN
                       </span>
@@ -280,20 +275,14 @@ const Blog = () => {
                     className="group flex flex-col rounded-3xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 shadow-sm hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.2)] transition-all duration-300 hover:-translate-y-1"
                   >
                     <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                      {post.cover_image ? (
-                        <ImageWithFallback
-                          src={post.cover_image}
-                          alt={post.title}
-                          width={600}
-                          height={450}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <BookOpen className="w-12 h-12 text-muted-foreground/30" />
-                        </div>
-                      )}
+                      <ImageWithFallback
+                        src={getPostCoverImage(post)}
+                        alt={post.title}
+                        width={600}
+                        height={450}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                        loading="lazy"
+                      />
                     </div>
                     <div className="p-6 md:p-8 flex flex-col flex-1">
                       <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">

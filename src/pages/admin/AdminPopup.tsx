@@ -32,7 +32,7 @@ const DEFAULT_POPUP: PopupSettings = {
   badge: "PAŞA MOTOR DUYURUSU",
   title: "TVS & Falcon Yetkili Servis ve Orijinal Parça Merkezi",
   description: "İstanbul Fatih'te en güvenilir motosiklet yetkili servisi ve 2000+ orijinal yedek parça stoğuyla hizmetinizdeyiz. Hemen online randevu alın veya kataloğumuzu inceleyin!",
-  image_url: "/src/assets/hero-bg.webp",
+  image_url: "/hero-bg.webp",
   button_text: "Yedek Parçaları İncele",
   button_link: "/yedek-parca",
   delay_seconds: 2,

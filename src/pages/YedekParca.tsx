@@ -27,6 +27,7 @@ import type { Tables } from "@/lib/db-types";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
 import ProductImagePlaceholder from "@/components/ui/ProductImagePlaceholder";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { CITIES } from "@/data/cities";
 import { PhotoPartFinderModal } from "@/components/PhotoPartFinderModal";
 
@@ -800,7 +801,7 @@ const YedekParca = () => {
                             : "w-full h-44 mb-3 bg-white flex items-center justify-center border border-border"
                         }`}>
                           {p.images && p.images.length > 0 ? (
-                            <img
+                            <ImageWithFallback
                               src={p.images[0]}
                               alt={p.title}
                               width={240}
@@ -808,6 +809,7 @@ const YedekParca = () => {
                               referrerPolicy="no-referrer"
                               className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                               loading="lazy"
+                              fallbackIcon={<ProductImagePlaceholder brand={p.brand || "ALT-GRUP"} />}
                             />
                           ) : (
                             <ProductImagePlaceholder brand={p.brand || "ALT-GRUP"} />

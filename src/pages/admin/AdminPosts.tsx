@@ -2,6 +2,7 @@ import { adminFetch } from "@/lib/api-client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useEffect, useState } from "react";
 import { dbClient } from "@/lib/db-client";
+import { getPostCoverImage } from "@/lib/blog-helpers";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit2, Trash2, X, Loader2, FileText, Eye, AlertTriangle, RefreshCw, Upload, Radar, Bot } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -554,6 +555,16 @@ const AdminPosts = () => {
                       onChange={() => toggleSelect(p.id)}
                       className="w-4 h-4 rounded border-border bg-muted text-primary focus:ring-primary accent-primary cursor-pointer shrink-0"
                     />
+
+                    {/* Kapak Görseli Küçük Önizleme */}
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted shrink-0 border border-border">
+                      <img 
+                        src={getPostCoverImage(p)} 
+                        alt={p.title} 
+                        className="w-full h-full object-cover" 
+                        loading="lazy" 
+                      />
+                    </div>
 
                     <div className="flex-1 min-w-0 ml-1">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">

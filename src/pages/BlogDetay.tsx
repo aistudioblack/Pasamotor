@@ -15,6 +15,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { getPostCoverImage } from "@/lib/blog-helpers";
 
 type Post = Tables<"posts">;
 
@@ -278,17 +279,18 @@ const BlogDetay = () => {
     }
   };
 
+  const coverImg = useMemo(() => getPostCoverImage(post), [post]);
+
   const articleSchema = useMemo(() => {
     if (!post) return null;
     const origin = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
+    const resolvedImg = coverImg.startsWith("http") ? coverImg : `${origin}${coverImg}`;
     return {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
       headline: post.title,
       description: post.excerpt || post.meta_description || "",
-      image: post.cover_image 
-        ? (post.cover_image.startsWith("http") ? post.cover_image : `${origin}${post.cover_image}`)
-        : `${origin}/favicon.png`,
+      image: resolvedImg,
       datePublished: post.published_at,
       dateModified: post.updated_at,
       mainEntityOfPage: { "@type": "WebPage", "@id": `${origin}/blog/${post.slug}` },
@@ -399,7 +401,7 @@ const BlogDetay = () => {
         title={post.meta_title || post.title}
         description={post.meta_description || post.excerpt || `${post.title} - Paşa Motor uzman rehber yazısı.`}
         canonical={`/blog/${post.slug}`}
-        image={post.cover_image || undefined}
+        image={coverImg}
         type="article"
         publishedTime={post.published_at || undefined}
         modifiedTime={post.updated_at}
@@ -513,22 +515,20 @@ const BlogDetay = () => {
       </header>
 
       {/* Cover Image Container */}
-      {post.cover_image && (
-        <div className="container mx-auto px-4 max-w-5xl -mt-16 md:-mt-24 mb-16 relative z-10">
-          <div className="rounded-2xl md:rounded-3xl overflow-hidden border border-border/80 bg-slate-950/90 aspect-[16/9] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center">
-            <ImageWithFallback
-              src={post.cover_image}
-              alt={post.title}
-              width={1200}
-              height={675}
-              className="max-w-full max-h-full object-contain hover:scale-[1.01] transition-transform duration-700"
-              loading="eager"
-              decoding="sync"
-              {...{ fetchpriority: "high" }}
-            />
-          </div>
+      <div className="container mx-auto px-4 max-w-5xl -mt-16 md:-mt-24 mb-16 relative z-10">
+        <div className="rounded-2xl md:rounded-3xl overflow-hidden border border-border/80 bg-slate-950/90 aspect-[16/9] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center">
+          <ImageWithFallback
+            src={coverImg}
+            alt={post.title}
+            width={1200}
+            height={675}
+            className="max-w-full max-h-full object-contain hover:scale-[1.01] transition-transform duration-700"
+            loading="eager"
+            decoding="sync"
+            {...{ fetchpriority: "high" }}
+          />
         </div>
-      )}
+      </div>
 
       {/* Main Grid: Content & Sticky TOC */}
       <section className="pb-24">
@@ -712,20 +712,14 @@ const BlogDetay = () => {
                   className="group flex flex-col rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <div className="aspect-[16/10] bg-muted overflow-hidden relative">
-                    {r.cover_image ? (
-                      <ImageWithFallback 
-                        src={r.cover_image} 
-                        alt={r.title} 
-                        width={400} 
-                        height={250} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        loading="lazy" 
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <BookOpen className="w-10 h-10 text-muted-foreground/30" />
-                      </div>
-                    )}
+                    <ImageWithFallback 
+                      src={getPostCoverImage(r)} 
+                      alt={r.title} 
+                      width={400} 
+                      height={250} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      loading="lazy" 
+                    />
                     <span className="absolute top-3 left-3 bg-slate-950/70 backdrop-blur-md text-foreground text-[10px] font-bold px-2.5 py-1 rounded-full uppercase border border-border/30">
                       Rehber
                     </span>
