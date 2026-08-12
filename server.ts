@@ -26,7 +26,7 @@ const getDirname = () => {
 let supabaseServerInstance: any = null;
 function getSupabase() {
   const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!sbUrl || !sbKey) {
     return null;
   }
@@ -39,7 +39,7 @@ function getSupabase() {
 let supabaseAdminInstance: any = null;
 function getSupabaseAdmin() {
   const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!sbUrl || !sbKey) {
     return null;
   }
@@ -831,14 +831,8 @@ ${compatibilityHtml}
 
       const adminClient = getSupabaseAdmin();
       if (!adminClient) {
-        return res.status(500).json({ error: "Supabase yöneticisi yapılandırılamadı. SUPABASE_SERVICE_ROLE_KEY eksik." });
+        return res.status(500).json({ error: "Supabase veritabanı bağlantısı yapılandırılamadı." });
       }
-      
-      // SignIn to bypass RLS if using Anon key instead of Service Role key
-      await adminClient.auth.signInWithPassword({
-        email: process.env.ADMIN_EMAIL || "aistudioblack@gmail.com",
-        password: process.env.ADMIN_INITIAL_PASSWORD || ""
-      });
 
       // Convert base64 to Buffer
       const base64Data = file.replace(/^data:image\/\w+;base64,/, "");
@@ -861,14 +855,22 @@ ${compatibilityHtml}
       });
 
       if (uploadError) {
-        console.error("Upload error details:", uploadError);
-        
-        let errorMsg = `Görsel yüklenemedi: ${uploadError.message}`;
-        if (uploadError.message.includes('row-level security') || uploadError.message.includes('Bucket not found') || uploadError.message.includes('Object not found')) {
-            errorMsg = "Lütfen Supabase Paneline gidin -> 'Storage' bölümünden 'product-images' adında PUBLIC bir bucket oluşturun ve 'Policies' sekmesinden Authenticated kullanıcılar için INSERT (yükleme) yetkisi (All Operations) ekleyin.";
+        console.error("Supabase Storage upload error details:", uploadError);
+        // Fallback: If Supabase storage bucket fails, save to local public directory
+        try {
+          const publicUploadDir = path.join(process.cwd(), "public/images/uploaded");
+          if (!fs.existsSync(publicUploadDir)) {
+            fs.mkdirSync(publicUploadDir, { recursive: true });
+          }
+          const cleanFileName = fileName.replace(/[^a-zA-Z0-9_.-]/g, "_");
+          const localFilePath = path.join(publicUploadDir, cleanFileName);
+          fs.writeFileSync(localFilePath, buffer);
+          
+          return res.json({ success: true, publicUrl: `/images/uploaded/${cleanFileName}` });
+        } catch (localErr: any) {
+          console.error("Local save fallback error:", localErr);
+          return res.status(500).json({ error: `Görsel yüklenemedi: ${uploadError.message}` });
         }
-        
-        return res.status(500).json({ error: errorMsg });
       }
 
       const { data: pub } = adminClient.storage.from(bucket).getPublicUrl(fileName);
@@ -1005,24 +1007,6 @@ ${compatibilityHtml}
       const adminClient = getSupabaseAdmin();
       if (!adminClient) {
         return res.status(500).json({ error: "Database client not initialized" });
-
-  app.delete("/api/admin/site-content/:page_key", requireAdmin, async (req, res) => {
-    try {
-      const { page_key } = req.params;
-      const adminClient = getSupabaseAdmin();
-      if (!adminClient) {
-        return res.status(500).json({ error: "Database client not initialized" });
-      }
-      const { error } = await adminClient.from("site_content").delete().eq("page_key", page_key);
-      if (error) {
-        return res.status(400).json({ error: error.message });
-      }
-      return res.json({ success: true });
-    } catch (error: any) {
-      return res.status(500).json({ error: error.message });
-    }
-  });
-
       }
 
       // Check if existing record exists to determine insert vs update
@@ -1058,6 +1042,23 @@ ${compatibilityHtml}
     } catch (e: any) {
       console.error(`Error saving site_content for ${req.params.page_key}:`, e);
       return res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.delete("/api/admin/site-content/:page_key", requireAdmin, async (req, res) => {
+    try {
+      const { page_key } = req.params;
+      const adminClient = getSupabaseAdmin();
+      if (!adminClient) {
+        return res.status(500).json({ error: "Database client not initialized" });
+      }
+      const { error } = await adminClient.from("site_content").delete().eq("page_key", page_key);
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+      return res.json({ success: true });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
     }
   });
 
