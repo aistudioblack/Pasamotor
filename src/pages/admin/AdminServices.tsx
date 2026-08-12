@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { dbClient } from "@/lib/db-client";
+import { adminFetch } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Edit2, Trash2, X } from "lucide-react";
 import DynamicIcon from "@/components/ui/DynamicIcon";
@@ -79,16 +80,21 @@ const AdminServices = () => {
   const handleSaveAll = async (newServices: Service[]) => {
     setSaving(true);
     try {
-      if (recordId) {
-        await dbClient.from("site_content").update({ sections: newServices, title: "Services" }).eq("id", recordId);
-      } else {
-        const { data: inserted } = await dbClient.from("site_content").insert({
-          page_key: "services",
+      const res = await adminFetch("/api/admin/site-content/services", {
+        method: "POST",
+        body: JSON.stringify({
           title: "Services",
-          sections: newServices
-        }).select().single();
-        if (inserted) setRecordId(inserted.id);
+          sections: newServices,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Kaydedilemedi");
       }
+
+      const result = await res.json();
+      if (result?.data?.id) setRecordId(result.data.id);
       setServices(newServices);
       toast({ title: "Kaydedildi" });
     } catch (e: any) {

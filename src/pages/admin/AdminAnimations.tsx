@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { dbClient } from "@/lib/db-client";
+import { adminFetch } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Check, Loader2, Play, Sparkles } from "lucide-react";
 import logo from "@/assets/pasa-motor-logo.webp";
@@ -90,37 +91,47 @@ const AdminAnimations = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await dbClient
-        .from("site_content")
-        .select("sections")
-        .eq("page_key", PAGE_KEY)
-        .maybeSingle();
-      const id = (data?.sections as any)?.animation_id;
-      if (typeof id === "string") setSelectedId(id);
-      setLoading(false);
+      try {
+        const res = await adminFetch("/api/admin/site-content/" + PAGE_KEY);
+        if (res.ok) {
+          const data = await res.json();
+          const id = (data?.sections as any)?.animation_id;
+          if (typeof id === "string") setSelectedId(id);
+        } else {
+          const { data } = await dbClient
+            .from("site_content")
+            .select("sections")
+            .eq("page_key", PAGE_KEY)
+            .maybeSingle();
+          const id = (data?.sections as any)?.animation_id;
+          if (typeof id === "string") setSelectedId(id);
+        }
+      } catch (e) {
+        console.error("Error loading animation:", e);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
   const apply = async (anim: LogoAnimation) => {
     setApplyingId(anim.id);
     try {
-      const { data: existing } = await dbClient
-        .from("site_content")
-        .select("id")
-        .eq("page_key", PAGE_KEY)
-        .maybeSingle();
-
       const payload = {
-        page_key: PAGE_KEY,
         title: "Hero Logo Animation",
-        sections: { animation_id: anim.id } as any,
+        sections: { animation_id: anim.id },
       };
 
-      const { error } = existing
-        ? await dbClient.from("site_content").update(payload).eq("id", existing.id)
-        : await dbClient.from("site_content").insert(payload);
+      const res = await adminFetch("/api/admin/site-content/" + PAGE_KEY, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
 
-      if (error) throw error;
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Kaydedilemedi");
+      }
+
       setSelectedId(anim.id);
       toast({ title: "Uygulandı", description: `${anim.name} animasyonu aktif.` });
     } catch (e: any) {

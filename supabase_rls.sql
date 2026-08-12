@@ -41,3 +41,17 @@ CREATE POLICY "Users can read own data" ON public.users
   FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own data" ON public.users
   FOR UPDATE USING (auth.uid() = id);
+
+-- 3f. site_content tablosu (Popup, Hizmetler, Duyurular, Markalar, Animasyonlar)
+-- Canlı Supabase veritabanında "permission denied for table site_content" hatasını çözmek için:
+GRANT ALL ON TABLE public.site_content TO anon, authenticated, service_role;
+
+ALTER TABLE public.site_content ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow all site_content" ON public.site_content;
+
+CREATE POLICY "Allow all site_content" ON public.site_content
+  FOR ALL
+  TO anon, authenticated, service_role
+  USING (true)
+  WITH CHECK (true);
