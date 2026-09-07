@@ -140,9 +140,17 @@ export default function AdminGithub() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ githubUrl, token }),
       });
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error("Non-JSON response from /api/github/push:", text.substring(0, 200));
+        throw new Error(`Sunucu yanıtı JSON değil. İşlem zaman aşımına uğramış olabilir ancak arka planda devam ediyor olabilir. Lütfen birkaç dakika sonra GitHub deponuzu kontrol edin.`);
+      }
       
-      if (!response.ok) throw new Error(data.error || "Bilinmeyen bir hata oluştu.");
+      if (!response.ok) throw new Error(data?.error || "Bilinmeyen bir hata oluştu.");
       
       setPushProgress(100);
       setTimeout(() => {

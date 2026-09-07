@@ -71,30 +71,25 @@ const HeroSection = () => {
   }, [animationId]);
 
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden" style={{ contentVisibility: 'visible', containIntrinsicSize: 'auto' }}>
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      
+      
+      <div className="absolute inset-0 z-0 bg-slate-950">
         <img
           src={heroBg}
-          alt="Paşa Motor showroom"
-          width={1920}
-          height={1080}
-          loading="eager"
-          decoding="sync"
-          className="w-full h-full object-cover"
+          alt="Paşa Motor Showroom Arka Planı"
+          className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none"
         />
-        <div
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(180deg, hsl(220 20% 7% / 0.70) 0%, hsl(220 20% 7% / 0.85) 60%, hsl(220 20% 7%) 100%)" }}
-        />
-        {/* Spot Işıkları Ambient Işık Efektleri */}
-        <div className="absolute top-[5%] left-[22%] w-[25%] h-[25%] bg-red-600/30 blur-[80px] animate-[pulse_4s_ease-in-out_infinite] pointer-events-none mix-blend-color-dodge rounded-full" />
-        <div className="absolute top-[18%] left-[18%] w-[15%] h-[15%] bg-red-500/20 blur-[50px] animate-[pulse_3s_ease-in-out_infinite_0.5s] pointer-events-none mix-blend-lighten rounded-full" />
-        
-        <div className="absolute top-[15%] right-[25%] w-[25%] h-[25%] bg-[#0ea5e9]/30 blur-[80px] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none mix-blend-color-dodge rounded-full" />
-        <div className="absolute top-[22%] right-[18%] w-[15%] h-[15%] bg-[#38bdf8]/20 blur-[50px] animate-[pulse_4s_ease-in-out_infinite_1s] pointer-events-none mix-blend-lighten rounded-full" />
-      </div>
+        {/* Karartma / Kontrast Katmanı (Metinlerin Okunabilirliği İçin) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/40 pointer-events-none" />
 
+        {/* Spot Işıkları Ambient Işık Efektleri */}
+        <div className="absolute top-[5%] left-[22%] w-[25%] h-[25%] bg-red-600/20 blur-[80px] animate-[pulse_4s_ease-in-out_infinite] pointer-events-none rounded-full" />
+        <div className="absolute top-[18%] left-[18%] w-[15%] h-[15%] bg-red-500/15 blur-[50px] animate-[pulse_3s_ease-in-out_infinite_0.5s] pointer-events-none rounded-full" />
+        <div className="absolute top-[15%] right-[25%] w-[25%] h-[25%] bg-blue-500/20 blur-[80px] animate-[pulse_5s_ease-in-out_infinite] pointer-events-none rounded-full" />
+        <div className="absolute top-[22%] right-[18%] w-[15%] h-[15%] bg-sky-400/15 blur-[50px] animate-[pulse_4s_ease-in-out_infinite_1s] pointer-events-none rounded-full" />
+      </div>
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-20">
         <div className="grid lg:grid-cols-[1.4fr_1fr] gap-10 items-center">
@@ -113,7 +108,7 @@ const HeroSection = () => {
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } }}
             >
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              TVS - Falcon - Işıldar Yetkili Servis Bayi
+              TVS - Falcon - Işıldar - Moto Lux Yetkili Servis Bayi
             </motion.div>
 
             <motion.h1 
@@ -129,7 +124,7 @@ const HeroSection = () => {
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-8"
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } } }}
             >
-              Fatih'te TVS, Falcon ve Işıldar markalarının yetkili satış ve servis noktası. Motosiklet satışı, profesyonel servis ve orijinal yedek parça hizmetleri.
+              Fatih'te TVS, Falcon, Işıldar ve Moto Lux markalarının yetkili satış ve servis noktası. Motosiklet satışı, profesyonel servis ve orijinal yedek parça hizmetleri.
             </motion.p>
 
             <motion.div 
@@ -158,7 +153,7 @@ const HeroSection = () => {
               variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.4 } } }}
             >
               {[
-                { value: "3", label: "Yetkili Marka" },
+                { value: "4", label: "Yetkili Marka" },
                 { value: "20+", label: "Yıllık Deneyim" },
                 { value: "1000+", label: "Mutlu Müşteri" },
               ].map((stat) => (
@@ -176,15 +171,13 @@ const HeroSection = () => {
           {/* Right: Animated Logo */}
           <div className="hidden lg:flex items-center justify-center relative min-h-[480px] overflow-visible">
             <div ref={desktopLogoRef} className="relative will-change-transform">
-              <img
-                src={logo}
-                alt="Paşa Motor logosu"
+              <img src={logo} onError={(e) => { e.currentTarget.src = "/pasa-motor-logo.webp"; }} alt="Paşa Motor logosu"
                 width={400}
                 height={200}
-                loading="eager"
-                decoding="sync"
+                
+                
                 className="relative w-full max-w-md object-contain drop-shadow-2xl select-none pointer-events-none"
-                style={{ mixBlendMode: "screen" }}
+                
                 draggable={false}
               />
             </div>
@@ -194,15 +187,13 @@ const HeroSection = () => {
         {/* Mobile logo */}
         <div className="lg:hidden flex justify-center mt-12 overflow-visible">
           <div ref={mobileLogoRef} className="relative will-change-transform">
-            <img 
-              src={logo} 
-              alt="Paşa Motor logosu" 
+            <img src={logo} onError={(e) => { e.currentTarget.src = "/pasa-motor-logo.webp"; }} alt="Paşa Motor logosu" 
               width={220}
               height={110}
-              loading="eager" 
-              decoding="sync" 
+               
+               
               className="h-52 w-auto object-contain drop-shadow-2xl select-none pointer-events-none" 
-              style={{ mixBlendMode: "screen" }} 
+               
               draggable={false} 
             />
           </div>

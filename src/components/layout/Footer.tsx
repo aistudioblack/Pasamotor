@@ -38,7 +38,7 @@ const Footer = () => {
 
             {/* Açıklama */}
             <p className="text-muted-foreground text-xs leading-relaxed">
-              Orijinal <strong className="text-foreground font-semibold">pasamotor.com.tr</strong> resmî platformumuzdur. İstanbul Fatih'te TVS, Falcon ve Işıldar yetkili teknik servis ve orijinal yedek parça tedarik noktası.
+              Orijinal <strong className="text-foreground font-semibold">pasamotor.com.tr</strong> resmî platformumuzdur. İstanbul Fatih'te TVS, Falcon, Işıldar ve Moto Lux yetkili teknik servis ve orijinal yedek parça tedarik noktası.
             </p>
 
             {/* Yetkili Marka Etiketleri */}
@@ -51,6 +51,7 @@ const Footer = () => {
                   { name: "TVS", style: "border-red-500/20 text-red-600 dark:text-red-400 bg-red-500/5 hover:border-red-500" },
                   { name: "Falcon", style: "border-stone-500/20 text-stone-600 dark:text-stone-400 bg-stone-50/5 hover:border-stone-500" },
                   { name: "Işıldar", style: "border-indigo-500/20 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 hover:border-indigo-500" },
+                  { name: "Moto Lux", style: "border-amber-500/20 text-amber-600 dark:text-amber-400 bg-amber-500/5 hover:border-amber-500" },
                 ].map((brand) => (
                   <span
                     key={brand.name}
@@ -86,9 +87,9 @@ const Footer = () => {
                 { label: "Ana Sayfa", path: "/" },
                 { label: "Hakkımızda", path: "/hakkimizda" },
                 { label: "Hizmetler", path: "/hizmetler" },
+                { label: "Mağaza", path: "/magaza" },
                 { label: "Yedek Parça", path: "/yedek-parca" },
                 { label: "Blog", path: "/blog" },
-                { label: "Galeri", path: "/galeri" },
                 { label: "İletişim", path: "/iletisim" },
               ].map((link) => (
                 <Link

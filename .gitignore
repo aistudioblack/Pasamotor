@@ -29,3 +29,9 @@ reset-*.mjs
 # Build outputs
 dist/
 dist-ssr/
+
+# Temporary and cache folders
+.img_cache/
+.agents/
+bun.lock
+db-check.ts

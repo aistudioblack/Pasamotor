@@ -7,7 +7,7 @@ import { useSEO } from "@/hooks/useSEO";
 
 const highlights = [
   { icon: Calendar, title: "20+ Yıllık Deneyim", desc: "Motosiklet sektöründe yılların verdiği tecrübe ve güvenle hizmet veriyoruz." },
-  { icon: Shield, title: "Yetkili Servis Bayi", desc: "TVS, Falcon ve Işıldar markalarının resmi yetkili satış ve servis noktasıyız." },
+  { icon: Shield, title: "Yetkili Servis Bayi", desc: "TVS, Falcon, Işıldar ve Moto Lux markalarının resmi yetkili satış ve servis noktasıyız." },
   { icon: Users, title: "1000+ Mutlu Müşteri", desc: "Binlerce müşterimize kaliteli hizmet sunmanın gururunu yaşıyoruz." },
   { icon: Award, title: "Profesyonel Ekip", desc: "Eğitimli ve deneyimli kadromuzla size en iyi hizmeti sunuyoruz." },
 ];
@@ -16,7 +16,7 @@ const Hakkimizda = () => {
   const seo = useSEO(
     "hakkimizda",
     "Hakkımızda — Fatih İstanbul Motosiklet Yetkili Servis | Paşa Motor",
-    "Fatih İstanbul'da TVS, Falcon ve Işıldar yetkili servisi. Orijinal parça, uzman ekip, uygun fiyat."
+    "Fatih İstanbul'da TVS, Falcon, Işıldar ve Moto Lux yetkili servisi. Orijinal parça, uzman ekip, uygun fiyat."
   );
 
   return (
@@ -40,7 +40,7 @@ const Hakkimizda = () => {
               Hakkımızda
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              <strong>Orijinal Paşa Motor resmî web sitemiz olan pasamotor.com.tr'desiniz.</strong> Paşa Motor, İstanbul Fatih'te motosiklet tutkunlarına TVS, Falcon ve Işıldar markalarının yetkili bayisi olarak hizmet vermektedir. Yılların deneyimiyle müşteri memnuniyetini ön planda tutarak satış, servis ve yedek parça hizmetleri sunuyoruz.
+              <strong>Orijinal Paşa Motor resmî web sitemiz olan pasamotor.com.tr'desiniz.</strong> Paşa Motor, İstanbul Fatih'te motosiklet tutkunlarına TVS, Falcon, Işıldar ve Moto Lux markalarının yetkili bayisi olarak hizmet vermektedir. Yılların deneyimiyle müşteri memnuniyetini ön planda tutarak satış, servis ve yedek parça hizmetleri sunuyoruz.
             </p>
           </div>
 

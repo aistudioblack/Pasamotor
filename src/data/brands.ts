@@ -98,5 +98,15 @@ export const BRANDS: Brand[] = [
     popularModels: ["Drift L 125", "Nevada 250", "Vulture", "Rival"],
     seoTitle: "Mondial Motosiklet Yedek Parça İstanbul — Paşa Motor",
     seoDescription: "İstanbul Fatih Mondial yedek parça ve profesyonel servis. Orijinal ve yan sanayi parça seçenekleri. Türkiye geneline kargo. WhatsApp: 0534 899 68 17"
-  }
+  },  {
+    slug: "motolux",
+    name: "Moto Lux",
+    desc: "Yenilikçi elektrikli ve benzinli motosiklet modelleri",
+    isAuthorized: true,
+    badge: "Yetkili Servis",
+    popularParts: ["Akü & Şarj Cihazı", "Fren Balatası", "Kayış", "Beyin / CDI", "Lastik", "Amortisör"],
+    popularModels: ["F5", "F7", "Macaron", "Rossi RS", "CEO 110", "Fayton", "Tubus"],
+    seoTitle: "Moto Lux Motosiklet Yetkili Servis İstanbul — Paşa Motor",
+    seoDescription: "İstanbul Fatih Moto Lux yetkili servisi. Orijinal Moto Lux yedek parça, akü, periyodik bakım ve garanti hizmetleri. Türkiye geneline kargo. WhatsApp: 0534 899 68 17"
+  },
 ];

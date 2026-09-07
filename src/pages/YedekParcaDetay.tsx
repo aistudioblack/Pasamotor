@@ -16,6 +16,10 @@ import {
   ChevronRight,
   Maximize2,
   Loader2,
+  ShoppingBag,
+  Plus,
+  Minus,
+  Check,
 } from "lucide-react";
 import { sanitizeHtml } from "@/lib/sanitize";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
@@ -23,6 +27,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import type { Tables } from "@/lib/db-types";
 import ProductImagePlaceholder from "@/components/ui/ProductImagePlaceholder";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { useCart } from "@/context/CartContext";
 
 type Product = Tables<"products">;
 
@@ -33,6 +38,8 @@ const YedekParcaDetay = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isMainImageLoaded, setIsMainImageLoaded] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const { addItem, openCart } = useCart();
 
   useEffect(() => {
     setIsMainImageLoaded(false);
@@ -210,7 +217,7 @@ const YedekParcaDetay = () => {
             {/* Left Column: Images (Sticky Area) */}
             <div className="lg:col-span-5 lg:sticky lg:top-32 space-y-4">
               <div
-                className="relative aspect-square rounded-2xl overflow-hidden bg-white border border-border/80 group shadow-sm cursor-zoom-in"
+                className="relative aspect-square rounded-2xl overflow-hidden bg-slate-950 border border-border/80 group shadow-sm cursor-zoom-in"
                 onClick={() =>
                   product?.images?.length ? setIsLightboxOpen(true) : null
                 }
@@ -332,35 +339,102 @@ const YedekParcaDetay = () => {
                 )}
               </div>
 
-              {/* Premium CRO Buy Area - High Conversion Design */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 pb-10 border-b border-border/60">
-                <a
-                  href={`https://wa.me/905348996817?text=${encodeURIComponent(`Merhaba, web sitenizden "${product.title}" ürünü için Şasi numaramla uyumluluk ve sipariş bilgisi almak istiyorum. ${product.sku ? "Ürün Kodu: " + product.sku : ""} ${product.price ? "(Fiyat: " + product.price + " TL)" : ""}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex text-center justify-center items-center gap-3 px-6 h-16 rounded-xl font-bold text-base transition-all hover:scale-[1.02] shadow-xl shadow-emerald-500/10 active:scale-[0.98] border border-emerald-600/30 group"
-                  style={{ backgroundColor: "#25D366", color: "#fff" }}
-                >
-                  <MessageCircle className="w-6 h-6 fill-white" />
-                  <div className="flex flex-col items-start leading-tight">
-                    <span>Şasi No İle Sor & Sipariş Ver</span>
-                    <span className="text-[11px] font-medium opacity-90">
-                      WhatsApp Hızlı Destek Hattı
-                    </span>
+              {/* Premium CRO Buy & Cart Area */}
+              <div className="space-y-4 mb-10 pb-10 border-b border-border/60">
+                {/* Quantity & Add to Cart Row */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  {/* Quantity selector */}
+                  <div className="flex items-center justify-between sm:justify-center rounded-2xl border border-border/80 bg-card p-1.5 h-14 sm:w-36 shrink-0 shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      disabled={quantity <= 1}
+                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      aria-label="Adet Azalt"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="flex flex-col items-center">
+                      <span className="font-heading font-extrabold text-lg text-foreground leading-none">
+                        {quantity}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold">Adet</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Adet Artır"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
                   </div>
-                </a>
-                <a
-                  href="tel:+905348996817"
-                  className="flex text-center justify-center items-center gap-3 px-6 h-16 rounded-xl bg-primary text-primary-foreground font-bold text-base hover:bg-primary/90 transition-all hover:scale-[1.02] shadow-lg active:scale-[0.98]"
-                >
-                  <Phone className="w-6 h-6" />
-                  <div className="flex flex-col items-start leading-tight">
-                    <span>Müşteri Temsilcisini Ara</span>
-                    <span className="text-[11px] font-medium opacity-90">
-                      0534 899 68 17
-                    </span>
-                  </div>
-                </a>
+
+                  {/* Add to Cart Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!product) return;
+                      const primaryImg =
+                        product.images && product.images.length > 0
+                          ? product.images[0]
+                          : "/pasa-motor-logo.webp";
+                      addItem(
+                        {
+                          id: `part_${product.id}`,
+                          productId: product.id,
+                          title: product.title,
+                          price: product.price ?? null,
+                          originalPrice: product.original_price ?? null,
+                          image: primaryImg,
+                          sku: product.sku ?? null,
+                          brand: product.brand,
+                          category: product.category,
+                          type: "yedek-parca",
+                          slug: product.slug,
+                          url: `/yedek-parca/${product.slug}`,
+                        },
+                        quantity
+                      );
+                    }}
+                    className="flex-1 h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-bold text-base flex items-center justify-center gap-2.5 shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    <span>Sepete Ekle</span>
+                  </button>
+                </div>
+
+                {/* Direct WhatsApp Quick Buy and Phone Call Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <a
+                    href={`https://wa.me/905348996817?text=${encodeURIComponent(`Merhaba, web sitenizden ${product.title} urunu icin sasi numaramla uyumluluk ve ${quantity > 1 ? quantity + " adet " : ""}siparis bilgisi almak istiyorum. ${product.sku ? "Urun Kodu: " + product.sku : ""} ${product.price ? "(Fiyat: " + product.price + " TL)" : ""}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex text-center justify-center items-center gap-3 px-5 h-14 rounded-2xl font-bold text-sm transition-all hover:scale-[1.01] shadow-lg shadow-emerald-500/10 active:scale-[0.98] border border-emerald-600/30 group"
+                    style={{ backgroundColor: "#25D366", color: "#fff" }}
+                  >
+                    <MessageCircle className="w-5 h-5 fill-white shrink-0" />
+                    <div className="flex flex-col items-start leading-tight text-left">
+                      <span>WhatsApp Hızlı Sipariş Ver</span>
+                      <span className="text-[10px] font-medium opacity-90">
+                        Şasi No İle Doğrudan Teyit
+                      </span>
+                    </div>
+                  </a>
+
+                  <a
+                    href="tel:+905348996817"
+                    className="flex text-center justify-center items-center gap-3 px-5 h-14 rounded-2xl bg-card border border-border hover:border-primary/50 text-foreground font-bold text-sm hover:bg-muted/50 transition-all active:scale-[0.98]"
+                  >
+                    <Phone className="w-5 h-5 text-primary shrink-0" />
+                    <div className="flex flex-col items-start leading-tight text-left">
+                      <span>Müşteri Temsilcisini Ara</span>
+                      <span className="text-[10px] font-medium text-muted-foreground">
+                        0534 899 68 17
+                      </span>
+                    </div>
+                  </a>
+                </div>
               </div>
 
               {/* USP (Unique Selling Proposition) Corporate Badges */}

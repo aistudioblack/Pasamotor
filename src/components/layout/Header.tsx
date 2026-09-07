@@ -1,22 +1,24 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X, Phone, ShoppingBag } from "lucide-react";
 import logo from "@/assets/pasa-motor-logo.webp";
 import { motion, AnimatePresence } from "motion/react";
+import { useCart } from "@/context/CartContext";
 
 const navLinks = [
   { label: "Ana Sayfa", path: "/" },
   { label: "Hakkımızda", path: "/hakkimizda" },
   { label: "Hizmetler", path: "/hizmetler" },
+  { label: "Mağaza", path: "/magaza" },
   { label: "Yedek Parça", path: "/yedek-parca" },
   { label: "Blog", path: "/blog" },
-  { label: "Galeri", path: "/galeri" },
   { label: "İletişim", path: "/iletisim" },
 ];
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { totalItems, openCart } = useCart();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
@@ -24,15 +26,14 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Brand */}
           <Link to="/" className="flex items-center gap-3 group shrink-0" aria-label="Paşa Motor - Ana sayfa">
-            <motion.img
-              src={logo}
+            <motion.img src={logo} onError={(e) => { e.currentTarget.src = "/pasa-motor-logo.webp"; }}
               alt="Paşa Motor"
               loading="eager"
               decoding="sync"
               width={160}
               height={56}
               className="h-11 w-auto md:h-14 object-contain drop-shadow-xl"
-              style={{ mixBlendMode: "screen" }}
+              
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
@@ -90,6 +91,25 @@ const Header = () => {
 
           {/* Right actions */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* Cart Button */}
+            <motion.button
+              onClick={openCart}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative p-2.5 rounded-full bg-card/80 border border-border/80 hover:border-primary/50 text-foreground hover:text-primary transition-all flex items-center justify-center shadow-sm group"
+              aria-label={`Sepeti Aç (${totalItems} ürün)`}
+              title="Alışveriş Sepeti"
+            >
+              <ShoppingBag className="w-5 h-5 transition-transform group-hover:-rotate-6" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-primary-foreground text-[11px] font-mono font-bold flex items-center justify-center shadow-md shadow-primary/40 animate-pulse">
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              )}
+            </motion.button>
+
             <motion.a
               href="tel:+902125868598"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -140,6 +160,22 @@ const Header = () => {
                   {link.label}
                 </Link>
               ))}
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  openCart();
+                }}
+                className="flex items-center justify-between px-4 py-3 rounded-xl bg-card border border-border/80 text-sm font-semibold text-foreground hover:border-primary/50 transition-all mt-1"
+              >
+                <div className="flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-primary" />
+                  <span>Alışveriş Sepetim</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-mono text-xs font-bold">
+                  {totalItems} Ürün
+                </span>
+              </button>
+
               <a
                 href="tel:+902125868598"
                 className="mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm"

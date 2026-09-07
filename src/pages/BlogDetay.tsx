@@ -14,7 +14,6 @@ import { getCachedPostBySlug, addPostToCache, getCachedPosts } from "@/lib/blog-
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { getPostCoverImage } from "@/lib/blog-helpers";
 
 type Post = Tables<"posts">;
@@ -302,7 +301,7 @@ const BlogDetay = () => {
         logo: { "@type": "ImageObject", url: `${origin}/favicon.png` },
       },
     };
-  }, [post]);
+  }, [post, coverImg]);
 
   const faqSchema = useMemo(() => {
     if (!post?.content) return null;
@@ -517,15 +516,18 @@ const BlogDetay = () => {
       {/* Cover Image Container */}
       <div className="container mx-auto px-4 max-w-5xl -mt-16 md:-mt-24 mb-16 relative z-10">
         <div className="rounded-2xl md:rounded-3xl overflow-hidden border border-border/80 bg-slate-950/90 aspect-[16/9] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center">
-          <ImageWithFallback
+          <img
             src={coverImg}
             alt={post.title}
             width={1200}
             height={675}
-            className="max-w-full max-h-full object-contain hover:scale-[1.01] transition-transform duration-700"
+            className="w-full h-full object-cover object-center hover:scale-[1.01] transition-transform duration-700"
             loading="eager"
             decoding="sync"
             {...{ fetchpriority: "high" }}
+            onError={(e) => { e.currentTarget.onerror = null;
+              e.currentTarget.src = "/placeholder.webp";
+            }}
           />
         </div>
       </div>
@@ -667,7 +669,7 @@ const BlogDetay = () => {
                       th: ({node, ...props}) => <th className="border border-border px-4 py-2 text-left font-semibold text-foreground" {...props} />,
                       td: ({node, ...props}) => <td className="border border-border px-4 py-2 text-muted-foreground" {...props} />,
                       code: ({node, ...props}) => <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-primary" {...props} />,
-                      img: ({node, ...props}) => <ImageWithFallback {...props} className="w-full h-auto rounded-xl my-6 shadow-md border border-border/50" />,
+                      img: ({node, ...props}) => <img {...props} className="w-full h-auto rounded-xl my-6 shadow-md border border-border/50" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/placeholder.webp"; }} />,
                     }}
                   >
                     {processedContent}
@@ -711,14 +713,17 @@ const BlogDetay = () => {
                   to={`/blog/${r.slug}`}
                   className="group flex flex-col rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 transform hover:-translate-y-1"
                 >
-                  <div className="aspect-[16/10] bg-muted overflow-hidden relative">
-                    <ImageWithFallback 
+                  <div className="aspect-[16/9] bg-slate-950 overflow-hidden relative flex items-center justify-center">
+                    <img 
                       src={getPostCoverImage(r)} 
                       alt={r.title} 
-                      width={400} 
-                      height={250} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      width={1200} 
+                      height={630} 
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" 
                       loading="lazy" 
+                      onError={(e) => { e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/placeholder.webp";
+                      }}
                     />
                     <span className="absolute top-3 left-3 bg-slate-950/70 backdrop-blur-md text-foreground text-[10px] font-bold px-2.5 py-1 rounded-full uppercase border border-border/30">
                       Rehber

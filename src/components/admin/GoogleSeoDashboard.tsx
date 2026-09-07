@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader2, Globe, BarChart2, Activity, ShieldCheck, AlertCircle, Sparkles, ShoppingBag, Terminal, CheckCircle2 } from "lucide-react";
 import { getAccessToken, googleSignIn, initAuth } from "@/lib/googleAuth";
+import { adminFetch } from "@/lib/api-client";
 import { fetchGSCSites, fetchGSCSearchAnalytics, fetchGA4Accounts, fetchGA4Report } from "@/lib/googleSeoService";
 import { toast } from "@/hooks/use-toast";
 import { dbClient } from "@/lib/db-client";

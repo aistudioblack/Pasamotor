@@ -54,7 +54,7 @@ const AdminServices = () => {
 
     if (finalServices.length === 0 || secureStorage.getItem("mig_services_1") !== "true") {
        finalServices = [
-          { id: "srv_sat", title: "Motosiklet Satışı", description: "TVS, Falcon ve Işıldar markalarının en güncel modellerini showroom'umuzda inceleyebilirsiniz. Kredi ve taksit seçenekleri mevcuttur.", iconName: "ShoppingBag", link: "/hizmetler" },
+          { id: "srv_sat", title: "Motosiklet Satışı", description: "TVS, Falcon, Işıldar ve Moto Lux markalarının en güncel modellerini showroom'umuzda inceleyebilirsiniz. Kredi ve taksit seçenekleri mevcuttur.", iconName: "ShoppingBag", link: "/hizmetler" },
           { id: "srv_mot", title: "Motor Servisi", description: "Periyodik bakım, motor revizyon, debriyaj, şanzıman ve genel mekanik onarım hizmetleri sunuyoruz.", iconName: "Wrench", link: "/hizmetler" },
           { id: "srv_ele", title: "Elektrik & Elektronik", description: "Aküden aydınlatmaya, CDI'den beyin arızalarına kadar tüm elektrik sorunlarını çözüyoruz.", iconName: "Zap", link: "/hizmetler" },
           { id: "srv_par", title: "Yedek Parça Satışı", description: "Orijinal ve muadil yedek parçalar geniş stoğumuzda. Bulunmayan parçalar kısa sürede temin edilir.", iconName: "Package", link: "/hizmetler" },

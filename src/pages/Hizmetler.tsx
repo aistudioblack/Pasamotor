@@ -64,7 +64,7 @@ const Hizmetler = () => {
 
           {/* Hero Image */}
           <div className="relative rounded-2xl overflow-hidden mb-16 max-w-4xl mx-auto">
-            <img src={serviceImg} alt="Paşa Motor servis atölyesi" loading="lazy" width={800} height={600} className="w-full h-64 md:h-80 object-cover" />
+            <img src={serviceImg} onError={(e) => { e.currentTarget.src = "/service.webp"; }} alt="Paşa Motor servis atölyesi" loading="lazy" width={800} height={600} className="w-full h-64 md:h-80 object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
             <div className="absolute bottom-6 left-6">
               <p className="font-heading font-bold text-xl text-foreground">Profesyonel Servis</p>

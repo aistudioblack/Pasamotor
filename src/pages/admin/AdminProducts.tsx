@@ -220,9 +220,9 @@ const AdminProducts = () => {
   const [confirmModal, setConfirmModal] = useState<{ id?: string, bulk?: boolean } | null>(null);
   const [lastDocs, setLastDocs] = useState<any[]>([]); // To keep track of cursors for each page
   const [hasMore, setHasMore] = useState(true);
-  const ITEMS_PER_PAGE = 50;
+  const [itemsPerPage, setItemsPerPage] = useState<number>(50);
 
-  const load = async (pageIndex: number = 1) => {
+  const load = async (pageIndex: number = page, limit: number = itemsPerPage) => {
     setLoading(true);
     try {
       let q = supabase
@@ -255,8 +255,8 @@ const AdminProducts = () => {
 
       q = q.order("created_at", { ascending: false });
 
-      const from = (pageIndex - 1) * ITEMS_PER_PAGE;
-      const to = from + ITEMS_PER_PAGE - 1;
+      const from = (pageIndex - 1) * limit;
+      const to = from + limit - 1;
 
       const { data, count, error } = await q.range(from, to);
 
@@ -266,7 +266,7 @@ const AdminProducts = () => {
 
       setItems(newItems || []);
       if (count !== null) setTotalProducts(count);
-      setHasMore((newItems || []).length === ITEMS_PER_PAGE);
+      setHasMore((newItems || []).length === limit);
     } catch (error) {
       console.error("Error loading products:", error);
     } finally {
@@ -275,9 +275,9 @@ const AdminProducts = () => {
   };
 
   useEffect(() => {
-    load(page);
+    load(page, itemsPerPage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, query, brandFilter, categoryFilter, stockFilter, statusFilter]);
+  }, [page, itemsPerPage, query, brandFilter, categoryFilter, stockFilter, statusFilter]);
 
   // Debounced search query handler
   useEffect(() => {
@@ -463,9 +463,9 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
   useEffect(() => {
     setSelected(new Set());
     setIsAllDBSelected(false);
-  }, [page]);
+  }, [page, itemsPerPage]);
 
-  const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(totalProducts / (itemsPerPage || 50)));
   const paginatedItems = filtered;
 
   const toggleSelect = (id: string) => {
@@ -669,23 +669,38 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
 
     setApplyingStock(true);
     try {
-      let q = supabase.from("products").update({ stock: qty });
       let updatedCount = 0;
 
-      if (isAllDBSelected) {
-        q = getFilterQuery(q);
-        const { error } = await q;
-        if (error) throw error;
-        updatedCount = totalProducts;
-      } else if (marginScope === "all") {
-        const { error } = await q;
-        if (error) throw error;
-        updatedCount = totalProducts;
-      } else if (marginScope === "filtered") {
-        q = getFilterQuery(q);
-        const { error } = await q;
-        if (error) throw error;
-        updatedCount = totalProducts;
+      if (isAllDBSelected || marginScope === "all" || marginScope === "filtered") {
+        // Fetch all matching IDs with pagination loop to avoid 1000 row limits
+        const allIds: string[] = [];
+        let offset = 0;
+        const BATCH = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+          let q = supabase.from("products").select("id").range(offset, offset + BATCH - 1);
+          if (isAllDBSelected || marginScope === "filtered") {
+            q = getFilterQuery(q);
+          }
+          const { data, error } = await q;
+          if (error) throw error;
+          if (data && data.length > 0) {
+            allIds.push(...data.map(d => d.id));
+            offset += data.length;
+            if (data.length < BATCH) hasMore = false;
+          } else {
+            hasMore = false;
+          }
+        }
+
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < allIds.length; i += CHUNK_SIZE) {
+          const chunk = allIds.slice(i, i + CHUNK_SIZE);
+          const { error } = await supabase.from("products").update({ stock: qty }).in("id", chunk);
+          if (error) throw error;
+          updatedCount += chunk.length;
+        }
       } else {
         // "selected"
         if (selected.size === 0) {
@@ -694,12 +709,15 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
           return;
         }
         const ids = Array.from(selected);
-        q = q.in("id", ids);
-        const { error } = await q;
-        if (error) throw error;
-        updatedCount = ids.length;
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+          const chunk = ids.slice(i, i + CHUNK_SIZE);
+          const { error } = await supabase.from("products").update({ stock: qty }).in("id", chunk);
+          if (error) throw error;
+          updatedCount += chunk.length;
+        }
       }
-      toast({ title: "Stoklar Güncellendi", description: `${updatedCount} ürünün stoku ${qty} olarak güncellendi.` });
+      toast({ title: "Stoklar Güncellendi", description: `${updatedCount} ürünün stoku ${qty} olarak başarıyla güncellendi.` });
       setBulkStock("");
       setSelected(new Set());
       setIsAllDBSelected(false);
@@ -715,61 +733,112 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
   const applyMargin = async () => {
     const pct = parseFloat(margin.replace(",", "."));
     if (isNaN(pct)) {
-      toast({ title: "Geçerli bir % değeri girin", variant: "destructive" });
+      toast({ title: "Geçerli bir % değeri girin (örn: 30)", variant: "destructive" });
       return;
     }
 
     setApplyingMargin(true);
     try {
-      const factor = 1 + pct / 100;
-      let targets: { id: string; price: number | null }[] = [];
+      const scope = isAllDBSelected ? "all" : marginScope;
+      const ids = Array.from(selected);
 
-      if (isAllDBSelected || marginScope === "all" || marginScope === "filtered") {
-        let q = supabase.from("products").select("id, price");
-        if (isAllDBSelected || marginScope === "filtered") {
-          q = getFilterQuery(q);
+      // Try server-side fast bulk margin endpoint first
+      try {
+        const res = await adminFetch("/api/admin/products/bulk-margin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            percent: pct,
+            ids: scope === "selected" ? ids : undefined,
+            scope,
+            brandFilter: brandFilter || undefined,
+            categoryFilter: categoryFilter || undefined,
+            statusFilter: statusFilter || undefined,
+            stockFilter: stockFilter || undefined,
+            query: query || undefined
+          })
+        });
+
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData.success) {
+            toast({
+              title: "Kâr Marjı Başarıyla Uygulandı",
+              description: resData.message || `${resData.updatedCount} ürünün fiyatına %${pct} kâr marjı eklendi.`
+            });
+            setMargin("");
+            setSelected(new Set());
+            setIsAllDBSelected(false);
+            load();
+            return;
+          }
         }
-        const { data, error } = await q;
-        if (error) throw error;
-        targets = data || [];
-      } else {
-        // selected
+      } catch (apiErr) {
+        console.warn("Backend bulk-margin API fallback to client loop:", apiErr);
+      }
+
+      // Client-side fallback with pagination loop to support all 2600+ items
+      const factor = 1 + pct / 100;
+      const targets: { id: string; price: number | null }[] = [];
+
+      if (scope === "selected") {
         if (selected.size === 0) {
           toast({ title: "Seçili ürün yok", variant: "destructive" });
           setApplyingMargin(false);
           return;
         }
-        const { data, error } = await supabase
-          .from("products")
-          .select("id, price")
-          .in("id", Array.from(selected));
-        if (error) throw error;
-        targets = data || [];
+        for (let i = 0; i < ids.length; i += 1000) {
+          const chunkIds = ids.slice(i, i + 1000);
+          const { data, error } = await supabase.from("products").select("id, price").in("id", chunkIds);
+          if (error) throw error;
+          if (data) targets.push(...data);
+        }
+      } else {
+        let offset = 0;
+        const BATCH = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+          let q = supabase.from("products").select("id, price").range(offset, offset + BATCH - 1);
+          if (scope === "filtered") {
+            q = getFilterQuery(q);
+          }
+          const { data, error } = await q;
+          if (error) throw error;
+          if (data && data.length > 0) {
+            targets.push(...data);
+            offset += data.length;
+            if (data.length < BATCH) hasMore = false;
+          } else {
+            hasMore = false;
+          }
+        }
       }
 
-      const validTargets = targets.filter(p => p.price != null);
+      const validTargets = targets.filter(p => p.price != null && !isNaN(Number(p.price)));
       if (validTargets.length === 0) {
         toast({ title: "Fiyatı olan ürün bulunamadı", variant: "destructive" });
         setApplyingMargin(false);
         return;
       }
 
-      const CHUNK_SIZE = 200;
+      const CHUNK_SIZE = 50;
       let okCount = 0;
 
       for (let i = 0; i < validTargets.length; i += CHUNK_SIZE) {
         const chunk = validTargets.slice(i, i + CHUNK_SIZE);
-        const updates = chunk.map(p => ({
-          id: p.id,
-          price: Math.round((p.price! * factor) * 100) / 100,
-        }));
-
-        const { error } = await supabase.from("products").upsert(updates);
-        if (error) throw error;
-        okCount += updates.length;
+        await Promise.all(
+          chunk.map(p => 
+            supabase.from("products").update({ price: Math.round((Number(p.price) * factor) * 100) / 100 }).eq("id", p.id)
+          )
+        );
+        okCount += chunk.length;
       }
 
-      toast({ title: "Fiyatlar Güncellendi", description: `${okCount} ürünün fiyatı başarıyla güncellendi.` });
+      toast({ 
+        title: "Fiyatlar Güncellendi", 
+        description: `Toplam ${okCount} ürünün fiyatına %${pct} kâr marjı başarıyla uygulandı.` 
+      });
       setMargin("");
       setSelected(new Set());
       setIsAllDBSelected(false);
@@ -792,29 +861,45 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
     setLoading(true);
     try {
       if (confirmModal.bulk) {
-        let q = supabase.from("products").delete();
-        let deletedCount = 0;
+        let allIds: string[] = [];
 
         if (isAllDBSelected) {
-          q = getFilterQuery(q);
-          const { error } = await q;
-          if (error) throw error;
-          deletedCount = totalProducts;
+          let offset = 0;
+          const BATCH = 1000;
+          let hasMore = true;
+          while (hasMore) {
+            let q = supabase.from("products").select("id").range(offset, offset + BATCH - 1);
+            q = getFilterQuery(q);
+            const { data, error } = await q;
+            if (error) throw error;
+            if (data && data.length > 0) {
+              allIds.push(...data.map(d => d.id));
+              offset += data.length;
+              if (data.length < BATCH) hasMore = false;
+            } else {
+              hasMore = false;
+            }
+          }
         } else {
-          const ids = Array.from(selected);
-          q = q.in("id", ids);
-          const { error } = await q;
-          if (error) throw error;
-          deletedCount = ids.length;
+          allIds = Array.from(selected);
         }
 
-        toast({ title: `${deletedCount} ürün silindi` });
+        const CHUNK = 100;
+        let deletedCount = 0;
+        for (let i = 0; i < allIds.length; i += CHUNK) {
+          const chunk = allIds.slice(i, i + CHUNK);
+          const { error } = await supabase.from("products").delete().in("id", chunk);
+          if (error) throw error;
+          deletedCount += chunk.length;
+        }
+
+        toast({ title: `${deletedCount} ürün başarıyla silindi` });
         setSelected(new Set());
         setIsAllDBSelected(false);
       } else if (confirmModal.id) {
         const { error } = await supabase.from("products").delete().eq("id", confirmModal.id);
         if (error) throw error;
-        toast({ title: "Silindi" });
+        toast({ title: "Ürün silindi" });
       }
     } catch (error: any) {
       toast({ title: "Hata", description: error.message, variant: "destructive" });
@@ -829,23 +914,39 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
     if (selected.size === 0 && !isAllDBSelected) return;
     setLoading(true);
     try {
-      let q = supabase.from("products").update({ is_active: isActive });
-      let updatedCount = 0;
+      let allIds: string[] = [];
 
       if (isAllDBSelected) {
-        q = getFilterQuery(q);
-        const { error } = await q;
-        if (error) throw error;
-        updatedCount = totalProducts;
+        let offset = 0;
+        const BATCH = 1000;
+        let hasMore = true;
+        while (hasMore) {
+          let q = supabase.from("products").select("id").range(offset, offset + BATCH - 1);
+          q = getFilterQuery(q);
+          const { data, error } = await q;
+          if (error) throw error;
+          if (data && data.length > 0) {
+            allIds.push(...data.map(d => d.id));
+            offset += data.length;
+            if (data.length < BATCH) hasMore = false;
+          } else {
+            hasMore = false;
+          }
+        }
       } else {
-        const ids = Array.from(selected);
-        q = q.in("id", ids);
-        const { error } = await q;
-        if (error) throw error;
-        updatedCount = ids.length;
+        allIds = Array.from(selected);
       }
 
-      toast({ title: `${updatedCount} ürünün durumu güncellendi` });
+      const CHUNK = 100;
+      let updatedCount = 0;
+      for (let i = 0; i < allIds.length; i += CHUNK) {
+        const chunk = allIds.slice(i, i + CHUNK);
+        const { error } = await supabase.from("products").update({ is_active: isActive }).in("id", chunk);
+        if (error) throw error;
+        updatedCount += chunk.length;
+      }
+
+      toast({ title: `${updatedCount} ürünün durumu ${isActive ? 'Aktif' : 'Pasif'} olarak güncellendi` });
       setSelected(new Set());
       setIsAllDBSelected(false);
       load();
@@ -933,8 +1034,8 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           <div>
-            <h1 className="font-heading font-bold text-2xl text-foreground">Ürünler</h1>
-            <p className="text-sm text-muted-foreground">Yedek parça ve ürün yönetimi · Hızlı fiyat & toplu işlem</p>
+            <h1 className="font-heading font-bold text-2xl text-foreground">Yedek Parça & Aksesuar Kataloğu</h1>
+            <p className="text-sm text-muted-foreground">Motosiklet yedek parçaları, sarf malzemeleri, stok takibi ve barkod yönetimi</p>
           </div>
           <div className="flex gap-2">
             <button onClick={() => setIsScanning(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/90">
@@ -974,6 +1075,17 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
               <option value="yedek-parca">Yedek Parça</option>
               <option value="motosiklet">Motosiklet</option>
               <option value="aksesuar">Aksesuar</option>
+              <option value="E-CAR">E-CAR</option>
+              <option value="ENDURO / CROSS">ENDURO / CROSS</option>
+              <option value="CHOPPER">CHOPPER</option>
+              <option value="SCOOTER">SCOOTER</option>
+              <option value="TOURING">TOURING</option>
+              <option value="E-GRUP">E-GRUP</option>
+              <option value="CUB">CUB</option>
+              <option value="E-TRICYCLE">E-TRICYCLE</option>
+              <option value="UTV">UTV</option>
+              <option value="GOLF BUGGY">GOLF BUGGY</option>
+              <option value="ÇOCUK GRUBU">ÇOCUK GRUBU</option>
             </select>
 
             <select
@@ -1273,29 +1385,57 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
             </div>
             
             {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between p-4 border-t border-border bg-muted/20">
-                <p className="text-sm text-muted-foreground">
-                  Toplam {totalProducts} üründen {(page - 1) * ITEMS_PER_PAGE + 1} - {Math.min(page * ITEMS_PER_PAGE, totalProducts)} arası gösteriliyor.
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-border bg-muted/20">
+              <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                <p>
+                  Toplam <strong className="text-foreground">{totalProducts}</strong> üründen{" "}
+                  <strong className="text-foreground">{totalProducts === 0 ? 0 : (page - 1) * itemsPerPage + 1}</strong> -{" "}
+                  <strong className="text-foreground">{Math.min(page * itemsPerPage, totalProducts)}</strong> arası gösteriliyor.
                 </p>
-                <div className="flex gap-1">
+                
+                <div className="flex items-center gap-1.5 ml-0 sm:ml-2 pl-0 sm:pl-3 border-l-0 sm:border-l border-border">
+                  <span className="text-xs">Sayfa Başına:</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      const newLimit = Number(e.target.value);
+                      setItemsPerPage(newLimit);
+                      setPage(1);
+                    }}
+                    className="px-2 py-1 rounded bg-background border border-border text-foreground text-xs font-semibold focus:ring-1 focus:ring-primary outline-none cursor-pointer"
+                  >
+                    <option value={50}>50 Ürün</option>
+                    <option value={100}>100 Ürün</option>
+                    <option value={250}>250 Ürün</option>
+                    <option value={500}>500 Ürün</option>
+                  </select>
+                </div>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <button
                     disabled={page === 1}
                     onClick={() => setPage(page - 1)}
-                    className="px-3 py-1 rounded bg-secondary text-secondary-foreground disabled:opacity-50 text-sm"
+                    className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground disabled:opacity-40 text-xs font-semibold hover:bg-secondary/80 transition-all cursor-pointer"
                   >
                     Önceki
                   </button>
+
+                  <span className="text-xs font-mono font-bold px-2 py-1 bg-background rounded border border-border text-foreground">
+                    Sayfa {page} / {totalPages}
+                  </span>
+
                   <button
-                    disabled={!hasMore}
+                    disabled={!hasMore || page >= totalPages}
                     onClick={() => setPage(page + 1)}
-                    className="px-3 py-1 rounded bg-secondary text-secondary-foreground disabled:opacity-50 text-sm"
+                    className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground disabled:opacity-40 text-xs font-semibold hover:bg-secondary/80 transition-all cursor-pointer"
                   >
                     Sonraki
                   </button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -1329,6 +1469,17 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
                     <option value="yedek-parca">Yedek Parça</option>
                     <option value="motosiklet">Motosiklet</option>
                     <option value="aksesuar">Aksesuar</option>
+                    <option value="E-CAR">E-CAR</option>
+                    <option value="ENDURO / CROSS">ENDURO / CROSS</option>
+                    <option value="CHOPPER">CHOPPER</option>
+                    <option value="SCOOTER">SCOOTER</option>
+                    <option value="TOURING">TOURING</option>
+                    <option value="E-GRUP">E-GRUP</option>
+                    <option value="CUB">CUB</option>
+                    <option value="E-TRICYCLE">E-TRICYCLE</option>
+                    <option value="UTV">UTV</option>
+                    <option value="GOLF BUGGY">GOLF BUGGY</option>
+                    <option value="ÇOCUK GRUBU">ÇOCUK GRUBU</option>
                   </select>
                 </div>
               </div>

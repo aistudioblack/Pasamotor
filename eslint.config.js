@@ -29,7 +29,8 @@ export default [
       "@typescript-eslint/no-empty-object-type": "off",
       "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-require-imports": "off",
-      "no-empty": "warn"
+      "no-empty": "warn",
+      "security/detect-object-injection": "off"
     },
   })
 ];

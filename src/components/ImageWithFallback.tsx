@@ -26,15 +26,21 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const [currentSrc, setCurrentSrc] = useState<string | undefined>(src ? String(src) : undefined);
 
   useEffect(() => {
-    if (src && String(src).trim() !== '') {
-      setCurrentSrc(String(src));
+    const srcStr = src ? String(src).trim() : '';
+    const isInvalid = !srcStr || srcStr.includes('nophoto') || srcStr.includes('placeholder.png') || srcStr === 'null' || srcStr === 'undefined';
+    
+    if (!isInvalid) {
+      setCurrentSrc(srcStr);
       setFallbackIndex(-1);
     } else {
-      // src missing initially, start with first fallback candidate
-      setCurrentSrc(DEFAULT_FALLBACK_IMAGES[0]);
-      setFallbackIndex(0);
+      if (fallbackIcon) {
+        setCurrentSrc(undefined);
+      } else {
+        setCurrentSrc(DEFAULT_FALLBACK_IMAGES[0]);
+        setFallbackIndex(0);
+      }
     }
-  }, [src]);
+  }, [src, fallbackIcon]);
 
   const handleError = () => {
     const nextIndex = fallbackIndex + 1;
@@ -48,6 +54,9 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   };
 
   if (!currentSrc) {
+    if (fallbackIcon) {
+      return <>{fallbackIcon}</>;
+    }
     return (
       <div 
         className={cn(

@@ -7,7 +7,6 @@ import type { Tables } from "@/lib/db-types";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCachedPosts, setCachedPosts } from "@/lib/blog-cache";
-import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { getPostCoverImage } from "@/lib/blog-helpers";
 
 type Post = Tables<"posts">;
@@ -221,19 +220,23 @@ const Blog = () => {
                   to={`/blog/${featured.slug}`}
                   className="group block rounded-3xl overflow-hidden bg-card border border-border hover:border-primary/40 transition-all duration-500 mb-12 lg:mb-16"
                 >
-                  <div className="grid grid-cols-1 lg:grid-cols-2">
-                    <div className="relative aspect-[16/10] lg:aspect-auto lg:min-h-[420px] overflow-hidden bg-muted">
-                      <ImageWithFallback
+                  <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
+                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-950 flex items-center justify-center">
+                      <img
                         src={getPostCoverImage(featured)}
                         alt={featured.title}
                         width={1200}
-                        height={800}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                        height={675}
+                        className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-700"
                         loading="eager"
                         decoding="sync"
                         {...{ fetchpriority: "high" }}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/placeholder.webp";
+                        }}
                       />
-                      <span className="absolute top-5 left-5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold tracking-wide">
+                      <span className="absolute top-5 left-5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold tracking-wide shadow-md z-10">
                         ÖNE ÇIKAN
                       </span>
                     </div>
@@ -274,14 +277,18 @@ const Blog = () => {
                     to={`/blog/${post.slug}`}
                     className="group flex flex-col rounded-3xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 shadow-sm hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.2)] transition-all duration-300 hover:-translate-y-1"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                      <ImageWithFallback
+                    <div className="relative aspect-[16/9] overflow-hidden bg-slate-950 flex items-center justify-center">
+                      <img
                         src={getPostCoverImage(post)}
                         alt={post.title}
-                        width={600}
-                        height={450}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                        width={1200}
+                        height={630}
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-in-out"
                         loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/placeholder.webp";
+                        }}
                       />
                     </div>
                     <div className="p-6 md:p-8 flex flex-col flex-1">

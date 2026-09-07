@@ -770,3 +770,67 @@ html {
   color: #ffffff !important;
   text-decoration: none !important;
 }
+
+/* ==========================================================================
+   3D SHOWROOM TURNTABLE & ROTATING RED LED LIGHT RING ANIMATIONS
+   ========================================================================== */
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinSlowReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes redNeonPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px #ef4444) drop-shadow(0 0 35px #dc2626) brightness(1.2);
+    opacity: 0.9;
+  }
+  50% {
+    filter: drop-shadow(0 0 25px #ff1a1a) drop-shadow(0 0 60px #ef4444) drop-shadow(0 0 90px #b91c1c) brightness(1.6);
+    opacity: 1;
+  }
+}
+
+@keyframes redGlowBreathing {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+.animate-spin-led {
+  animation: spinSlow 5s linear infinite;
+}
+
+.animate-spin-led-fast {
+  animation: spinSlow 3s linear infinite;
+}
+
+.animate-spin-led-reverse {
+  animation: spinSlowReverse 6s linear infinite;
+}
+
+.animate-red-neon-pulse {
+  animation: redNeonPulse 3s ease-in-out infinite;
+}
+
+.animate-red-breathing {
+  animation: redGlowBreathing 4s ease-in-out infinite;
+}
+

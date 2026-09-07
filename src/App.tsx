@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Analytics } from "@vercel/analytics/react";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import { CartProvider } from "@/context/CartContext";
 import Index from "./pages/Index";
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -44,7 +45,8 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const Hakkimizda = lazy(() => import("./pages/Hakkimizda"));
 const Hizmetler = lazy(() => import("./pages/Hizmetler"));
-const Galeri = lazy(() => import("./pages/Galeri"));
+const Magaza = lazy(() => import("./pages/Magaza"));
+const MagazaDetay = lazy(() => import("./pages/MagazaDetay"));
 const Iletisim = lazy(() => import("./pages/Iletisim"));
 const YedekParca = lazy(() => import("./pages/YedekParca"));
 const YedekParcaDetay = lazy(() => import("./pages/YedekParcaDetay"));
@@ -59,6 +61,7 @@ const MondialServis = lazy(() => import("./pages/seo/MondialServis"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminMotorcycles = lazy(() => import("./pages/admin/AdminMotorcycles"));
 const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
 const AdminPosts = lazy(() => import("./pages/admin/AdminPosts"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
@@ -81,7 +84,17 @@ const AdminServiceRepair = lazy(() => import("./pages/admin/AdminServiceRepair")
 const AdminPages = lazy(() => import("./pages/admin/AdminPages"));
 const AdminPopup = lazy(() => import("./pages/admin/AdminPopup"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 30, // 30 saniye boyunca taze sayılır
+      gcTime: 1000 * 60 * 60 * 24, // 24 saat önbellek hafızada tutulur
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      retry: 2,
+    },
+  },
+});
 
 const PageLoader = () => (
   <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -93,62 +106,67 @@ const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Analytics />
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <ScrollToTop />
-          <ErrorBoundary>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/hakkimizda" element={<Hakkimizda />} />
-                <Route path="/hizmetler" element={<Hizmetler />} />
-                <Route path="/galeri" element={<Galeri />} />
-                <Route path="/iletisim" element={<Iletisim />} />
-                <Route path="/yedek-parca" element={<YedekParca />} />
-                <Route path="/tvs-motosiklet-yedek-parca" element={<YedekParca />} />
-                <Route path="/honda-motosiklet-yedek-parca" element={<YedekParca />} />
-                <Route path="/yamaha-motosiklet-yedek-parca" element={<YedekParca />} />
-                <Route path="/falcon-motosiklet-yedek-parca" element={<YedekParca />} />
-                <Route path="/isildar-motosiklet-yedek-parca" element={<YedekParca />} />
-                <Route path="/yedek-parca/:slug" element={<YedekParcaDetay />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogDetay />} />
-                <Route path="/marka/:slug" element={<MarkaDetay />} />
-                <Route path="/sehir/:slug" element={<SehirYedekParca />} />
-                <Route path="/sayfa/:slug" element={<LegalPage />} />
-                <Route path="/kuba-motor-yetkili-servis" element={<KubaServis />} />
-                <Route path="/rks-motor-yetkili-servis" element={<RksServis />} />
-                <Route path="/mondial-motor-yetkili-servis" element={<MondialServis />} />
-                <Route path="/admin/giris" element={<AdminLogin />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/urunler" element={<AdminProducts />} />
-                <Route path="/admin/markalar" element={<AdminBrands />} />
-                <Route path="/admin/hizmetler" element={<AdminServices />} />
-                <Route path="/admin/servis-tamir" element={<AdminServiceRepair />} />
-                <Route path="/admin/blog" element={<AdminPosts />} />
-                <Route path="/admin/blog-ajani" element={<AdminBlogAgent />} />
-                <Route path="/admin/notlar" element={<AdminNotes />} />
-                <Route path="/admin/sayfalar" element={<AdminPages />} />
-                <Route path="/admin/popup" element={<AdminPopup />} />
-                <Route path="/admin/mesajlar" element={<AdminMessages />} />
-                <Route path="/admin/galeri" element={<AdminGallery />} />
-                <Route path="/admin/faq" element={<AdminFAQ />} />
-                <Route path="/admin/animasyonlar" element={<AdminAnimations />} />
-                <Route path="/admin/ayarlar" element={<AdminSettings />} />
-                <Route path="/admin/tedarikciler" element={<AdminSuppliers />} />
-                <Route path="/admin/kullanicilar" element={<AdminUsers />} />
-                <Route path="/admin/api" element={<AdminAPI />} />
-                <Route path="/admin/yapay-zeka-test" element={<AdminAITester />} />
-                <Route path="/admin/changelog" element={<AdminChangelog />} />
-                <Route path="/admin/github" element={<AdminGithub />} />
-                <Route path="/admin/veritabani" element={<AdminDatabase />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
-        </BrowserRouter>
+        <CartProvider>
+          <Toaster />
+          <Sonner />
+          <Analytics />
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <ScrollToTop />
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/hakkimizda" element={<Hakkimizda />} />
+                  <Route path="/hizmetler" element={<Hizmetler />} />
+                  <Route path="/magaza" element={<Magaza />} />
+                  <Route path="/magaza/:slug" element={<MagazaDetay />} />
+                  <Route path="/iletisim" element={<Iletisim />} />
+                  <Route path="/yedek-parca" element={<YedekParca />} />
+                  <Route path="/tvs-motosiklet-yedek-parca" element={<YedekParca />} />
+                  <Route path="/honda-motosiklet-yedek-parca" element={<YedekParca />} />
+                  <Route path="/yamaha-motosiklet-yedek-parca" element={<YedekParca />} />
+                  <Route path="/falcon-motosiklet-yedek-parca" element={<YedekParca />} />
+                  <Route path="/isildar-motosiklet-yedek-parca" element={<YedekParca />} />
+                  <Route path="/yedek-parca/:slug" element={<YedekParcaDetay />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogDetay />} />
+                  <Route path="/marka/:slug" element={<MarkaDetay />} />
+                  <Route path="/sehir/:slug" element={<SehirYedekParca />} />
+                  <Route path="/sayfa/:slug" element={<LegalPage />} />
+                  <Route path="/kuba-motor-yetkili-servis" element={<KubaServis />} />
+                  <Route path="/rks-motor-yetkili-servis" element={<RksServis />} />
+                  <Route path="/mondial-motor-yetkili-servis" element={<MondialServis />} />
+                  <Route path="/admin/giris" element={<AdminLogin />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/motosikletler" element={<AdminMotorcycles />} />
+                  <Route path="/admin/yedek-parca" element={<AdminProducts />} />
+                  <Route path="/admin/urunler" element={<AdminProducts />} />
+                  <Route path="/admin/markalar" element={<AdminBrands />} />
+                  <Route path="/admin/hizmetler" element={<AdminServices />} />
+                  <Route path="/admin/servis-tamir" element={<AdminServiceRepair />} />
+                  <Route path="/admin/blog" element={<AdminPosts />} />
+                  <Route path="/admin/blog-ajani" element={<AdminBlogAgent />} />
+                  <Route path="/admin/notlar" element={<AdminNotes />} />
+                  <Route path="/admin/sayfalar" element={<AdminPages />} />
+                  <Route path="/admin/popup" element={<AdminPopup />} />
+                  <Route path="/admin/mesajlar" element={<AdminMessages />} />
+                  <Route path="/admin/galeri" element={<AdminGallery />} />
+                  <Route path="/admin/faq" element={<AdminFAQ />} />
+                  <Route path="/admin/animasyonlar" element={<AdminAnimations />} />
+                  <Route path="/admin/ayarlar" element={<AdminSettings />} />
+                  <Route path="/admin/tedarikciler" element={<AdminSuppliers />} />
+                  <Route path="/admin/kullanicilar" element={<AdminUsers />} />
+                  <Route path="/admin/api" element={<AdminAPI />} />
+                  <Route path="/admin/yapay-zeka-test" element={<AdminAITester />} />
+                  <Route path="/admin/changelog" element={<AdminChangelog />} />
+                  <Route path="/admin/github" element={<AdminGithub />} />
+                  <Route path="/admin/veritabani" element={<AdminDatabase />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
+          </BrowserRouter>
+        </CartProvider>
       </TooltipProvider>
     </QueryClientProvider>
   </HelmetProvider>

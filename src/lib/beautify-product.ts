@@ -17,8 +17,10 @@ export function beautifyProduct(manufacturer: string, oemCode: string, rawName: 
   let mRaw = (rawName || "").trim();
 
   // Marka adını ve kodu ham isimden temizleyelim (çiftleme olmaması için)
-  const cleanRegexM = new RegExp(mBrand.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
-  const cleanRegexC = new RegExp(mCode.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+    // eslint-disable-next-line security/detect-non-literal-regexp
+const cleanRegexM = new RegExp(mBrand.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+    // eslint-disable-next-line security/detect-non-literal-regexp
+const cleanRegexC = new RegExp(mCode.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
   mRaw = mRaw.replace(cleanRegexM, "").replace(cleanRegexC, "").replace(/\s+/g, " ").trim();
 
   // Türkçe motosiklet yedek parça sözlüğü (En çok kullanılan birleştirilmiş kelimeler)
@@ -144,6 +146,7 @@ export function beautifyProduct(manufacturer: string, oemCode: string, rawName: 
 
   const matchedBrands: string[] = [];
   majorBrands.forEach(b => {
+        // eslint-disable-next-line security/detect-non-literal-regexp
     const rx = new RegExp(`\\b${b.key}\\b`, 'i');
     if (rx.test(rawLower)) {
       matchedBrands.push(b.name);
@@ -153,6 +156,7 @@ export function beautifyProduct(manufacturer: string, oemCode: string, rawName: 
   // Uyumlu model listesi temizlenmesi
   let cleanModelsStr = mRaw;
   partNouns.forEach(item => {
+        // eslint-disable-next-line security/detect-non-literal-regexp
     const rx = new RegExp(item.key.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
     cleanModelsStr = cleanModelsStr.replace(rx, "");
   });

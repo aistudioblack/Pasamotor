@@ -43,16 +43,22 @@ CREATE POLICY "Users can update own data" ON public.users
   FOR UPDATE USING (auth.uid() = id);
 
 -- 3f. site_content tablosu (Popup, Hizmetler, Duyurular, Markalar, Animasyonlar)
--- Canlı Supabase veritabanında "permission denied for table site_content" hatasını çözmek için:
-GRANT ALL ON TABLE public.site_content TO anon, authenticated, service_role;
-
 ALTER TABLE public.site_content ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow all site_content" ON public.site_content;
+DROP POLICY IF EXISTS "Public read non-sensitive site_content" ON public.site_content;
+DROP POLICY IF EXISTS "Admin full access site_content" ON public.site_content;
 
-CREATE POLICY "Allow all site_content" ON public.site_content
+-- Anonim/Ziyaretçi kullanıcılar sadece hassas olmayan site içeriklerini okuyabilir (Token ve ayarlar gizli kalır)
+CREATE POLICY "Public read non-sensitive site_content" ON public.site_content
+  FOR SELECT
+  TO anon, authenticated
+  USING (page_key NOT IN ('github_settings', 'google_oauth_settings', 'admin_settings'));
+
+-- Tüm yazma ve hassas okuma işlemleri sadece sunucu (service_role) veya yetkili adminler tarafından yapılabilir
+CREATE POLICY "Service role full access site_content" ON public.site_content
   FOR ALL
-  TO anon, authenticated, service_role
+  TO service_role
   USING (true)
   WITH CHECK (true);
 

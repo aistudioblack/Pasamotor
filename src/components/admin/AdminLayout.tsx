@@ -29,7 +29,9 @@ import {
   Github,
   StickyNote,
   Search,
-  Megaphone
+  Megaphone,
+  Gauge,
+  Bot
 } from "lucide-react";
 import logo from "@/assets/pasa-motor-logo.webp";
 
@@ -54,7 +56,9 @@ interface AdminLayoutProps {
   children: ReactNode;
 }
 
-const navGroups = [
+const SUPER_ADMIN_EMAILS = ["ahmetcafoglu@hotmail.com", "pasamotor@gmail.com"];
+
+const navGroups: any[] = [
   {
     title: "Gösterge Paneli",
     icon: LayoutDashboard,
@@ -66,19 +70,21 @@ const navGroups = [
     title: "E-Ticaret & Katalog",
     icon: Package,
     items: [
-      { to: "/admin/urunler", label: "Ürünler", icon: Package },
+      { to: "/admin/motosikletler", label: "Motosiklet & Modeller", icon: Gauge },
+      { to: "/admin/yedek-parca", label: "Yedek Parça Kataloğu", icon: Package },
       { to: "/admin/markalar", label: "Markalar", icon: Store },
       { to: "/admin/hizmetler", label: "Hizmetler", icon: Wrench },
       { to: "/admin/servis-tamir", label: "Servis & Tamir", icon: Briefcase },
     ]
   },
   {
-    title: "İçerik & Иletişim",
+    title: "İçerik & İletişim",
     icon: MessageSquare,
     items: [
-      { to: "/admin/mesajlar", label: "Mesajlar", icon: MessageSquare },
+      { to: "/admin/mesajlar", label: "Mesajlar", icon: MessageSquare, showBadge: true },
       { to: "/admin/faq", label: "Sıkça Sorulan Sorular", icon: HelpCircle },
       { to: "/admin/blog", label: "Blog Yazıları", icon: FileText },
+      { to: "/admin/blog-ajani", label: "AI Blog Ajanı", icon: Bot },
       { to: "/admin/galeri", label: "Medya Galerisi", icon: ImageIcon },
       { to: "/admin/popup", label: "Popup Duyurusu", icon: Megaphone },
       { to: "/admin/sayfalar", label: "Yasal Sayfalar", icon: FileText },
@@ -125,6 +131,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [userRole, setUserRole] = useState("user");
   const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [unreadMessages, setUnreadMessages] = useState<number>(0);
 
   useEffect(() => {
     let mounted = true;
@@ -170,11 +177,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         console.error('Error fetching user role:', userError);
       }
       
-      const role = (userData?.name && ['admin', 'senior_manager', 'manager', 'mechanic', 'editor', 'user'].includes(userData.name))
+      const role = (userData?.name && ['admin', 'senior_manager', 'manager', 'mechanic', 'editor'].includes(userData.name))
         ? userData.name 
         : (userData?.role || 'user');
         
-      const isSuper = currentUser.email === 'ahmetcafoglu@hotmail.com' || currentUser.email === 'pasamotor@gmail.com';
+      const userEmail = (currentUser.email || '').toLowerCase().trim();
+      const isSuper = SUPER_ADMIN_EMAILS.includes(userEmail);
       
       const hasAccess = role === 'admin' || role === 'senior_manager' || role === 'manager' || role === 'mechanic' || role === 'editor' || isSuper;
 
@@ -184,6 +192,22 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         setLoading(false);
       }
     };
+
+    const fetchUnreadCount = async () => {
+      try {
+        const { count, error } = await dbClient
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("is_read", false);
+        if (!error && count !== null && mounted) {
+          setUnreadMessages(count);
+        }
+      } catch (err) {
+        // non-blocking
+      }
+    };
+
+    fetchUnreadCount();
 
     const { data: sub } = dbClient.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -218,7 +242,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     }
   };
 
-  const isSuperAdmin = user?.email === "ahmetcafoglu@hotmail.com";
+  const userEmail = (user?.email || '').toLowerCase().trim();
+  const isSuperAdmin = SUPER_ADMIN_EMAILS.includes(userEmail) || userRole === "super_admin" || userRole === "senior_manager";
   const isSystemRoute = systemRoutes.some((route) => location.pathname.startsWith(route));
 
   if (loading) {
@@ -246,7 +271,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           </p>
           <button
             onClick={handleLogout}
-            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 animate-pulse"
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 animate-pulse cursor-pointer"
           >
             Çıkış Yap
           </button>
@@ -255,8 +280,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     );
   }
 
-  const isActive = (to: string, end?: boolean) =>
-    end ? location.pathname === to : location.pathname.startsWith(to);
+  const isActive = (to: string, end?: boolean) => {
+    if (end || to === "/admin") {
+      return location.pathname === to;
+    }
+    return location.pathname === to || location.pathname.startsWith(to + "/");
+  };
+
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase("tr");
 
   const filteredNavGroups = navGroups
     .map((group) => {
@@ -270,12 +301,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       }
 
       const filteredItems = itemsToFilter.filter((item) =>
-        item.label.toLowerCase().includes(searchQuery.toLowerCase())
+        item.label.toLocaleLowerCase("tr").includes(normalizedQuery)
       );
-      const correctedTitle = group.title === "İçerik & Иletişim" ? "İçerik & İletişim" : group.title;
+
       return {
         ...group,
-        title: correctedTitle,
         items: filteredItems
       };
     })
@@ -320,7 +350,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground hover:text-foreground font-semibold px-1 rounded hover:bg-muted transition-colors animate-fade-in"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground hover:text-foreground font-semibold px-1 rounded hover:bg-muted transition-colors animate-fade-in cursor-pointer"
                 title="Aramayı Temizle"
               >
                 ✕
@@ -344,6 +374,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                   <SidebarMenu className="space-y-1">
                     {group.items.map((item) => {
                       const active = isActive(item.to, (item as any).end);
+                      const isMessageItem = item.to === "/admin/mesajlar";
                       return (
                         <SidebarMenuItem key={item.to}>
                           <SidebarMenuButton 
@@ -356,9 +387,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                                 : "text-muted-foreground/90 hover:text-foreground hover:bg-muted/85 border-l-2 border-transparent"
                             }`}
                           >
-                            <Link to={item.to} className="w-full flex items-center">
+                            <Link to={item.to} className="w-full flex items-center justify-between">
                               <motion.div
-                                className="flex items-center gap-2.5 w-full"
+                                className="flex items-center gap-2.5 min-w-0"
                                 whileHover={{ x: 3 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
                               >
@@ -368,15 +399,23 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                                     : "text-muted-foreground group-hover/btn:text-foreground group-hover/btn:scale-110"
                                 }`} />
                                 <span className="truncate text-[13px] font-sans">{item.label}</span>
+                              </motion.div>
+
+                              <div className="flex items-center gap-1.5 shrink-0 ml-1">
+                                {isMessageItem && unreadMessages > 0 && (
+                                  <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-primary text-primary-foreground font-mono leading-none shadow-sm animate-pulse">
+                                    {unreadMessages > 99 ? '99+' : unreadMessages}
+                                  </span>
+                                )}
                                 
                                 {active && (
                                   <motion.span 
                                     layoutId="activeGlow"
-                                    className="absolute right-2 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_#ef4444]"
+                                    className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_#ef4444]"
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                   />
                                 )}
-                              </motion.div>
+                              </div>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -424,7 +463,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   onClick={handleLogout} 
-                  className="text-destructive/90 hover:text-destructive hover:bg-destructive/10 group/logout h-9 transition-all"
+                  className="text-destructive/90 hover:text-destructive hover:bg-destructive/10 group/logout h-9 transition-all cursor-pointer"
                 >
                   <LogOut className="w-4 h-4 text-destructive/80 group-hover/logout:text-destructive transition-colors" />
                   <span className="text-xs font-semibold font-sans">Çıkış Yap</span>

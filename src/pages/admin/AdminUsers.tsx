@@ -113,10 +113,11 @@ const AdminUsers = () => {
   };
 
   const handleDelete = async (id: string, email: string) => {
-    if (email === "ahmetcafoglu@hotmail.com") {
+    const superAdmins = ["ahmetcafoglu@hotmail.com", "pasamotor@gmail.com"];
+    if (superAdmins.includes(email.toLowerCase().trim())) {
       toast({ 
         title: "Hata", 
-        description: "Süper Admin (ahmetcafoglu@hotmail.com) yetkisi ve hesabı silinemez ya da değiştirilemez!", 
+        description: `Süper Admin (${email}) yetkisi ve hesabı silinemez ya da değiştirilemez!`, 
         variant: "destructive" 
       });
       return;

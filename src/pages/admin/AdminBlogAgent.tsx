@@ -64,6 +64,7 @@ const humanRefineContent = (html: string): string => {
   ];
   
   for (const filler of fillers) {
+        // eslint-disable-next-line security/detect-non-literal-regexp
     const regex = new RegExp(`(<p>|\\s)*${filler}[^<]*?(</p>|\\s)`, "gi");
     refined = refined.replace(regex, " ");
   }

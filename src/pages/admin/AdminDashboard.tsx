@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { dbClient } from "@/lib/db-client";
 import { supabase } from "@/lib/supabase-client";
 import GoogleSeoDashboard from "@/components/admin/GoogleSeoDashboard";
+import { MOTORCYCLES } from "@/data/motorcycles";
 import {
   Package,
   FileText,
@@ -15,6 +16,7 @@ import {
   Phone,
   Plus,
   Loader2,
+  Gauge
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -96,10 +98,11 @@ const AdminDashboard = () => {
         ]);
 
       setStats([
-        { label: "Toplam Ürün", value: products.count || 0, icon: Package, link: "/admin/urunler", color: "text-primary", bg: "bg-primary/10" },
+        { label: "Motosiklet Modelleri", value: MOTORCYCLES.length, icon: Gauge, link: "/admin/motosikletler", color: "text-red-500", bg: "bg-red-500/10" },
+        { label: "Yedek Parça Stoğu", value: products.count || 0, icon: Package, link: "/admin/yedek-parca", color: "text-primary", bg: "bg-primary/10" },
         { label: "Blog Yazısı", value: posts.count || 0, icon: FileText, link: "/admin/blog", color: "text-secondary", bg: "bg-secondary/10" },
         { label: "Toplam Mesaj", value: messages.count || 0, icon: MessageSquare, link: "/admin/mesajlar", color: "text-accent", bg: "bg-accent/10" },
-        { label: "Galeri Görseli", value: gallery.count || 0, icon: ImageIcon, link: "/admin/galeri", color: "text-primary", bg: "bg-primary/10" },
+        { label: "Galeri Görseli", value: gallery.count || 0, icon: ImageIcon, link: "/admin/galeri", color: "text-emerald-500", bg: "bg-emerald-500/10" },
       ]);
       setUnreadMessages(unread.count || 0);
       setRecentMessages((recentMsgs.data as RecentMessage[]) || []);
@@ -110,11 +113,26 @@ const AdminDashboard = () => {
       setLowStockProducts(lowStockSnap.count || 0);
       setOutOfStockProducts(outOfStockSnap.count || 0);
 
-      // Fetch actual brands distribution dynamically
-      const { data: brandData } = await supabase.from("products").select("brand");
-      if (brandData && brandData.length > 0) {
+      // Fetch actual brands distribution dynamically (pagination loop to cover all products)
+      const allBrands: { brand: string | null }[] = [];
+      let offset = 0;
+      const BATCH = 1000;
+      let hasMore = true;
+      while (hasMore) {
+        const { data, error } = await supabase.from("products").select("brand").range(offset, offset + BATCH - 1);
+        if (error) break;
+        if (data && data.length > 0) {
+          allBrands.push(...data);
+          offset += data.length;
+          if (data.length < BATCH) hasMore = false;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      if (allBrands.length > 0) {
         const counts: Record<string, number> = {};
-        brandData.forEach((p) => {
+        allBrands.forEach((p) => {
           const b = (p.brand || "DİĞER").trim().toUpperCase();
           counts[b] = (counts[b] || 0) + 1;
         });

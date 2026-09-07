@@ -54,6 +54,7 @@ const AdminBrands = () => {
           { id: "brand_tvs", name: "TVS", desc: "Hindistan'ın lider motosiklet üreticisi" },
           { id: "brand_falcon", name: "Falcon", desc: "Güvenilir ve ekonomik motosikletler" },
           { id: "brand_isildar", name: "Işıldar", desc: "Kaliteli Türk motosiklet markası" },
+          { id: "brand_motolux", name: "Motolux", desc: "Yenilikçi elektrikli ve benzinli motosiklet modelleri" },
           { id: "brand_vox", name: "Vox", desc: "Güvenlik, konfor ve şık tasarımı bir arada sunan seçkin motosiklet ve aksesuar markası" },
           { id: "brand_rapidox", name: "RapidoX", desc: "Orijinal ve yüksek kaliteli yedek parçalar sunan lider marka" },
           { id: "brand_honda", name: "Honda", desc: "Dünyaca ünlü yüksek kaliteli Japon motosiklet üreticisi" },

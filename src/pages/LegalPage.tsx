@@ -6,6 +6,7 @@ import SEO from "@/components/seo/SEO";
 import { Loader2 } from "lucide-react";
 import type { Tables } from "@/lib/db-types";
 import { legalDefaults } from "@/data/legalDefaults";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type Page = Tables<"pages">;
 
@@ -120,7 +121,7 @@ export default function LegalPage() {
                        prose-p:text-muted-foreground prose-p:leading-relaxed
                        prose-a:text-primary prose-a:no-underline hover:prose-a:underline
                        prose-strong:text-foreground prose-strong:font-semibold"
-            dangerouslySetInnerHTML={{ __html: page.content || "" }} 
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content || "") }} 
           />
         </article>
       </main>

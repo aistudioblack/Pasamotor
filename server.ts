@@ -2,6 +2,7 @@ import { runAutoSync } from "./src/lib/syncEngine";
 import { CITIES } from "./src/data/cities";
 import { BRANDS } from "./src/data/brands";
 import express from "express";
+import helmet from "helmet";
 import path from "path";
 import cors from "cors";
 import fs from "fs";
@@ -65,10 +66,16 @@ async function requireAdmin(req: any, res: any, next: any) {
     if (!adminClient) return res.status(500).json({ error: 'Admin client not initialized' });
     const { data: { user }, error } = await adminClient.auth.getUser(token);
     if (error || !user) return res.status(401).json({ error: 'Geçersiz token' });
-    let isAdmin = true; // allow all authenticated users in preview (user.email === process.env.ADMIN_EMAIL || user.user_metadata?.role === 'admin');
-    if (!isAdmin) {
-      const { data: dbUser } = await adminClient.from('users').select('role, name').eq('id', user.id).single();
-      if (dbUser && (dbUser.role === 'admin' || dbUser.name === 'admin' || dbUser.name === 'senior_manager')) {
+    let isAdmin = false;
+    const superAdminEmails = (process.env.SUPER_ADMIN_EMAILS || "ahmetcafoglu@hotmail.com,pasamotor@gmail.com")
+      .split(",")
+      .map(e => e.trim().toLowerCase());
+    
+    if (user.email && (user.email.toLowerCase() === (process.env.ADMIN_EMAIL || "").toLowerCase() || superAdminEmails.includes(user.email.toLowerCase()))) {
+      isAdmin = true;
+    } else {
+      const { data: dbUser } = await adminClient.from('users').select('role').eq('id', user.id).single();
+      if (dbUser && (dbUser.role === 'admin' || dbUser.role === 'senior_manager')) {
         isAdmin = true;
       }
     }
@@ -173,7 +180,7 @@ async function generateWithGemini(
     "gemini-3.1-flash-lite",
     "gemini-3.1-pro-preview"
   ];
-  const currentModel = geminiModels[modelIndex] || "gemini-3.5-flash";
+    const currentModel = geminiModels[modelIndex] || "gemini-3.5-flash";
   const searchActive = useSearch && !fallbackToNoSearch;
 
   try {
@@ -228,7 +235,32 @@ async function generateText(prompt: string, isJson: boolean = true, useSearch = 
 import { encrypt, decrypt } from "./src/lib/crypto_util";
 
 const app = express();
-const PORT = 3000;
+
+// High-priority health check endpoints for Cloud Run and container readiness probes
+// Placed before all middlewares so health checks return immediately with zero overhead
+app.get(["/api/health", "/health", "/healthz", "/_health"], (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+let lastSyncCheck = Date.now();
+app.use((req, res, next) => {
+  const now = Date.now();
+  if (now - lastSyncCheck > 30 * 60 * 1000) { // Check every 30 minutes
+    lastSyncCheck = now;
+    // trigger auto sync in background without blocking request
+    runAutoSync().catch(err => console.error("Auto Sync from middleware failed", err));
+  }
+  next();
+});
+
+// Prevent unhandled errors from terminating the container
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Promise Rejection:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
 
 // Security: block access to dotfiles (like .env) and sensitive paths
 app.use((req, res, next) => {
@@ -244,13 +276,33 @@ app.use((req, res, next) => {
 });
 
 // Middleware
+if (process.env.NODE_ENV === "production") {
+  app.use(helmet({
+    contentSecurityPolicy: false, // Prevents iframe blockage for previews
+    crossOriginEmbedderPolicy: false,
+  }));
+}
+
+const allowedOrigins = [
+  process.env.VITE_APP_URL || "http://localhost:3000",
+  "https://pasamotor.com"
+];
+
 app.use(cors({
-  origin: ["https://pasamotor.com.tr", "http://localhost:3000"],
-  methods: ["GET", "POST", "OPTIONS"],
+  origin: (origin, callback) => {
+    // In dev mode or allowed origins, accept
+    if (!origin || process.env.NODE_ENV !== "production" || allowedOrigins.includes(origin) || origin.includes("run.app")) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
 }));
-app.use(express.json({ limit: "1gb" })); // Support large JSON payloads for bulk imports up to 1GB
-app.use(express.urlencoded({ limit: "1gb", extended: true }));
+app.use(express.json({ limit: "10mb" })); // Reduced from 1GB to 10MB to prevent DoS / Memory exhaustion
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // ==========================================
 // Paşa Motor API Endpoints
@@ -275,7 +327,11 @@ const contactSchema = z.object({
 app.post("/api/contact", contactLimiter, async (req, res) => {
   try {
     const validatedData = contactSchema.parse(req.body);
-    const { data, error } = await supabaseAdminInstance.from("messages").insert({
+    const adminClient = getSupabaseAdmin();
+    if (!adminClient) {
+      return res.status(500).json({ error: "Veritabanı bağlantısı kurulamadı." });
+    }
+    const { data, error } = await adminClient.from("messages").insert({
       name: validatedData.name.trim(),
       phone: validatedData.phone.trim(),
       subject: validatedData.subject.trim(),
@@ -311,9 +367,118 @@ app.post("/api/admin/supplier-password", requireAdmin, async (req, res) => {
     
     res.json({ success: true });
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
   }
 });
+
+// Admin Bulk Price Margin Endpoint - Handles all products (>1000) with safe chunked updates
+app.post("/api/admin/products/bulk-margin", requireAdmin, async (req, res) => {
+  try {
+    const { percent, ids, brandFilter, categoryFilter, statusFilter, stockFilter, query, scope } = req.body;
+    const pct = parseFloat(percent);
+    if (isNaN(pct)) {
+      return res.status(400).json({ error: "Geçerli bir yüzde marj değeri girin" });
+    }
+
+    const admin = getSupabaseAdmin();
+    if (!admin) return res.status(500).json({ error: "Veritabanı bağlantı hatası" });
+
+    const factor = 1 + pct / 100;
+    const allTargets: { id: string; price: number | null }[] = [];
+
+    if (scope === "selected" && Array.isArray(ids) && ids.length > 0) {
+      // Fetch selected ids in batches of 1000
+      for (let i = 0; i < ids.length; i += 1000) {
+        const chunkIds = ids.slice(i, i + 1000);
+        const { data, error } = await admin
+          .from("products")
+          .select("id, price")
+          .in("id", chunkIds);
+        if (error) throw error;
+        if (data) allTargets.push(...data);
+      }
+    } else {
+      // Loop with range pagination to fetch ALL matching products without 1000 row limit
+      let offset = 0;
+      const CHUNK = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        let q = admin.from("products").select("id, price").range(offset, offset + CHUNK - 1);
+        
+        if (scope === "filtered" || scope === "all") {
+          if (brandFilter) q = q.eq("brand", brandFilter);
+          if (categoryFilter) q = q.eq("category", categoryFilter);
+          if (statusFilter === "active") q = q.eq("is_active", true);
+          else if (statusFilter === "passive") q = q.eq("is_active", false);
+
+          if (stockFilter === "in_stock") q = q.gt("stock", 0);
+          else if (stockFilter === "low_stock") q = q.gt("stock", 0).lte("stock", 5);
+          else if (stockFilter === "out_of_stock") q = q.eq("stock", 0);
+
+          if (query) {
+            q = q.or(`title.ilike.%${query}%,slug.ilike.%${query}%,sku.ilike.%${query}%`);
+          }
+        }
+
+        const { data, error } = await q;
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allTargets.push(...data);
+          offset += data.length;
+          if (data.length < CHUNK) hasMore = false;
+        } else {
+          hasMore = false;
+        }
+      }
+    }
+
+    const validTargets = allTargets.filter(p => p.price != null && !isNaN(Number(p.price)));
+    if (validTargets.length === 0) {
+      return res.json({ success: true, updatedCount: 0, message: "Fiyatı tanımlı ürün bulunamadı." });
+    }
+
+    // Update in parallel batches of 50
+    const UPDATE_BATCH = 50;
+    let okCount = 0;
+
+    for (let i = 0; i < validTargets.length; i += UPDATE_BATCH) {
+      const chunk = validTargets.slice(i, i + UPDATE_BATCH);
+      await Promise.all(
+        chunk.map(p => {
+          const currentPrice = Number(p.price) || 0;
+          const newPrice = Math.round((currentPrice * factor) * 100) / 100;
+          return admin
+            .from("products")
+            .update({ price: newPrice })
+            .eq("id", p.id);
+        })
+      );
+      okCount += chunk.length;
+    }
+
+    return res.json({
+      success: true,
+      totalFound: allTargets.length,
+      updatedCount: okCount,
+      percent: pct,
+      message: `${okCount} ürünün fiyatına %${pct} kâr marjı başarıyla uygulandı.`
+    });
+  } catch (err: any) {
+    console.error("Bulk margin error:", err);
+    return res.status(500).json({ error: err.message || "Toplu fiyat marjı güncellenirken hata oluştu" });
+  }
+});
+
+    app.get("/api/cron/sync", async (req, res) => {
+      try {
+        const result = await runAutoSync();
+        return res.json(result);
+      } catch (err: any) {
+        return res.status(500).json({ error: err.message });
+      }
+    });
 
     app.post("/api/supplier/fcs-auth", requireAdmin, async (req, res) => {
     try {
@@ -394,7 +559,7 @@ app.post("/api/admin/supplier-password", requireAdmin, async (req, res) => {
       return res.json({ success: true, cookies: allCookies });
     } catch (error: any) { 
       console.error("FCS Auth error:", error);
-      return res.status(500).json({ error: error.message }); 
+      return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." }); 
     }
   });
 
@@ -457,7 +622,7 @@ app.post("/api/admin/supplier-password", requireAdmin, async (req, res) => {
       });
 
       res.json({ success: true, count: mappedProducts.length, data: mappedProducts, totalDataCount: totalDataCount });
-    } catch (error: any) { res.status(500).json({ error: error.message }); }
+    } catch (error: any) { res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." }); }
   });
 
   app.post("/api/supplier/beautify-supabase", requireAdmin, async (req, res) => {
@@ -571,7 +736,7 @@ ${compatibilityHtml}
       res.json({ success: true, message: `${updatedCount} adet yedek parça ürünü kurumsal formata dönüştürüldü ve görselleri tanımlandı!`, updated: updatedCount });
     } catch (error: any) {
       console.error("Supabase beautification error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -772,7 +937,7 @@ ${compatibilityHtml}
       res.json({ url });
     } catch (error: any) {
       console.error("Local Image Save error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -795,13 +960,18 @@ ${compatibilityHtml}
       if (!fs.existsSync(destNewAssets)) fs.mkdirSync(destNewAssets, { recursive: true });
       if (!fs.existsSync(destPublic)) fs.mkdirSync(destPublic, { recursive: true });
 
-      // Uzantıyı mutlaka .webp yapalım
-      const nameWithoutExt = path.parse(fileName).name;
-      const webpFileName = `${nameWithoutExt}.webp`;
+      // Uzantıyı mutlaka .webp yapalım ve path traversal önlemi alalım
+      const safeBaseName = path.basename(fileName).replace(/[^a-zA-Z0-9_-]/g, "_");
+      const webpFileName = `${safeBaseName}.webp`;
 
       const assetPath = path.join(destAssets, webpFileName);
       const newAssetPath = path.join(destNewAssets, webpFileName);
       const publicPath = path.join(destPublic, webpFileName);
+
+      // Path traversal security check (Zero Trust)
+      if (!path.resolve(assetPath).startsWith(destAssets) || !path.resolve(publicPath).startsWith(destPublic)) {
+        return res.status(400).json({ error: "Geçersiz dosya adı formatı." });
+      }
 
       // sharp ile gelen görseli optimize edip webp formatına dönüştürüyoruz (asla kırık/bozuk olmayacak şekilde)
       await sharp(buffer)
@@ -816,7 +986,7 @@ ${compatibilityHtml}
       res.json({ url });
     } catch (error: any) {
       console.error("Local Image Save error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -850,8 +1020,11 @@ ${compatibilityHtml}
         // Ignore the error if the bucket already exists or cannot create
       }
 
+      // Path traversal sanitize for uploaded file name
+      const safeUploadFileName = path.basename(fileName).replace(/[^a-zA-Z0-9_.-]/g, "_");
+
       // Upload file using admin permissions (bypassing RLS)
-      const { data, error: uploadError } = await adminClient.storage.from(bucket).upload(fileName, buffer, {
+      const { data, error: uploadError } = await adminClient.storage.from(bucket).upload(safeUploadFileName, buffer, {
         contentType: "image/webp",
         upsert: true,
       });
@@ -864,22 +1037,26 @@ ${compatibilityHtml}
           if (!fs.existsSync(publicUploadDir)) {
             fs.mkdirSync(publicUploadDir, { recursive: true });
           }
-          const cleanFileName = fileName.replace(/[^a-zA-Z0-9_.-]/g, "_");
+          const cleanFileName = safeUploadFileName;
           const localFilePath = path.join(publicUploadDir, cleanFileName);
+          if (!path.resolve(localFilePath).startsWith(publicUploadDir)) {
+            return res.status(400).json({ error: "Geçersiz dosya adı formatı." });
+          }
+          // eslint-disable-next-line security/detect-non-literal-fs-filename
           fs.writeFileSync(localFilePath, buffer);
           
           return res.json({ success: true, publicUrl: `/images/uploaded/${cleanFileName}` });
         } catch (localErr: any) {
           console.error("Local save fallback error:", localErr);
-          return res.status(500).json({ error: `Görsel yüklenemedi: ${uploadError.message}` });
+          return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
         }
       }
 
-      const { data: pub } = adminClient.storage.from(bucket).getPublicUrl(fileName);
+      const { data: pub } = adminClient.storage.from(bucket).getPublicUrl(safeUploadFileName);
       return res.json({ success: true, publicUrl: pub.publicUrl });
     } catch (error: any) {
       console.error("Image upload endpoint error:", error);
-      return res.status(500).json({ error: error.message || "Görsel yüklenirken sunucu hatası oluştu." });
+      return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -907,10 +1084,10 @@ ${compatibilityHtml}
         return res.status(404).json({ error: "Kullanıcı veritabanında bulunamadı." });
       }
 
-      const requesterEmail = req.user.email;
+      const requesterEmail = (req as any).user.email;
       const targetEmail = dbUser.email;
-      const isRequesterSuperAdmin = requesterEmail === "ahmetcafoglu@hotmail.com";
-      const isTargetSuperAdmin = targetEmail === "ahmetcafoglu@hotmail.com";
+      const isRequesterSuperAdmin = (process.env.SUPER_ADMIN_EMAILS || "ahmetcafoglu@hotmail.com").split(",").includes(requesterEmail);
+      const isTargetSuperAdmin = (process.env.SUPER_ADMIN_EMAILS || "ahmetcafoglu@hotmail.com").split(",").includes(targetEmail);
 
       if (isTargetSuperAdmin && !isRequesterSuperAdmin) {
         return res.status(403).json({ error: "Süper Admin şifresi sadece kendisi tarafından değiştirilebilir!" });
@@ -928,7 +1105,7 @@ ${compatibilityHtml}
       return res.json({ success: true, message: "Kullanıcı şifresi başarıyla güncellendi!" });
     } catch (error: any) {
       console.error("Password change endpoint error:", error);
-      return res.status(500).json({ error: error.message || "Şifre değiştirilirken sunucu hatası oluştu." });
+      return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -949,7 +1126,7 @@ ${compatibilityHtml}
       res.json({ status: "awake", timestamp: new Date().toISOString(), message: "Supabase pinged successfully!" });
     } catch (e: any) {
       console.error("Keep-Alive ping error:", e.message);
-      res.status(500).json({ status: "error", message: e.message });
+      res.status(500).json({ status: "error", message: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -976,7 +1153,7 @@ ${compatibilityHtml}
       return res.json(data || null);
     } catch (e: any) {
       console.error(`Error fetching site_content for ${req.params.page_key}:`, e);
-      return res.status(500).json({ error: e.message });
+      return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -997,7 +1174,7 @@ ${compatibilityHtml}
       return res.json(data || null);
     } catch (e: any) {
       console.error(`Error fetching admin site_content for ${req.params.page_key}:`, e);
-      return res.status(500).json({ error: e.message });
+      return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1043,7 +1220,7 @@ ${compatibilityHtml}
       return res.json({ success: true, data: result });
     } catch (e: any) {
       console.error(`Error saving site_content for ${req.params.page_key}:`, e);
-      return res.status(500).json({ error: e.message });
+      return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1056,11 +1233,11 @@ ${compatibilityHtml}
       }
       const { error } = await adminClient.from("site_content").delete().eq("page_key", page_key);
       if (error) {
-        return res.status(400).json({ error: error.message });
+        return res.status(400).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
       }
       return res.json({ success: true });
     } catch (error: any) {
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1083,10 +1260,32 @@ ${compatibilityHtml}
 
         try {
           const parsed = new URL(url);
-          const host = parsed.hostname;
-          const isInternal = /^127\.|^10\.|^172\.(1[6-9]|2[0-9]|3[0-1])\.|^192\.168\.|localhost/i.test(host);
+          if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+            results.push({ url, status: "error", message: "Yalnızca HTTP/HTTPS protokolleri desteklenmektedir." });
+            continue;
+          }
+          const host = parsed.hostname.toLowerCase();
+          const isInternal = (
+            host === "localhost" ||
+            host === "127.0.0.1" ||
+            host === "0.0.0.0" ||
+            host === "::1" ||
+            host === "[::1]" ||
+            host === "metadata.google.internal" ||
+            host.endsWith(".internal") ||
+            host.endsWith(".local") ||
+            host.endsWith(".localhost") ||
+            /^127\./.test(host) ||
+            /^10\./.test(host) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+            /^192\.168\./.test(host) ||
+            /^169\.254\./.test(host) ||
+            /^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(host) ||
+            /^fc00:/i.test(host) ||
+            /^fe80:/i.test(host)
+          );
           if (isInternal) {
-             results.push({ url, status: "error", message: "İç ağ (Internal Network) istekleri güvenlik nedeniyle engellenmiştir." });
+             results.push({ url, status: "error", message: "İç ağ (Internal Network) ve Cloud Metadata istekleri güvenlik nedeniyle engellenmiştir." });
              continue;
           }
         } catch (e) {
@@ -1171,7 +1370,7 @@ ${compatibilityHtml}
       res.json({ results });
     } catch (error: any) {
       console.error("Competitor Analysis endpoint error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1183,7 +1382,7 @@ ${compatibilityHtml}
       res.json({ text });
     } catch (error: any) {
       console.error("API AI Generate error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1313,7 +1512,7 @@ ${compatibilityHtml}
       res.json({ image: "/placeholder.webp" });
     } catch (error: any) {
       console.error("API AI Generate Image error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1365,7 +1564,7 @@ Sadece geçerli JSON döndür, yorum ekleme.`;
         searchKeyword: "balata debriyaj"
       });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1380,7 +1579,7 @@ Sadece geçerli JSON döndür, yorum ekleme.`;
       const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanText}&tl=tr&client=tw-ob`;
       res.json({ audioUrl: ttsUrl });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1748,7 +1947,7 @@ KURALLAR:
       res.json({ success: true, ...results });
     } catch (error: any) {
       console.error("AI SEO Agent Error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
     */
   });
@@ -1792,7 +1991,7 @@ KURALLAR:
       
     } catch (error: any) {
       console.error("POST /api/github/push error:", error);
-      res.status(500).json({ error: error.message || "Bilinmeyen SDK Hatası" });
+      res.status(500).json({ error: error?.message || "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1804,7 +2003,7 @@ KURALLAR:
       res.json({ success: true, results: status });
     } catch (error: any) {
       console.error("SEO Ping API Error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1822,7 +2021,7 @@ KURALLAR:
       res.json({ success: true, message: "Sitemap cron job ping executed successfully.", results: status });
     } catch (error: any) {
       console.error("GET /api/seo/cron/sitemap error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1834,7 +2033,7 @@ KURALLAR:
       res.json({ success: true, message: "Supplier auto-sync triggered in background." });
     } catch (error: any) {
       console.error("GET /api/supplier/cron/sync error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1907,12 +2106,11 @@ KURALLAR:
       if (inPostRes.ok) {
         res.json({ success: true, message: "URLs başarıyla IndexNow'a bildirildi.", urls });
       } else {
-        const text = await inPostRes.text();
-        res.status(500).json({ error: `IndexNow API Hatası: HTTP ${inPostRes.status} - ${text}` });
+        res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
       }
     } catch (error: any) {
       console.error("POST /api/seo/notify-url error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -1985,7 +2183,7 @@ KURALLAR:
       
     } catch (error: any) {
       console.error("POST /api/external/draft-blog error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -2003,7 +2201,12 @@ KURALLAR:
       // Allow fetching single post by slug if provided as query param, else fetch all
       const slugQuery = req.query.slug as string;
       
-      let query = supabaseAdminInstance.from('posts').select('id, title, slug, excerpt, content, meta_title, meta_description, cover_image, is_published, created_at').order('created_at', { ascending: false });
+      const adminClient = getSupabaseAdmin();
+      if (!adminClient) {
+        return res.status(500).json({ error: "Database not connected" });
+      }
+
+      let query = adminClient.from('posts').select('id, title, slug, excerpt, content, meta_title, meta_description, cover_image, is_published, created_at').order('created_at', { ascending: false });
       
       if (slugQuery) {
         query = query.eq('slug', slugQuery);
@@ -2020,7 +2223,7 @@ KURALLAR:
       
     } catch (error: any) {
       console.error("GET /api/external/posts error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -2043,8 +2246,8 @@ KURALLAR:
       const payload: any = {};
       
       for (const field of allowedFields) {
-        if (updateData[field] !== undefined) {
-          payload[field] = updateData[field];
+                      if (updateData[field] !== undefined) {
+                            payload[field] = updateData[field];
         }
       }
 
@@ -2060,7 +2263,7 @@ KURALLAR:
         .single();
         
       if (error) {
-         return res.status(500).json({ error: error.message });
+         return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
       }
       
       if (!data) {
@@ -2075,7 +2278,7 @@ KURALLAR:
       
     } catch (error: any) {
       console.error("PUT /api/external/posts error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
     }
   });
 
@@ -2104,6 +2307,7 @@ KURALLAR:
       ];
       let targetPath = "";
       for (const p of pathsToTry) {
+                // eslint-disable-next-line security/detect-non-literal-fs-filename
         if (p && fs.existsSync(p)) {
           targetPath = p;
           break;
@@ -2115,11 +2319,12 @@ KURALLAR:
         return res.status(404).send("index.html not found");
       }
 
+            // eslint-disable-next-line security/detect-non-literal-fs-filename
       let html = fs.readFileSync(targetPath, "utf8");
 
       const title = customTitle || "Paşa Motor | Yedek Parça & Yetkili Servis";
       const desc = customDesc || "İstanbul'un en güvenilir motosiklet yedek parça merkezi ve TVS, Falcon, Işıldar yetkili servisi.";
-      const image = customImage || "https://pasamotor.com.tr/src/assets/pasa-motor-logo.webp";
+      const image = customImage || "https://pasamotor.com.tr/pasa-motor-logo.webp";
       const canonical = canonicalUrl || `https://pasamotor.com.tr${req.originalUrl}`;
 
       // Replace <title>
@@ -2148,7 +2353,7 @@ KURALLAR:
             "@type": "AutoRepair",
             "@id": "https://pasamotor.com.tr/#localbusiness",
             "name": "Paşa Motor Yetkili Servis ve Yedek Parça Merkezi",
-            "image": "https://pasamotor.com.tr/src/assets/pasa-motor-logo.webp",
+            "image": "https://pasamotor.com.tr/pasa-motor-logo.webp",
             "address": {
               "@type": "PostalAddress",
               "streetAddress": "Kızılelma Cad. No:66/A Kocamustafapaşa",
@@ -2227,7 +2432,7 @@ KURALLAR:
       res.send(html);
     } catch (error: any) {
       console.error("HTML SEO Injector Error:", error);
-      res.status(500).send(error.message);
+      res.status(500).send("İşlem sırasında beklenmeyen bir hata oluştu.");
     }
   }
 
@@ -2332,7 +2537,7 @@ ${urls.map(u => `  <url>
 
       res.send(xml);
     } catch (error: any) {
-      res.status(500).send(`<error>${error.message}</error>`);
+      res.status(500).send("<error>İşlem sırasında beklenmeyen bir hata oluştu.</error>");
     }
   });
 
@@ -2348,7 +2553,10 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
   });
 
   // SEO Prerender Interceptors for high-value pages (Only in production to prevent bypassing Vite in dev)
-  if (process.env.NODE_ENV === "production") {
+  const isCompiledApp = (typeof __filename !== "undefined" && (__filename.endsWith(".cjs") || __filename.includes("dist")));
+  const isProdEnvironment = process.env.NODE_ENV === "production" || isCompiledApp;
+
+  if (isProdEnvironment) {
     app.get("/yedek-parca/:slug", async (req, res) => {
       try {
         const slug = req.params.slug;
@@ -2544,65 +2752,135 @@ const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NA
 
 if (!isServerless) {
   (async () => {
-    if (process.env.NODE_ENV !== "production") {
-      const { createServer: createViteServer } = await import("vite");
-      const vite = await createViteServer({
-        server: { middlewareMode: true },
-        appType: "spa",
-      });
-      app.use(vite.middlewares);
-    } else {
-      const distPath = path.join(process.cwd(), "dist");
-      app.use(express.static(distPath, { index: false }));
-      app.use(express.static(path.join(process.cwd(), "public"), { index: false }));
-      app.get("*all", (req, res) => {
-        return serveSEOInjectedHtml(req, res);
-      });
-    }
+    try {
+      const isCompiled = (typeof __filename !== "undefined" && (__filename.endsWith(".cjs") || __filename.includes("dist")));
+      const isProduction = process.env.NODE_ENV === "production" || isCompiled;
 
-    // Keep-alive loop to prevent Supabase from pausing (runs every 10 min)
-    const activeSupabase = getSupabase();
-    if (activeSupabase) {
-      setInterval(async () => {
-         try {
-           const supabase = getSupabase();
-           if (!supabase) return;
-           const { error } = await supabase.from("products").select("id").limit(1);
-           if (error) console.error("Internal Supabase Keep-Alive Ping Failed:", error.message);
-           else console.log("Internal Supabase Keep-Alive Ping Successful.");
-         } catch(e) {
-           // ignore
-         }
-      }, 10 * 60 * 1000); // 10 minutes
+      if (!isProduction) {
+        const { createServer: createViteServer } = await import("vite");
+        const vite = await createViteServer({
+          server: { middlewareMode: true, hmr: { port: 24678 } },
+          appType: "spa",
+        });
+        app.use(vite.middlewares);
+      } else {
+        const rootDir = (typeof __dirname !== "undefined" && __dirname.endsWith("dist"))
+          ? path.resolve(__dirname, "..")
+          : process.cwd();
+        const distPath = path.join(rootDir, "dist");
+        const publicPath = path.join(rootDir, "public");
 
-      // Background supplier auto sync loop (runs every 2 minutes)
-      setInterval(async () => {
-         try {
-           const { runAutoSync } = await import("./src/lib/syncEngine");
-           await runAutoSync();
-         } catch(e) {
-           console.error("Auto Sync Loop Failed:", e);
-         }
-      }, 2 * 60 * 1000); // Check every 2 minutes
-
-      // Trigger initial auto sync check 15 seconds after server startup
-      setTimeout(async () => {
-        try {
-          console.log("[AutoSync Startup] Triggering initial supplier sync check...");
-          const { runAutoSync } = await import("./src/lib/syncEngine");
-          await runAutoSync();
-        } catch(e) {
-          console.error("[AutoSync Startup] Error:", e);
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        if (fs.existsSync(distPath)) {
+          app.use(express.static(distPath, { index: false }));
         }
-      }, 15000);
-    }
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        if (fs.existsSync(publicPath)) {
+          app.use(express.static(publicPath, { index: false }));
+        }
+        app.get("*all", (req, res) => {
+          return serveSEOInjectedHtml(req, res);
+        });
+      }
 
-    // Auto-update default 7 blog posts cover images in Supabase on startup - REMOVED
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-      console.log(`API endpoints available at http://localhost:${PORT}/api/products`);
-    });
-  })();
+      // In AI Studio Dev Sandbox, CONTROL_PLANE_PORT is set and Nginx proxies to port 3000.
+      // In deployed Cloud Run service, Cloud Run injects PORT (default 8080) and expects 0.0.0.0:${PORT}.
+      const isDevSandbox = Boolean(process.env.CONTROL_PLANE_PORT);
+      const primaryPort = isDevSandbox
+        ? (Number(process.env.DEFAULT_APP_PORT) || 3000)
+        : (Number(process.env.PORT) || 8080);
+
+      const activeServers: any[] = [];
+
+      const mainServer = app.listen(primaryPort, "0.0.0.0", () => {
+        console.log(`Main server listening on http://0.0.0.0:${primaryPort}`);
+        console.log(`API endpoints ready at http://0.0.0.0:${primaryPort}/api/products`);
+      });
+      activeServers.push(mainServer);
+
+      mainServer.on("error", (err: any) => {
+        console.error("HTTP Server Error on primary port", primaryPort, err);
+      });
+
+      // Also listen on auxiliary port (3000 or 8080) if different, handling any EADDRINUSE gracefully
+      const auxiliaryPort = (primaryPort !== 3000) ? 3000 : (primaryPort !== 8080 && !isDevSandbox ? 8080 : null);
+      if (auxiliaryPort) {
+        try {
+          const auxServer = app.listen(auxiliaryPort, "0.0.0.0", () => {
+            console.log(`Auxiliary server listening on http://0.0.0.0:${auxiliaryPort}`);
+          });
+          activeServers.push(auxServer);
+
+          auxServer.on("error", (err: any) => {
+            if (err.code === "EADDRINUSE") {
+              console.log(`Auxiliary port ${auxiliaryPort} already handled.`);
+            } else {
+              console.warn(`Auxiliary port ${auxiliaryPort} error:`, err.message);
+            }
+          });
+        } catch (e: any) {
+          // ignore
+        }
+      }
+
+      // Background tasks are started AFTER the HTTP server is bound so startup probes never block
+      const activeSupabase = getSupabase();
+      if (activeSupabase) {
+        const pingTimer = setInterval(async () => {
+          try {
+            const supabase = getSupabase();
+            if (!supabase) return;
+            const { error } = await supabase.from("products").select("id").limit(1);
+            if (error) console.error("Internal Supabase Keep-Alive Ping Failed:", error.message);
+            else console.log("Internal Supabase Keep-Alive Ping Successful.");
+          } catch (e) {
+            // ignore
+          }
+        }, 10 * 60 * 1000); // 10 minutes
+        pingTimer.unref();
+
+        const syncTimer = setInterval(async () => {
+          try {
+            await runAutoSync();
+          } catch (e) {
+            console.error("Auto Sync Loop Failed:", e);
+          }
+        }, 30 * 60 * 1000); // Check every 30 minutes
+        syncTimer.unref();
+      }
+
+      const handleShutdown = (signal: string) => {
+        console.log(`Received ${signal}, shutting down gracefully...`);
+        let closedCount = 0;
+        const total = activeServers.length;
+        if (total === 0) process.exit(0);
+
+        activeServers.forEach((srv) => {
+          srv.close(() => {
+            closedCount++;
+            if (closedCount >= total) {
+              console.log("HTTP server closed.");
+              process.exit(0);
+            }
+          });
+        });
+
+        setTimeout(() => {
+          console.warn("Forcing shutdown after timeout.");
+          process.exit(0);
+        }, 5000).unref();
+      };
+
+      process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+      process.on("SIGINT", () => handleShutdown("SIGINT"));
+    } catch (startupErr) {
+      console.error("Fatal startup error:", startupErr);
+      process.exit(1);
+    }
+  })().catch((unhandledErr) => {
+    console.error("Unhandled error during async server startup:", unhandledErr);
+    process.exit(1);
+  });
 }
 
 export default app;

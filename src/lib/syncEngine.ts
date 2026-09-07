@@ -2,6 +2,13 @@ import { createClient } from "@supabase/supabase-js";
 import { decrypt } from "./crypto_util";
 
 function getSetCookieSafe(headers: any): string[] {
+  if (typeof headers?.getSetCookie === 'function') {
+    try {
+      const list = headers.getSetCookie();
+      if (list && list.length > 0) return list;
+    } catch (e) { /* ignore error */ }
+  }
+
   const getHeader = (name: string) => {
     if (typeof headers.get === 'function') return headers.get(name);
     if (headers[name]) return headers[name];
@@ -32,25 +39,41 @@ function getSetCookieSafe(headers: any): string[] {
   return results;
 }
 
+let isAutoSyncRunning = false;
+
 export const runAutoSync = async () => {
+  if (isAutoSyncRunning) {
+    console.log("[AutoSync] Sync already in progress, skipping.");
+    return { success: true, skipped: true };
+  }
+  isAutoSyncRunning = true;
   console.log("[AutoSync] Starting auto-sync process...");
   let successCount = 0;
   let failCount = 0;
 
   try {
-    const sbUrl = process.env.VITE_SUPABASE_URL || '';
-    const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
-    if (!sbUrl || !sbKey) throw new Error("Missing Supabase credentials");
+    const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+    const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+    if (!sbUrl || !sbKey) {
+      console.log("[AutoSync] Missing Supabase credentials, skipping sync.");
+      return { success: false, count: 0 };
+    }
 
     const supabase = createClient(sbUrl, sbKey, {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    // Bypass RLS just in case using Anon key
-    await supabase.auth.signInWithPassword({
-      email: process.env.ADMIN_EMAIL || "aistudioblack@gmail.com",
-      password: process.env.ADMIN_INITIAL_PASSWORD || ""
-    });
+    // Bypass RLS if admin credentials are provided
+    if (process.env.ADMIN_INITIAL_PASSWORD) {
+      try {
+        await supabase.auth.signInWithPassword({
+          email: process.env.ADMIN_EMAIL || "aistudioblack@gmail.com",
+          password: process.env.ADMIN_INITIAL_PASSWORD
+        });
+      } catch (authErr) {
+        console.warn("[AutoSync] Supabase auth sign-in warning:", authErr);
+      }
+    }
 
     // Fetch suppliers where auto_sync_enabled is true
     const { data: suppliers, error: supErr } = await supabase
@@ -83,7 +106,7 @@ export const runAutoSync = async () => {
         let syncSuccess = false;
         let totalItems = 0;
         let updatedItems = 0;
-        const createdItems = 0;
+        let createdItems = 0;
         let failedItems = 0;
         let skippedItems = 0;
 
@@ -96,7 +119,10 @@ export const runAutoSync = async () => {
 
           // FCS Login Logic
           const browserUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-          const getReq = await fetch("https://siparis.fcs.com.tr/Login", { headers: { "User-Agent": browserUA } });
+          const getReq = await fetch("https://siparis.fcs.com.tr/Login", { 
+            headers: { "User-Agent": browserUA },
+            signal: AbortSignal.timeout(10000)
+          });
           const cookiesHeader = getSetCookieSafe(getReq.headers);
           const sessionCookie = cookiesHeader ? cookiesHeader.map((c: string) => c.split(';')[0]).join('; ') : '';
 
@@ -109,6 +135,7 @@ export const runAutoSync = async () => {
               "User-Agent": browserUA
             },
             body: JSON.stringify({ "CustomerCode": supplier.user_code, "UserCode": supplier.user_code, "Password": decrypt(supplier.password_encrypted), "LanguageId": 1, "Captcha": "", "NewPassword": "", "NewPasswordRepeat": "", "ChangePassword": false }),
+            signal: AbortSignal.timeout(12000)
           });
           if (!loginRes.ok) throw new Error("FCS Login Request Failed: " + loginRes.status);
           
@@ -125,7 +152,10 @@ export const runAutoSync = async () => {
           const loginCookies = getSetCookieSafe(loginRes.headers).map((c: string) => c.split(';')[0]);
           let allCookies = [sessionCookie, ...loginCookies].join('; ');
 
-          const homeRes = await fetch("https://siparis.fcs.com.tr/Home", { headers: { "Cookie": allCookies, "Accept": "text/html", "User-Agent": browserUA } });
+          const homeRes = await fetch("https://siparis.fcs.com.tr/Home", { 
+            headers: { "Cookie": allCookies, "Accept": "text/html", "User-Agent": browserUA },
+            signal: AbortSignal.timeout(10000)
+          });
           const homeCookies = getSetCookieSafe(homeRes.headers).map((c: string) => c.split(';')[0]);
           allCookies = [allCookies, ...homeCookies].join('; ');
 
@@ -151,29 +181,45 @@ export const runAutoSync = async () => {
           for (const brand of allowedBrands) {
             let offset = 0;
             let hasMore = true;
+            let pageCount = 0;
 
-            while (hasMore) {
-              const searchRes = await fetch("https://siparis.fcs.com.tr/Search/SearchProduct", {
-                method: "POST",
-                headers: { 
-                  "Content-Type": "application/json;charset=UTF-8", 
-                  "Cookie": allCookies, 
-                  "X-Requested-With": "XMLHttpRequest",
-                  "User-Agent": browserUA
-                },
-                body: JSON.stringify({ "dataCount": offset, "manufacturer": brand, "orderby": "4", "productGroup1": "MOTOSİKLET", "productGroup2": "", "productGroup3": null, "vehicleBrand": "", "vehicleModel": null, "t9Text": "", "campaign": false, "newArrival": false, "newProduct": false, "comparsionProduct": false, "onQuantity": false, "onWay": false, "directSearch": false })
-              });
+            while (hasMore && pageCount < 50) {
+              pageCount++;
+              let searchRes: Response | null = null;
+              try {
+                searchRes = await fetch("https://siparis.fcs.com.tr/Search/SearchProduct", {
+                  method: "POST",
+                  headers: { 
+                    "Content-Type": "application/json;charset=UTF-8", 
+                    "Cookie": allCookies, 
+                    "X-Requested-With": "XMLHttpRequest",
+                    "User-Agent": browserUA
+                  },
+                  body: JSON.stringify({ "dataCount": offset, "manufacturer": brand, "orderby": "4", "productGroup1": "MOTOSİKLET", "productGroup2": "", "productGroup3": null, "vehicleBrand": "", "vehicleModel": null, "t9Text": "", "campaign": false, "newArrival": false, "newProduct": false, "comparsionProduct": false, "onQuantity": false, "onWay": false, "directSearch": false }),
+                  signal: AbortSignal.timeout(12000)
+                });
+              } catch (fetchErr) {
+                console.warn(`[AutoSync] FCS search timeout/error for brand ${brand}:`, fetchErr);
+                break;
+              }
               
-              if (!searchRes.ok) break;
+              if (!searchRes || !searchRes.ok) break;
               
-              const pageData = await searchRes.json() as any;
+              let pageData: any = null;
+              try {
+                pageData = await searchRes.json() as any;
+                if (pageData?.Status === false) console.log(`Search failed for ${brand}:`, pageData);
+              } catch {
+                break;
+              }
               const items = pageData?.ProductList || [];
               
               if (pageData?.hasMore !== undefined) hasMore = pageData.hasMore;
               else hasMore = items.length === 24;
               
               offset += 24;
-              if (items.length === 0) break;
+              if (items.length === 0) { console.log(`No items found for brand ${brand}`); break; }
+              console.log(`Found ${items.length} items for brand ${brand}`);
               totalItems += items.length;
 
               const toUpdate: any[] = [];
@@ -223,7 +269,24 @@ export const runAutoSync = async () => {
           
           syncSuccess = true;
         } else {
-           console.log(`[AutoSync] Skipping non-FCS source: ${supplier.source_type} for now in background.`);
+           console.log(`[AutoSync] Triggering Edge Function for source: ${supplier.source_type}`);
+           const { data, error } = await supabase.functions.invoke("sync-supplier", {
+             body: { supplier_id: supplier.id, mode: "sync_update", triggered_by: "cron" }
+           });
+           
+           if (error) {
+              throw error;
+           }
+           if (data?.error) {
+              throw new Error(data.error);
+           }
+           
+           totalItems = data?.total || 0;
+           createdItems = data?.created || 0;
+           updatedItems = data?.updated || 0;
+           skippedItems = data?.skipped || 0;
+           failedItems = data?.failed || 0;
+           
            syncSuccess = true;
         }
 
@@ -269,5 +332,7 @@ export const runAutoSync = async () => {
   } catch (globalErr: any) {
     console.error("[AutoSync] Global error:", globalErr);
     return { success: false, error: globalErr.message };
+  } finally {
+    isAutoSyncRunning = false;
   }
 };

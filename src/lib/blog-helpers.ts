@@ -85,56 +85,16 @@ const DEFAULT_COVER = "/images/blog-cover-images/motosiklet-yedek-parca-fiyatlar
 export function getPostCoverImage(post?: { slug?: string; title?: string; cover_image?: string | null } | null): string {
   if (!post) return DEFAULT_COVER;
 
-  // 1. Eğer post.cover_image geçerli bir URL ise ve bozuk servis barındırmıyorsa direkt kullan
-  if (post.cover_image && typeof post.cover_image === "string" && post.cover_image.trim() !== "") {
-    const img = post.cover_image.trim();
-    if (!img.includes("pollinations.ai") && (img.startsWith("/") || img.startsWith("http"))) {
-      return img;
-    }
-  }
-
   const slug = (post.slug || "").toLowerCase().trim();
-  const title = (post.title || "").toLowerCase().trim();
-  const textToSearch = `${slug} ${title}`;
 
-  // 2. Slug veya title üzerinden birebir/kısmi dosya eşleşmesi
-  for (const file of COVER_FILES) {
-    const baseName = file.replace("-kapak.webp", "").replace(".webp", "");
-    if (slug === baseName || slug.includes(baseName) || baseName.includes(slug)) {
-      return `/images/blog-cover-images/${file}`;
-    }
+  // 1. Slug mevcutsa, her zaman o slug için üretilen özel kapak görselini döndür
+  if (slug) {
+    return `/images/blog-cover-images/${slug}-kapak.webp`;
   }
 
-  // 3. Konu/Marka/Kategori anahtar kelime eşleşmesi
-  if (textToSearch.includes("tvs") || textToSearch.includes("apache") || textToSearch.includes("jupiter")) {
-    return "/images/blog-cover-images/tvs-motosiklet-bakimi-servis-kapak.webp";
-  }
-  if (textToSearch.includes("honda") || textToSearch.includes("pcx")) {
-    return "/images/blog-cover-images/honda-pcx-scooter-varyator-kayis-degisimi-ve-bakimi-kapak.webp";
-  }
-  if (textToSearch.includes("yamaha") || textToSearch.includes("nmax") || textToSearch.includes("xmax")) {
-    return "/images/blog-cover-images/yamaha-nmax-xmax-periyodik-bakim-ve-kronik-arizalar-kapak.webp";
-  }
-  if (textToSearch.includes("falcon")) {
-    return "/images/blog-cover-images/falcon-motosiklet-servisi-bakim-kapak.webp";
-  }
-  if (textToSearch.includes("fren") || textToSearch.includes("balata") || textToSearch.includes("disk")) {
-    return "/images/blog-cover-images/motosiklet-fren-sistemi-yedek-parcalari-kapak.webp";
-  }
-  if (textToSearch.includes("akü") || textToSearch.includes("aku") || textToSearch.includes("marş") || textToSearch.includes("mars") || textToSearch.includes("elektrik")) {
-    return "/images/blog-cover-images/motosiklet-calismagidiyor-marz-basmiyor-elektrik-arizalari-kapak.webp";
-  }
-  if (textToSearch.includes("yağ") || textToSearch.includes("yag") || textToSearch.includes("filtre") || textToSearch.includes("piston") || textToSearch.includes("silindir")) {
-    return "/images/blog-cover-images/motosiklet-motor-yedek-parcalari-kapak.webp";
-  }
-  if (textToSearch.includes("kayış") || textToSearch.includes("kayis") || textToSearch.includes("varyatör") || textToSearch.includes("scooter")) {
-    return "/images/blog-cover-images/istanbul-scooter-servisi-kayis-varyator-bakimi-kapak.webp";
-  }
-  if (textToSearch.includes("kargo") || textToSearch.includes("sipariş")) {
-    return "/images/blog-cover-images/motosiklet-yedek-parca-kargo-teslimat-kapak.webp";
-  }
-  if (textToSearch.includes("ışıldar") || textToSearch.includes("isildar") || textToSearch.includes("menzil")) {
-    return "/images/blog-cover-images/kurye-motoru-elektrik-arizalari-kapak.webp";
+  // 2. Eğer cover_image varsa ve geçerliyse kullan
+  if (post.cover_image && typeof post.cover_image === "string" && post.cover_image.trim() !== "") {
+    return post.cover_image.trim();
   }
 
   return DEFAULT_COVER;

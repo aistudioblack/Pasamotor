@@ -23,7 +23,7 @@ export const motorcycleDealerSchema = {
       name: "Paşa Motor (.com.tr)",
       alternateName: ["Paşa Motor Yetkili Servis Bayi", "Pasa Motor", "pasamotor.com.tr", "Orijinal Paşa Motor"],
       description:
-        "Orijinal Paşa Motor resmî web sitesi (pasamotor.com.tr). İstanbul Fatih'te TVS, Falcon ve Işıldar markalarının yetkili satış ve servis bayi. 20+ yıllık deneyim ile motosiklet satış, profesyonel servis ve orijinal yedek parça.",
+        "Orijinal Paşa Motor resmî web sitesi (pasamotor.com.tr). İstanbul Fatih'te TVS, Falcon, Işıldar ve Moto Lux markalarının yetkili satış ve servis bayi. 20+ yıllık deneyim ile motosiklet satış, profesyonel servis ve orijinal yedek parça.",
       url: "https://pasamotor.com.tr",
       logo: "https://pasamotor.com.tr/favicon.png",
       image: "https://pasamotor.com.tr/favicon.png",

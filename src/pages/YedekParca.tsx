@@ -20,7 +20,8 @@ import {
   Inbox,
   Sparkles,
   ShieldCheck,
-  Camera
+  Camera,
+  MessageCircle,
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import type { Tables } from "@/lib/db-types";
@@ -30,6 +31,7 @@ import ProductImagePlaceholder from "@/components/ui/ProductImagePlaceholder";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { CITIES } from "@/data/cities";
 import { PhotoPartFinderModal } from "@/components/PhotoPartFinderModal";
+import { useCart } from "@/context/CartContext";
 
 type Product = Tables<"products">;
 
@@ -51,7 +53,7 @@ try {
   console.warn("Session storage read failed:", e);
 }
 
-const BRANDS_LIST = ["Tümü", "TVS", "Falcon", "Işıldar", "Vox", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"] as const;
+const BRANDS_LIST = ["Tümü", "TRW", "TVS", "Falcon", "Işıldar", "Motolux", "Vox", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"] as const;
 
 const CATEGORIES_LIST = [
   { slug: "tumu", name: "Tüm Kategoriler" },
@@ -65,6 +67,7 @@ const CATEGORIES_LIST = [
 const YedekParca = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { addItem } = useCart();
   
   const brandMatchMap: Record<string, string> = {
     "/tvs-motosiklet-yedek-parca": "TVS",
@@ -107,7 +110,7 @@ const YedekParca = () => {
   
   // Sayfalama (Pagination) State'i
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 16; // E-ticaret standardı sayfa başına 16 ürün
+  const [itemsPerPage, setItemsPerPage] = useState<number>(48); // Sayfa başına dinamik gösterim (24, 48, 100, 250, 500)
 
   // Mobil Filtre Drawer/Modal Kontrolü
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -674,7 +677,7 @@ const YedekParca = () => {
                 </div>
 
                 {/* Sıralama ve Görünüm Kontrolleri */}
-                <div className="flex flex-wrap items-center justify-center md:justify-end gap-3">
+                <div className="flex flex-wrap items-center justify-center md:justify-end gap-2.5">
                   
                   {/* Mobil Filtre Butonu (Sadece mobilde görünür) */}
                   <button
@@ -685,13 +688,32 @@ const YedekParca = () => {
                     Filtrele
                   </button>
 
+                  {/* Sayfa Başına Gösterim Seçici */}
+                  <div className="flex items-center gap-1.5 bg-background/90 border border-border rounded-xl px-2.5 py-1.5 text-xs">
+                    <span className="text-muted-foreground hidden sm:inline text-[11px]">Göster:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="bg-transparent text-foreground text-xs font-semibold focus:outline-none cursor-pointer"
+                    >
+                      <option value={24}>24 Ürün</option>
+                      <option value={48}>48 Ürün</option>
+                      <option value={100}>100 Ürün</option>
+                      <option value={250}>250 Ürün</option>
+                      <option value={500}>500 Ürün</option>
+                    </select>
+                  </div>
+
                   {/* Sıralama Seçici */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 bg-background/90 border border-border rounded-xl px-2.5 py-1.5 text-xs">
                     <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="bg-background/90 text-foreground border border-border rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                      className="bg-transparent text-foreground text-xs font-semibold focus:outline-none cursor-pointer"
                     >
                       <option value="recommended">Önerilen (Popüler)</option>
                       <option value="price-asc">Fiyat: Düşükten Yükseğe</option>
@@ -797,8 +819,8 @@ const YedekParca = () => {
                         {/* Ürün Görseli */}
                         <div className={`relative overflow-hidden rounded-xl shrink-0 ${
                           viewMode === "list" 
-                            ? "w-full sm:w-40 h-36 bg-white flex items-center justify-center border border-border" 
-                            : "w-full h-44 mb-3 bg-white flex items-center justify-center border border-border"
+                            ? "w-full sm:w-40 h-36 bg-slate-950 flex items-center justify-center border border-border/80" 
+                            : "w-full h-44 mb-3 bg-slate-950 flex items-center justify-center border border-border/80"
                         }`}>
                           {p.images && p.images.length > 0 ? (
                             <ImageWithFallback
@@ -880,18 +902,48 @@ const YedekParca = () => {
                               )}
                             </div>
 
-                            {/* Whatsapp hızlı sipariş butonu */}
-                            <a
-                              href={`https://wa.me/905348996817?text=${encodeURIComponent(`Merhaba, ${p.title || ""}${p.sku ? ", " + p.sku : ""} (Marka: ${p.brand || ""}, Fiyat: ${p.price ? p.price + " TL" : "Fiyat Sorun"}) Bu ürünü sipariş vermek istiyorum.`)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-md shadow-emerald-500/10 border border-emerald-400/25 shrink-0"
-                              title="Sipariş Ver"
-                            >
-                              <ShoppingBag className="w-3.5 h-3.5" />
-                              <span>Sipariş Ver</span>
-                            </a>
+                            {/* Sepete Ekle ve WhatsApp Butonları */}
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const primaryImg = p.images && p.images.length > 0 ? p.images[0] : "/pasa-motor-logo.webp";
+                                  addItem({
+                                    id: `part_${p.id}`,
+                                    productId: p.id,
+                                    title: p.title,
+                                    price: p.price ?? null,
+                                    originalPrice: p.original_price ?? null,
+                                    image: primaryImg,
+                                    sku: p.sku ?? null,
+                                    brand: p.brand,
+                                    category: p.category,
+                                    type: "yedek-parca",
+                                    slug: p.slug,
+                                    url: `/yedek-parca/${p.slug}`,
+                                  }, 1);
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-md shadow-primary/20 hover:scale-[1.03] active:scale-[0.97]"
+                                title="Sepete Ekle"
+                              >
+                                <ShoppingBag className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">Sepete Ekle</span>
+                                <span className="sm:hidden">Ekle</span>
+                              </button>
+
+                              <a
+                                href={`https://wa.me/905348996817?text=${encodeURIComponent(`Merhaba, ${p.title || ""}${p.sku ? " - Kod: " + p.sku : ""}${p.brand ? " - " + p.brand : ""}${p.price ? " - Fiyat: " + p.price + " TL" : ""} urunu icin siparis ve stok teyidi almak istiyorum.`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="p-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-white transition-all duration-300 flex items-center justify-center border border-emerald-500/30 shrink-0"
+                                title="Hızlı WhatsApp Siparişi"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                              </a>
+                            </div>
                           </div>
                         </div>
 
@@ -917,62 +969,84 @@ const YedekParca = () => {
               )}
 
               {/* ALT KISIM (Paginated Navigation Controls) */}
-              {!loading && totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/[0.04]">
+              {!loading && filteredProducts.length > 0 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/[0.06] mt-4">
                   
-                  {/* Sayfa Bilgisi */}
-                  <div className="text-xs text-muted-foreground">
-                    Toplam <strong className="text-foreground">{filteredProducts.length}</strong> üründen{" "}
-                    <strong className="text-foreground">{(currentPage - 1) * itemsPerPage + 1}</strong> ile{" "}
-                    <strong className="text-foreground">{Math.min(currentPage * itemsPerPage, filteredProducts.length)}</strong> arası gösteriliyor
+                  {/* Sayfa Bilgisi & Sayfa Başına Seçici */}
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                    <div>
+                      Toplam <strong className="text-foreground">{filteredProducts.length}</strong> üründen{" "}
+                      <strong className="text-foreground">{(currentPage - 1) * itemsPerPage + 1}</strong> ile{" "}
+                      <strong className="text-foreground">{Math.min(currentPage * itemsPerPage, filteredProducts.length)}</strong> arası gösteriliyor
+                    </div>
+
+                    <div className="flex items-center gap-1.5 pl-3 border-l border-border">
+                      <span className="text-[11px]">Sayfa Başına:</span>
+                      <select
+                        value={itemsPerPage}
+                        onChange={(e) => {
+                          setItemsPerPage(Number(e.target.value));
+                          setCurrentPage(1);
+                        }}
+                        className="bg-background border border-border text-foreground text-xs font-semibold rounded-lg px-2 py-1 focus:outline-none cursor-pointer"
+                      >
+                        <option value={24}>24</option>
+                        <option value={48}>48</option>
+                        <option value={100}>100</option>
+                        <option value={250}>250</option>
+                        <option value={500}>500</option>
+                      </select>
+                    </div>
                   </div>
 
                   {/* Sayfalama Butonları */}
-                  <div className="flex items-center gap-1.5">
-                    
-                    {/* Önceki Sayfa */}
-                    <button
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="p-2 rounded-xl bg-background border border-border text-muted-foreground hover:text-foreground hover:bg-muted/70 disabled:opacity-40 disabled:hover:bg-background transition-all cursor-pointer"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-1.5">
+                      
+                      {/* Önceki Sayfa */}
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="p-2 rounded-xl bg-background border border-border text-muted-foreground hover:text-foreground hover:bg-muted/70 disabled:opacity-40 disabled:hover:bg-background transition-all cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
 
-                    {/* Sayfa Sayıları */}
-                    {pageNumbers.map((p, idx) => {
-                      if (p === "...") {
+                      {/* Sayfa Sayıları */}
+                      {pageNumbers.map((p, idx) => {
+                        if (p === "...") {
+                          return (
+                            <span key={`ellipsis-${idx}`} className="px-2.5 py-1 text-xs text-muted-foreground select-none">
+                              ...
+                            </span>
+                          );
+                        }
                         return (
-                          <span key={`ellipsis-${idx}`} className="px-2.5 py-1 text-xs text-muted-foreground select-none">
-                            ...
-                          </span>
+                          <button
+                            key={`page-${p}`}
+                            onClick={() => setCurrentPage(Number(p))}
+                            className={`w-8 h-8 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                              currentPage === p
+                                ? "bg-primary text-primary-foreground shadow"
+                                : "bg-background border border-border text-muted-foreground hover:text-foreground hover:bg-muted/70"
+                            }`}
+                          >
+                            {p}
+                          </button>
                         );
-                      }
-                      return (
-                        <button
-                          key={`page-${p}`}
-                          onClick={() => setCurrentPage(Number(p))}
-                          className={`w-8 h-8 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                            currentPage === p
-                              ? "bg-primary text-primary-foreground shadow"
-                              : "bg-background border border-border text-muted-foreground hover:text-foreground hover:bg-muted/70"
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      );
-                    })}
+                      })}
 
-                    {/* Sonraki Sayfa */}
-                    <button
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className="p-2 rounded-xl bg-background border border-border text-muted-foreground hover:text-foreground hover:bg-muted/70 disabled:opacity-40 disabled:hover:bg-background transition-all cursor-pointer"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                      {/* Sonraki Sayfa */}
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="p-2 rounded-xl bg-background border border-border text-muted-foreground hover:text-foreground hover:bg-muted/70 disabled:opacity-40 disabled:hover:bg-background transition-all cursor-pointer"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
 
-                  </div>
+                    </div>
+                  )}
 
                 </div>
               )}

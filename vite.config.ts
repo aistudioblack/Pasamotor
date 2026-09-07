@@ -9,12 +9,9 @@ export default defineConfig(({ command, isSsrBuild }) => ({
     include: ['lucide-react/dynamicIconImports']
   },
   server: {
-    host: "0.0.0.0",
-    port: 3000,
     hmr: process.env.DISABLE_HMR !== "true" ? { overlay: false } : false,
   },
   define: {
-    'process.env.GEMINI_API_KEY': JSON.stringify(process.env.GEMINI_API_KEY),
     'process.env.GOOGLE_MAPS_PLATFORM_KEY': JSON.stringify(process.env.GOOGLE_MAPS_PLATFORM_KEY || ''),
   },
   plugins: [react()],
@@ -44,9 +41,6 @@ export default defineConfig(({ command, isSsrBuild }) => ({
           if (id.includes('/pages/admin/')) return 'admin';
           if (id.includes('@google/genai')) return 'admin';
           if (id.includes('recharts')) return 'charts';
-          
-          // Icons
-          if (id.includes('lucide-react')) return 'icons';
 
           // Supabase — ayrı chunk
           if (id.includes('@supabase')) return 'supabase';

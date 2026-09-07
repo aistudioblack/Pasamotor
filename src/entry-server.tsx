@@ -10,7 +10,6 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import Index from "./pages/Index";
 import Hakkimizda from "./pages/Hakkimizda";
 import Hizmetler from "./pages/Hizmetler";
-import Galeri from "./pages/Galeri";
 import Iletisim from "./pages/Iletisim";
 import YedekParca from "./pages/YedekParca";
 import Blog from "./pages/Blog";
@@ -39,7 +38,6 @@ export function render(url: string) {
                 <Route path="/" element={<Index />} />
                 <Route path="/hakkimizda" element={<Hakkimizda />} />
                 <Route path="/hizmetler" element={<Hizmetler />} />
-                <Route path="/galeri" element={<Galeri />} />
                 <Route path="/iletisim" element={<Iletisim />} />
                 <Route path="/yedek-parca" element={<YedekParca />} />
                 <Route path="/blog" element={<Blog />} />

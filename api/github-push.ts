@@ -1,6 +1,12 @@
 import { glob } from "glob";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
+
+function computeGitBlobSha(buf: Buffer): string {
+  const header = Buffer.from(`blob ${buf.length}\0`);
+  return crypto.createHash("sha1").update(Buffer.concat([header, buf])).digest("hex");
+}
 
 export async function pushToGithubSdk(githubUrl: string, token: string) {
   token = (token || "").trim();
@@ -36,15 +42,11 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
   
   // Test authentication and repo access
   try {
-    // Fine-grained token'lar sadece o repoya erişebilir, genel kullanıcı profiline erişemeyebilir.
-    // Bu yüzden direkt ilgili repoya erişim yetkisini test etmek en güvenli yöntemdir.
     await octokit.repos.get({ owner, repo });
     console.log("[GitHub SDK] Depo erişim testi başarılı!");
   } catch (e: any) {
     console.error(`[GitHub SDK] Depo (${owner}/${repo}) erişim hatası:`, e.message || e);
     
-    // Eğer 404 (Not Found) aldıysak, bunun sebebi çoğunlukla deponun seçilmemiş veya private olmasıdır.
-    // Eğer 401 (Unauthorized) aldıysak, token tamamen geçersizdir.
     let detailMsg = e.message || "Bilinmeyen hata";
     if (e.status === 404) {
       detailMsg = "Depo Bulunamadı (404) - Token bu depoya erişmek için yetkilendirilmemiş olabilir. Fine-grained PAT ayarlarında 'Only select repositories' kısmından bu depoyu seçtiğinizden emin olun.";
@@ -53,7 +55,6 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     }
 
     try {
-      // Fallback as general auth test if repo doesn't exist yet or other reason
       const authUser = await octokit.users.getAuthenticated();
       console.log(`[GitHub SDK] Genel kullanıcı testi başarılı! Kullanıcı: ${authUser.data.login}`);
     } catch (innerErr: any) {
@@ -84,7 +85,15 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     "scripts/**",
     "**/scripts/**",
     "firebase-applet-config.json",
-    "firebase-blueprint.json"
+    "firebase-blueprint.json",
+    ".img_cache/**",
+    "**/.img_cache/**",
+    ".agents/**",
+    "**/.agents/**",
+    "*.log",
+    "**/*.log",
+    "bun.lock",
+    "db-check.ts"
   ];
 
   const gitignorePatterns: string[] = [...defaultIgnore];
@@ -95,13 +104,9 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
       const lines = gitignoreContent.split(/\r?\n/);
       for (const line of lines) {
         const trimmed = line.trim();
-        // Boş satırları veya yorumları atla
         if (!trimmed || trimmed.startsWith("#")) continue;
-        
-        // !.env.example gibi negation'ları atla
         if (trimmed.startsWith("!")) continue;
 
-        // Glob formatına dönüştürme
         let pattern = trimmed;
         if (pattern.startsWith("/")) {
           pattern = pattern.substring(1);
@@ -120,10 +125,9 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     console.warn("Dinamik .gitignore okunurken hata oluştu, varsayılan listeyle devam ediliyor:", err);
   }
 
-  // Benzersiz elemanlardan oluşan ignore listesi
   const finalIgnore = Array.from(new Set(gitignorePatterns));
 
-  // Get all files
+  // Get all project files
   const files = await glob("**/*", {
     ignore: finalIgnore,
     nodir: true,
@@ -162,7 +166,6 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     });
     baseTree = commitData.data.tree.sha;
   } catch (e: any) {
-    // If branch doesn't exist, we'll start from scratch (but typically we assume repo is empty or branch doesn't exist)
     if (e.status === 409 || e.status === 404) {
       // Empty repo or branch not found
     } else {
@@ -170,8 +173,7 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     }
   }
 
-  // Eğer depo tamamen boşsa, düşük seviyeli Git veritabanı API'leri (createBlob, createTree vb.) "Git Repository is empty" hatası verir.
-  // Bu durumda depoyu standart createOrUpdateFileContents API'si ile initialize edip bir README.md dosyası oluşturmalıyız.
+  // Eğer depo tamamen boşsa, düşük seviyeli Git API'leri hata vermemesi için README oluşturup başlatılır
   if (!latestCommitSha) {
     console.log("[GitHub SDK] Depo boş veya ana dal bulunamadı. Depo otomatik olarak başlatılıyor...");
     try {
@@ -185,7 +187,6 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
       });
       console.log("[GitHub SDK] Depo başarıyla başlatıldı ve README.md oluşturuldu.");
       
-      // Bilgileri yeniden çekelim
       const refData = await octokit.git.getRef({
         owner,
         repo,
@@ -201,11 +202,35 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
       baseTree = commitData.data.tree.sha;
     } catch (initErr: any) {
       console.error("[GitHub SDK] Depo başlatılamadı:", initErr.message || initErr);
-      throw new Error("Boş GitHub deposu otomatik olarak başlatılamadı. Lütfen GitHub web arayüzünde depoda en az bir dosya (örn. README.md veya .gitignore) oluşturup tekrar deneyin. Detay: " + (initErr.message || "Bilinmeyen hata"));
+      throw new Error("Boş GitHub deposu otomatik olarak başlatılamadı. Detay: " + (initErr.message || "Bilinmeyen hata"));
     }
   }
 
-  const treeData = [];
+  // Uzak depodaki mevcut blob SHA haritasını alarak aynı dosyaların tekrar yüklenmesini önleme
+  const remoteBlobMap = new Map<string, string>();
+  if (baseTree) {
+    try {
+      const remoteTreeData = await octokit.git.getTree({
+        owner,
+        repo,
+        tree_sha: baseTree,
+        recursive: "true"
+      });
+      if (remoteTreeData?.data?.tree) {
+        for (const item of remoteTreeData.data.tree) {
+          if (item.type === "blob" && item.path && item.sha) {
+            remoteBlobMap.set(item.path, item.sha);
+          }
+        }
+      }
+      console.log(`[GitHub SDK] Uzak ağaçtan ${remoteBlobMap.size} adet mevcut dosya referansı alındı.`);
+    } catch (treeFetchErr: any) {
+      console.warn("[GitHub SDK] Uzak dosya ağacı önbelleği alınamadı, tüm dosyalar doğrudan doğrulanacak:", treeFetchErr?.message);
+    }
+  }
+
+  const treeData: any[] = [];
+  const filesToUpload: { file: string; filePath: string; buf: Buffer; sha: string; isBinary: boolean }[] = [];
 
   for (const file of files) {
     const filePath = path.join(process.cwd(), file);
@@ -213,27 +238,51 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     // Path Traversal Security Check (Zero Trust)
     const normalizedPath = path.resolve(filePath);
     if (!normalizedPath.startsWith(process.cwd())) {
-       console.warn(`[Security] Path Traversal Attempt Blocked: ${file}`);
-       continue;
+      console.warn(`[Security] Path Traversal Attempt Blocked: ${file}`);
+      continue;
     }
 
-    // read as base64 for images etc, utf-8 for text
-    const ext = path.extname(file).toLowerCase();
-    const isBinary = [".png", ".jpg", ".jpeg", ".gif", ".ico", ".webp", ".svg", ".eot", ".ttf", ".woff", ".woff2", ".mp3", ".mp4", ".pdf", ".zip", ".webm"].includes(ext);
-    
-    let content = "";
-    let encoding: "utf-8" | "base64" = "utf-8";
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    const buf = fs.readFileSync(filePath);
+    if (buf.length > 25 * 1024 * 1024) {
+      console.warn(`[GitHub SDK] Dosya 25MB sınırını aştığı için atlandı: ${file}`);
+      continue;
+    }
 
-    if (isBinary) {
-       content = fs.readFileSync(filePath, "base64");
-       encoding = "base64";
+    const sha = computeGitBlobSha(buf);
+    const normalizedRelativePath = file.replace(/\\/g, "/");
+    const remoteSha = remoteBlobMap.get(normalizedRelativePath);
+
+    if (remoteSha && remoteSha === sha) {
+      // Dosya uzak depoda zaten birebir aynı hash ile mevcut, blob oluşturmaya gerek yok
+      treeData.push({
+        path: normalizedRelativePath,
+        mode: "100644" as const,
+        type: "blob" as const,
+        sha
+      });
     } else {
-       content = fs.readFileSync(filePath, "utf-8");
+      const ext = path.extname(file).toLowerCase();
+      const isBinary = [".png", ".jpg", ".jpeg", ".gif", ".ico", ".webp", ".svg", ".eot", ".ttf", ".woff", ".woff2", ".mp3", ".mp4", ".pdf", ".zip", ".webm"].includes(ext);
+      filesToUpload.push({
+        file,
+        filePath,
+        buf,
+        sha,
+        isBinary
+      });
     }
+  }
 
-    let blobSha = "";
+  console.log(`[GitHub SDK] Toplam dosya: ${files.length}. Değişmeyen dosya: ${treeData.length}, Yüklenecek: ${filesToUpload.length}`);
+
+  const uploadSingleFile = async (item: typeof filesToUpload[0]) => {
     let retryCount = 0;
-    while (retryCount < 3) {
+    let blobSha = "";
+    const encoding = item.isBinary ? "base64" : "utf-8";
+    const content = item.isBinary ? item.buf.toString("base64") : item.buf.toString("utf-8");
+
+    while (retryCount < 4) {
       try {
         const blob = await octokit.git.createBlob({
           owner,
@@ -245,25 +294,31 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
         break;
       } catch (err: any) {
         retryCount++;
-        console.warn(`Retry ${retryCount} for blob ${file} due to: ${err.message}`);
-        if (retryCount >= 3) {
-          console.error("Error creating blob natively for", file, err);
-          // throw new Error(`Blob oluşturma hatası (${file}): ` + err.message);
+        console.warn(`[GitHub SDK] Yeniden deneme ${retryCount}/4 (${item.file}): ${err.message}`);
+        if (retryCount >= 4) {
+          console.error(`[GitHub SDK] Dosya yüklenemedi: ${item.file}`, err);
+          throw new Error(`GitHub'a dosya yüklenirken hata oluştu (${item.file}): ${err.message}`);
         } else {
-          await new Promise(r => setTimeout(r, 1500));
+          await new Promise(r => setTimeout(r, 1000 * retryCount));
         }
       }
     }
-    
-    if (blobSha) {
-      treeData.push({
-        path: file.replace(/\\/g, "/"),
-        mode: "100644" as const,
-        type: "blob" as const,
-        sha: blobSha
-      });
-    } else {
-      console.warn(`Skipping file from commit due to blob creation failure: ${file}`);
+
+    return {
+      path: item.file.replace(/\\/g, "/"),
+      mode: "100644" as const,
+      type: "blob" as const,
+      sha: blobSha || item.sha
+    };
+  };
+
+  // Küçük dosyaları 3'lü paketler halinde, büyük dosyaları (>1MB) tekli olarak yükleyerek GitHub API 500 hatalarını önleme
+  const CHUNK_SIZE = 3;
+  for (let i = 0; i < filesToUpload.length; i += CHUNK_SIZE) {
+    const chunk = filesToUpload.slice(i, i + CHUNK_SIZE);
+    const results = await Promise.all(chunk.map(uploadSingleFile));
+    for (const r of results) {
+      if (r) treeData.push(r);
     }
   }
 
@@ -301,7 +356,6 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
       force: true
     });
   } else {
-    // Branch didn't exist, create it
     await octokit.git.createRef({
       owner,
       repo,
@@ -309,4 +363,5 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
       sha: newCommit.data.sha
     });
   }
+  console.log(`[GitHub SDK] Push işlemi başarıyla tamamlandı! Commit: ${newCommit.data.sha}`);
 }

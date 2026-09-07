@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { PopupSettings, FormattedPopupDescription } from "@/components/common/SitePopup";
 import { convertToWebP, getWebPFileName } from "@/lib/imageOptimization";
 import { motion } from "motion/react";
+import logo from "@/assets/pasa-motor-logo.webp";
+import heroBg from "@/assets/hero-bg.webp";
 import {
   Megaphone,
   Save,
@@ -32,7 +34,7 @@ const DEFAULT_POPUP: PopupSettings = {
   badge: "PAŞA MOTOR DUYURUSU",
   title: "TVS & Falcon Yetkili Servis ve Orijinal Parça Merkezi",
   description: "İstanbul Fatih'te en güvenilir motosiklet yetkili servisi ve 2000+ orijinal yedek parça stoğuyla hizmetinizdeyiz. Hemen online randevu alın veya kataloğumuzu inceleyin!",
-  image_url: "/hero-bg.webp",
+  image_url: heroBg,
   button_text: "Yedek Parçaları İncele",
   button_link: "/yedek-parca",
   delay_seconds: 2,

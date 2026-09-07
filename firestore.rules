@@ -127,10 +127,10 @@ service cloud.firestore {
     }
     match /faqs/{id} {
       allow get: if isAdmin() || existing().is_active == true;
-      allow list: if false;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
+      allow list: if isAdmin() || resource.data.is_active == true;
+      allow create: if isAdmin() && isValidId(id) && isValidFaq(incoming());
+      allow update: if isAdmin() && isValidId(id) && isValidFaq(incoming());
+      allow delete: if isAdmin() && isValidId(id);
     }
     match /gallery_images/{id} {
       allow get: if true;
