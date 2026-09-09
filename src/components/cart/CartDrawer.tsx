@@ -22,6 +22,7 @@ import {
   HelpCircle
 } from "lucide-react";
 import { useCart, DEFAULT_WHATSAPP_PHONE } from "@/context/CartContext";
+import { formatColorName } from "@/lib/colorUtils";
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -237,7 +238,7 @@ export const CartDrawer: React.FC = () => {
                           )}
                           {item.selectedColor && (
                             <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                              Renk: {item.selectedColor}
+                              Renk: {formatColorName(item.selectedColor)}
                             </span>
                           )}
                         </div>

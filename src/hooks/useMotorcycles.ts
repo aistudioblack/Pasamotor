@@ -3,7 +3,7 @@ import { dbClient } from "@/lib/db-client";
 import { MOTORCYCLES, Motorcycle } from "@/data/motorcycles";
 
 export const MOTORCYCLES_QUERY_KEY = ["motorcycles"] as const;
-const LOCAL_STORAGE_CACHE_KEY = "pasamotor_motorcycles_cache_v4";
+const LOCAL_STORAGE_CACHE_KEY = "pasamotor_motorcycles_cache_v6_motolux";
 
 /**
  * İlk render veya sayfa açılışında en son bilinen önbelleği ya da yerel kataloğu

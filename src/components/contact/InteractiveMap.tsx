@@ -1,58 +1,52 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Compass, 
-  ExternalLink, 
   Copy, 
   Check, 
   Clock, 
   Bus, 
   Car, 
-  MapPin, 
-  Navigation,
-  Info
+  ExternalLink,
+  Info,
+  MapPin,
+  Maximize2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
-const POSITION = [41.007132, 28.936435]; // Exact coordinate for Paşa Motor, Fatih
-
-declare global {
-  interface Window {
-    ymaps: any;
-  }
-}
+const POSITION = [41.007132, 28.936435] as const; // Paşa Motor, Kızılelma Cad. No:66/A, Fatih / İstanbul
+// OpenStreetMap Bounding Box: [min_lon, min_lat, max_lon, max_lat]
+const OSM_EMBED_URL = `https://www.openstreetmap.org/export/embed.html?bbox=28.930435%2C41.003632%2C28.942435%2C41.010632&layer=mapnik&marker=41.007132%2C28.936435`;
+const OSM_FULL_URL = `https://www.openstreetmap.org/?mlat=41.007132&mlon=28.936435#map=18/41.007132/28.936435`;
 
 export default function InteractiveMap() {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'bus' | 'car'>('bus');
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [shopStatus, setShopStatus] = useState({ open: true, label: "HESAPLANIYOR", text: "", color: "" });
 
-  // Compute live open/closed state on render & every 30 seconds
+  // Canlı çalışma saati durumunu hesapla (Türkiye saati UTC+3)
   useEffect(() => {
     const calcStatus = () => {
       const nowUtc = new Date();
-      // TR is UTC+3. Calculate Turkish local time:
       const trTime = new Date(nowUtc.getTime() + (3 * 60 * 60 * 1000));
-      const day = trTime.getUTCDay(); // 0: Sunday, 1: Mon, ..., 6: Sat
+      const day = trTime.getUTCDay(); // 0: Pazar, 1: Pzt, ..., 6: Cmt
       const hour = trTime.getUTCHours();
       const minute = trTime.getUTCMinutes();
       const timeVal = hour * 100 + minute;
 
-      if (day === 0) { // Sunday
+      if (day === 0) { // Pazar
         setShopStatus({
           open: false,
           label: "ŞU AN KAPALI",
           text: "Pazar günleri kapalıyız.",
           color: "text-rose-500 bg-rose-500/10 border-rose-500/20"
         });
-      } else if (day === 6) { // Saturday
+      } else if (day === 6) { // Cumartesi
         if (timeVal >= 900 && timeVal < 1700) {
           setShopStatus({
             open: true,
             label: "ŞU AN AÇIK",
-            text: "Bugün 17:00'ye kadar teknik servis ve parça satışı aktiftir.",
+            text: "Bugün 17:00'ye kadar servis ve parça satışı aktiftir.",
             color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
           });
         } else {
@@ -63,7 +57,7 @@ export default function InteractiveMap() {
             color: "text-rose-500 bg-rose-500/10 border-rose-500/20"
           });
         }
-      } else { // Weekdays
+      } else { // Hafta İçi
         if (timeVal >= 900 && timeVal < 1900) {
           setShopStatus({
             open: true,
@@ -87,152 +81,21 @@ export default function InteractiveMap() {
     return () => clearInterval(interval);
   }, []);
 
-  // IntersectionObserver to delay map load until client is near the component
-  useEffect(() => {
-    if (!mapContainerRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsInView(true);
-            observer.disconnect();
-          }
-        });
-      },
-      { rootMargin: "300px" }
-    );
-
-    observer.observe(mapContainerRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isInView) return;
-
-    let mapInstance: any = null;
-    let resizeObserver: ResizeObserver | null = null;
-    let timeouts: NodeJS.Timeout[] = [];
-
-    const initMap = () => {
-      window.ymaps.ready(() => {
-        if (!mapContainerRef.current) return;
-
-        mapContainerRef.current.innerHTML = '';
-
-        mapInstance = new window.ymaps.Map(mapContainerRef.current, {
-          center: POSITION,
-          zoom: 17,
-          controls: ['zoomControl', 'geolocationControl']
-        }, {
-          searchControlProvider: 'yandex#search'
-        });
-
-        // Use custom balloon and icon for Paşa Motor
-        const MyIconContentLayout = window.ymaps.templateLayoutFactory.createClass(
-          '<div style="transform: translate(0, -10px);" class="relative flex flex-col items-center justify-center shrink-0">' +
-          /* Glowing ripple ring */
-          '<div class="absolute w-14 h-14 bg-red-600/15 rounded-full animate-ping pointer-events-none"></div>' +
-          '<div class="absolute w-8 h-8 bg-red-600/25 rounded-full animate-pulse pointer-events-none"></div>' +
-          /* Corporate Pill Box Banner */
-          '<div class="px-2 py-0.5 bg-slate-950/95 border border-red-500/40 rounded-lg shadow-xl text-[9px] font-black text-white whitespace-nowrap mb-1.5 flex items-center gap-1 shrink-0">' +
-          '<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>' +
-          '<span>PAŞA MOTOR</span>' +
-          '</div>' +
-          /* Corporate Shield / Hexagon Frame */
-          '<div class="w-9 h-9 bg-slate-900 rounded-xl border-2 border-red-600 flex items-center justify-center shadow-2xl text-white transform hover:scale-105 duration-200 transition-transform">' +
-          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>' +
-          '</div>' +
-          /* Downward Triangle Arrow Point */
-          '<div class="w-2 h-2 bg-slate-900 border-r border-b border-red-600 transform rotate-45 -mt-1 shadow-md"></div>' +
-          '</div>'
-        );
-
-        const placemark = new window.ymaps.Placemark(POSITION, {
-          hintContent: 'Paşa Motor | Yedek Parça & Yetkili Servis',
-          balloonContent: `
-            <div style="font-family: sans-serif; padding: 12px 6px; width: 220px; line-height: 1.5;">
-              <h4 style="margin: 0 0 4px 0; color: #dc2626; font-size: 14px; font-weight: bold;">Paşa Motor</h4>
-              <p style="margin: 0 0 8px 0; font-size: 11px; color: #475569;">TVS, Falcon, Işıldar Yetkili Servisi & Orijinal Parça Merkezi</p>
-              <div style="font-size: 10px; color: #64748b; font-weight: 500; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
-                📍 Kızılelma Cad. No:66/A Kocamustafapaşa / Fatih
-              </div>
-            </div>
-          `
-        }, {
-          iconLayout: 'default#imageWithContent',
-          iconImageHref: '', // Transparent
-          iconImageSize: [50, 75],
-          iconImageOffset: [-25, -60],
-          iconContentLayout: MyIconContentLayout
-        });
-
-        mapInstance.geoObjects.add(placemark);
-
-        // Responsive Resyncing
-        const forceResync = () => {
-          if (mapInstance && mapInstance.container) {
-            mapInstance.container.fitToViewport();
-          }
-        };
-
-        resizeObserver = new ResizeObserver(() => {
-          forceResync();
-        });
-
-        if (mapContainerRef.current) {
-          resizeObserver.observe(mapContainerRef.current);
-        }
-
-        timeouts = [100, 500, 1500, 3000].map(d => setTimeout(forceResync, d));
-        setIsLoaded(true);
-      });
-    };
-
-    if (window.ymaps) {
-      initMap();
-    } else {
-      const scriptSrc = 'https://api-maps.yandex.ru/2.1/?lang=tr_TR';
-      let script = document.querySelector(`script[src="${scriptSrc}"]`) as HTMLScriptElement;
-      
-      if (script) {
-        script.addEventListener('load', initMap);
-      } else {
-        script = document.createElement('script');
-        script.src = scriptSrc;
-        script.async = true;
-        script.onload = initMap;
-        document.body.appendChild(script);
-      }
-    }
-
-    return () => {
-      timeouts.forEach(clearTimeout);
-      if (resizeObserver) resizeObserver.disconnect();
-      if (mapInstance) {
-        mapInstance.destroy();
-      }
-    };
-  }, [isInView]);
-
-  const openNavigation = (provider: 'google' | 'yandex' | 'apple') => {
+  const openNavigation = (provider: 'google' | 'apple' | 'yandex') => {
     const [lat, lng] = POSITION;
     let url = '';
     switch (provider) {
       case 'google': 
         url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`; 
         break;
-      case 'yandex': 
-        url = `https://yandex.com/maps/?rtext=~${lat},${lng}`; 
-        break;
       case 'apple': 
         url = `https://maps.apple.com/?daddr=${lat},${lng}`; 
         break;
+      case 'yandex': 
+        url = `https://yandex.com/maps/?rtext=~${lat},${lng}`; 
+        break;
     }
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleCopyCoords = () => {
@@ -242,19 +105,19 @@ export default function InteractiveMap() {
   };
 
   return (
-    <div className="relative w-full h-full bg-slate-900 overflow-hidden flex flex-col group">
+    <div className="relative w-full h-full min-h-[420px] bg-slate-900 overflow-hidden flex flex-col group select-none">
       
-      {/* Top Overlay Action Header Bar */}
-      <div className="absolute top-4 left-4 right-4 z-[999] flex flex-col md:flex-row gap-3">
-        {/* Navigation Provider Control */}
-        <div className="flex-1 bg-slate-950/95 backdrop-blur-md border border-white/10 p-3 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-red-600/20 rounded-xl flex items-center justify-center text-rose-500 border border-rose-500/30 shrink-0">
-              <Compass className="w-5 h-5 animate-pulse" />
+      {/* Üst Hızlı Navigasyon ve Canlı Durum Çubuğu */}
+      <div className="absolute top-3 left-3 right-3 z-[25] flex flex-col md:flex-row gap-2.5 pointer-events-auto">
+        {/* Navigasyon Sağlayıcı Butonları: Google, Apple, Yandex (OSM kaldırıldı) */}
+        <div className="flex-1 bg-slate-950/95 backdrop-blur-md border border-white/15 p-2.5 sm:p-3 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-red-600/20 rounded-xl flex items-center justify-center text-rose-500 border border-rose-500/30 shrink-0">
+              <Compass className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
             </div>
             <div>
-              <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-[0.1em] block">Hızlı Navigasyon</span>
-              <span className="text-xs font-black text-white block">Paşa Motor Fatih</span>
+              <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-[0.1em] block">Navigasyon Aç</span>
+              <span className="text-xs font-black text-white block truncate">Paşa Motor (Kızılelma Cad.)</span>
             </div>
           </div>
           
@@ -262,36 +125,36 @@ export default function InteractiveMap() {
             <Button 
               size="sm"
               variant="outline"
-              className="h-8 px-2.5 rounded-lg text-[11px] font-bold border-white/10 hover:bg-slate-800 text-white bg-slate-900/60 transition-all"
+              className="h-7 sm:h-8 px-2.5 rounded-lg text-[11px] font-bold border-white/15 hover:bg-slate-800 text-white bg-slate-900/80 transition-all cursor-pointer"
               onClick={() => openNavigation('google')}
-              title="Google Haritalar ile Git"
+              title="Google Haritalar ile Yol Tarifi Al"
             >
               Google
             </Button>
             <Button 
               size="sm"
               variant="outline"
-              className="h-8 px-2.5 rounded-lg text-[11px] font-bold border-[#FFCC00]/20 hover:bg-[#FFCC00]/20 text-[#FFCC00] bg-slate-900/60 transition-all"
-              onClick={() => openNavigation('yandex')}
-              title="Yandex Harita ile Git"
+              className="h-7 sm:h-8 px-2.5 rounded-lg text-[11px] font-bold border-white/15 hover:bg-slate-800 text-white bg-slate-900/80 transition-all cursor-pointer"
+              onClick={() => openNavigation('apple')}
+              title="Apple Harita ile Yol Tarifi Al"
             >
-              Yandex
+              Apple
             </Button>
             <Button 
               size="sm"
               variant="outline"
-              className="h-8 px-2.5 rounded-lg text-[11px] font-bold border-white/10 hover:bg-slate-800 text-white bg-slate-900/60 transition-all"
-              onClick={() => openNavigation('apple')}
-              title="Apple Maps ile Yol Tarifi Al"
+              className="h-7 sm:h-8 px-2.5 rounded-lg text-[11px] font-bold border-[#FFCC00]/30 hover:bg-[#FFCC00]/20 text-[#FFCC00] bg-slate-900/80 transition-all cursor-pointer"
+              onClick={() => openNavigation('yandex')}
+              title="Yandex Navigasyon ile Yol Tarifi Al"
             >
-              Apple
+              Yandex
             </Button>
           </div>
         </div>
 
-        {/* Dynamic Shop Hours Badge */}
-        <div className="md:w-64 bg-slate-950/95 backdrop-blur-md border border-white/10 p-3 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex items-center gap-3">
-          <div className={`w-2.5 h-2.5 rounded-full relative shrink-0 ${shopStatus.open ? 'bg-emerald-555' : 'bg-rose-500'}`}>
+        {/* Canlı Mağaza Açık/Kapalı Durum Rozeti */}
+        <div className="md:w-64 bg-slate-950/95 backdrop-blur-md border border-white/15 p-2.5 sm:p-3 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex items-center gap-3">
+          <div className="w-2.5 h-2.5 rounded-full relative shrink-0">
             <span className={`animate-ping absolute inset-0 rounded-full opacity-75 ${shopStatus.open ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
             <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${shopStatus.open ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
           </div>
@@ -305,21 +168,49 @@ export default function InteractiveMap() {
         </div>
       </div>
 
-      {/* Map Canvas Host */}
-      <div 
-        ref={mapContainerRef} 
-        className={`flex-1 w-full transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-40'} map-container-wrapper relative z-10`}
-      />
+      {/* Büyük Haritada Aç Butonu (Sağ Üst / Orta) */}
+      <a
+        href={OSM_FULL_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="OpenStreetMap üzerinde tam boyutta incele"
+        className="absolute right-3.5 top-28 z-[22] px-2.5 py-1.5 rounded-xl bg-slate-950/90 hover:bg-slate-900 border border-white/20 text-white flex items-center gap-1.5 shadow-xl hover:scale-105 transition-all cursor-pointer text-[10px] font-bold backdrop-blur-md"
+      >
+        <Maximize2 className="w-3.5 h-3.5 text-rose-500" />
+        <span className="hidden sm:inline">Büyük Haritada Aç</span>
+      </a>
 
-      {/* Bottom Interactive Transport & Location Copier Bar */}
-      <div className="absolute bottom-4 left-4 right-4 z-[999] flex flex-col sm:flex-row gap-3">
-        {/* Exact Coordinates Copying Block */}
+      {/* Yükleniyor Placeholder'ı */}
+      {!isIframeLoaded && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900 text-slate-400 gap-2">
+          <div className="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-xs font-semibold tracking-wide text-slate-300">Harita Hazırlanıyor...</span>
+        </div>
+      )}
+
+      {/* Resmi OpenStreetMap Canlı Embed Alanı */}
+      <div className="w-full h-full min-h-[420px] flex-1 relative z-0">
+        <iframe
+          src={OSM_EMBED_URL}
+          title="Paşa Motor OpenStreetMap Canlı Haritası"
+          loading="eager"
+          onLoad={() => setIsIframeLoaded(true)}
+          className={`w-full h-full border-0 absolute inset-0 transition-opacity duration-300 ${
+            isIframeLoaded ? 'opacity-100' : 'opacity-20'
+          }`}
+          style={{ width: '100%', height: '100%', border: 0 }}
+        />
+      </div>
+
+      {/* Alt Bilgi & GPS / Ulaşım Çubuğu */}
+      <div className="absolute bottom-3 left-3 right-3 z-[25] flex flex-col sm:flex-row gap-2.5 pointer-events-auto">
+        {/* Koordinat Kopyalama Kartı */}
         <button
           onClick={handleCopyCoords}
-          className="bg-slate-950/95 backdrop-blur-md border border-white/10 p-2.5 rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.4)] flex items-center justify-between text-left hover:border-indigo-500/40 hover:bg-slate-950 duration-350 transition-all select-none cursor-pointer group shrink-0"
+          className="bg-slate-950/95 backdrop-blur-md border border-white/15 p-2.5 rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.4)] flex items-center justify-between text-left hover:border-indigo-500/40 hover:bg-slate-950 duration-200 transition-all select-none cursor-pointer group shrink-0"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
               {copied ? <Check className="w-4 h-4 text-emerald-400 shadow-inner" /> : <Copy className="w-4 h-4" />}
             </div>
             <div>
@@ -327,43 +218,41 @@ export default function InteractiveMap() {
               <span className="text-[11px] font-bold text-white font-mono block">41.007132, 28.936435</span>
             </div>
           </div>
-          <div className="text-[10px] font-black text-indigo-400 bg-indigo-500/5 px-2 py-1 rounded border border-indigo-500/10 ml-4 group-hover:bg-indigo-555 group-hover:bg-indigo-600/20 group-hover:text-indigo-300 duration-200">
+          <div className="text-[10px] font-black text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20 ml-4 group-hover:bg-indigo-600/20 duration-200">
             {copied ? 'Kopyalandı ✓' : 'Kopyala'}
           </div>
         </button>
 
-        {/* Quick Transit Information Overlay (Very useful for couriers, clients & motorists) */}
-        <div className="flex-1 bg-slate-950/95 backdrop-blur-md border border-white/10 p-2.5 rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.4)] flex flex-col justify-center gap-2">
-          {/* Tabs header */}
-          <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-1.5">
+        {/* Ulaşım İpuçları Kartı */}
+        <div className="flex-1 bg-slate-950/95 backdrop-blur-md border border-white/15 p-2.5 rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.4)] flex flex-col justify-center gap-1.5">
+          <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-1">
             <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1">
               <Info className="w-3 h-3 text-indigo-400" /> Pratik Ulaşım İpuçları
             </span>
-            <div className="flex bg-slate-900 border border-white/5 rounded-lg p-0.5">
+            <div className="flex bg-slate-900 border border-white/10 rounded-lg p-0.5">
               <button
                 onClick={() => setActiveTab('bus')}
-                className={`px-2 py-0.5 text-[9px] font-bold rounded-md flex items-center gap-1 transition-colors ${activeTab === 'bus' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-0.5 text-[9px] font-bold rounded-md flex items-center gap-1 transition-colors cursor-pointer ${activeTab === 'bus' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
               >
                 <Bus className="w-3 h-3" /> Toplu Taşıma
               </button>
               <button
                 onClick={() => setActiveTab('car')}
-                className={`px-2 py-0.5 text-[9px] font-bold rounded-md flex items-center gap-1 transition-colors ${activeTab === 'car' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-0.5 text-[9px] font-bold rounded-md flex items-center gap-1 transition-colors cursor-pointer ${activeTab === 'car' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
               >
                 <Car className="w-3 h-3" /> Motor & Araç
               </button>
             </div>
           </div>
 
-          {/* Tab Content */}
-          <div className="text-[10px] leading-relaxed text-zinc-300 px-1 font-sans">
+          <div className="text-[10px] leading-relaxed text-zinc-300 px-0.5 font-sans">
             {activeTab === 'bus' ? (
-              <span className="block whitespace-normal break-words font-medium leading-relaxed">
-                🚌 <strong className="text-white font-semibold">35C, 35D, 35A, 35T</strong> otobüs hattıyla <strong className="text-white font-semibold">Kızılelma Durağında</strong> inerek dükkanımıza ulaşabilirsiniz. Fındıkzade Tramvay ve Marmaray'a 12 dk yürüyüş mesafesindedir.
+              <span className="block whitespace-normal break-words font-medium">
+                🚌 <strong className="text-white font-semibold">35C, 35D, 35A, 35T</strong> otobüs hatlarıyla <strong className="text-white font-semibold">Kızılelma Durağında</strong> inebilirsiniz. Fındıkzade Tramvay ve Marmaray'a 12 dk yürüyüş mesafesindedir.
               </span>
             ) : (
-              <span className="block whitespace-normal break-words font-medium leading-relaxed">
-                🏍️ <strong className="text-white font-semibold">Kızılelma Caddesi</strong> üzerindeyiz, Kocamustafapaşa Meydanı yönündeki tabelaları takip ederek merkezimize kolayca ulaşabilirsiniz.
+              <span className="block whitespace-normal break-words font-medium">
+                🏍️ <strong className="text-white font-semibold">Kızılelma Caddesi No:66/A</strong> üzerindeyiz. Kocamustafapaşa Meydanı tabelalarını takip ederek mağazamızın önüne kolayca ulaşabilirsiniz.
               </span>
             )}
           </div>

@@ -27,9 +27,11 @@ import {
   SlidersHorizontal,
   ShoppingBag,
   RotateCw,
+  Sparkles,
 } from "lucide-react";
 import { MOTORCYCLES, Motorcycle } from "@/data/motorcycles";
 import { useMotorcycles } from "@/hooks/useMotorcycles";
+import { formatColorName } from "@/lib/colorUtils";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 
@@ -319,7 +321,7 @@ const Magaza = () => {
                       if (found !== -1) targetIdx = found;
                     }
                   }
-                  const activeImage = bike.images[targetIdx] || bike.images[0];
+                  const activeImage = activeColor?.imageUrl || bike.images[targetIdx] || bike.images[0];
                   const isCompared = comparedBikes.some((b) => b.id === bike.id);
 
                   return (
@@ -367,6 +369,7 @@ const Magaza = () => {
                         src={activeImage}
                         alt={`${bike.brand} ${bike.model} (${activeColor?.name || ''})`}
                         onError={(e) => { e.currentTarget.src = "/placeholder.webp"; }}
+                        referrerPolicy="no-referrer"
                         className="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-500 [filter:drop-shadow(0_12px_24px_rgba(0,0,0,0.9))] relative z-10 mix-blend-normal"
                         loading="lazy"
                         decoding="async"
@@ -426,39 +429,63 @@ const Magaza = () => {
 
                         {/* Price Block */}
                         <div className="mt-3 p-3 rounded-xl bg-muted/40 border border-border/60 flex items-center justify-between">
-                          <div>
-                            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block">
-                              {bike.cashPrice ? "Nakit / Peşin" : "Satış Fiyatı"}
-                            </span>
-                            <span className="font-heading font-black text-base text-foreground tracking-tight">
-                              {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.price)}
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider flex items-center justify-end gap-1">
-                              <CreditCard className="w-3 h-3" /> 12 Taksit
-                            </span>
-                            <span className="text-xs font-bold text-foreground">
-                              {bike.installment12Price 
-                                ? `${new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.installment12Price)}`
-                                : `${Math.round(bike.price / 12).toLocaleString("tr-TR")} ₺/ay`}
-                            </span>
-                          </div>
+                          {bike.price > 0 ? (
+                            <>
+                              <div>
+                                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block">
+                                  {bike.cashPrice ? "Nakit / Peşin" : "Satış Fiyatı"}
+                                </span>
+                                <span className="font-heading font-black text-base text-foreground tracking-tight">
+                                  {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.price)}
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider flex items-center justify-end gap-1">
+                                  <CreditCard className="w-3 h-3" /> 12 Taksit
+                                </span>
+                                <span className="text-xs font-bold text-foreground">
+                                  {bike.installment12Price 
+                                    ? `${new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.installment12Price)}`
+                                    : `${Math.round(bike.price / 12).toLocaleString("tr-TR")} ₺/ay`}
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div>
+                                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block">
+                                  Bayi Satış Durumu
+                                </span>
+                                <span className="font-heading font-black text-sm text-red-500 tracking-tight flex items-center gap-1">
+                                  Fiyat ve Stok Sorunuz
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider flex items-center justify-end gap-1">
+                                  <ShieldCheck className="w-3 h-3" /> 0 KM Sıfır
+                                </span>
+                                <span className="text-xs font-semibold text-foreground">
+                                  12 Taksit & Takas
+                                </span>
+                              </div>
+                            </>
+                          )}
                         </div>
 
                         {/* Color Options */}
                         <div className="mt-3 flex items-center justify-between">
                           <span className="text-[11px] font-semibold text-muted-foreground truncate max-w-[140px]">
-                            Renk: <strong className="text-foreground">{activeColor?.name || 'Standart'}</strong>
+                            Renk: <strong className="text-foreground">{formatColorName(activeColor?.name, activeColor?.hex)}</strong>
                           </span>
                           <div className="flex items-center gap-1.5 shrink-0">
                             {bike.colors.map((c, i) => {
                               const isActive = activeColorIndex === i;
+                              const displayName = formatColorName(c.name, c.hex);
                               return (
                                 <button
-                                  key={c.name}
+                                  key={c.name + i}
                                   onClick={(e) => handleColorChange(bike.id, i, e)}
-                                  title={c.name}
+                                  title={displayName}
                                   style={isActive ? { backgroundColor: c.hex, boxShadow: `0 0 0 2px ${c.hex}66` } : { backgroundColor: c.hex }}
                                   className={`w-4 h-4 rounded-full border transition-all shadow-inner ${
                                     isActive
@@ -483,27 +510,37 @@ const Magaza = () => {
                             <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover/btn:translate-x-0.5 group-hover/btn:text-foreground transition-all" />
                           </Link>
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              addItem({
-                                id: `bike_${bike.id}_${activeColor?.name || "default"}`,
-                                productId: bike.id,
-                                title: `${bike.brand} ${bike.model}${activeColor ? ` (${activeColor.name})` : ""}`,
-                                price: bike.price,
-                                image: activeImage || "/placeholder.webp",
-                                brand: bike.brand,
-                                category: bike.category,
-                                type: "motosiklet",
-                                slug: bike.slug,
-                                url: `/magaza/${bike.slug}`,
-                              }, 1);
-                            }}
-                            className="py-2 px-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-semibold tracking-wide transition-all duration-200 border border-red-500/40 shadow-[0_2px_10px_rgba(239,68,68,0.25)] hover:shadow-[0_4px_16px_rgba(239,68,68,0.35)] flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
-                          >
-                            <ShoppingBag className="w-3.5 h-3.5" />
-                            <span>Sepete Ekle</span>
-                          </button>
+                          {bike.price > 0 ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                addItem({
+                                  id: `bike_${bike.id}_${activeColor?.name || "default"}`,
+                                  productId: bike.id,
+                                  title: `${bike.brand} ${bike.model}${activeColor ? ` (${activeColor.name})` : ""}`,
+                                  price: bike.price,
+                                  image: activeImage || "/placeholder.webp",
+                                  brand: bike.brand,
+                                  category: bike.category,
+                                  type: "motosiklet",
+                                  slug: bike.slug,
+                                  url: `/magaza/${bike.slug}`,
+                                }, 1);
+                              }}
+                              className="py-2 px-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-semibold tracking-wide transition-all duration-200 border border-red-500/40 shadow-[0_2px_10px_rgba(239,68,68,0.25)] hover:shadow-[0_4px_16px_rgba(239,68,68,0.35)] flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
+                            >
+                              <ShoppingBag className="w-3.5 h-3.5" />
+                              <span>Sepete Ekle</span>
+                            </button>
+                          ) : (
+                            <Link
+                              to={`/magaza/${bike.slug}`}
+                              className="py-2 px-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-semibold tracking-wide transition-all duration-200 border border-red-500/40 shadow-[0_2px_10px_rgba(239,68,68,0.25)] flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>Teklif Al</span>
+                            </Link>
+                          )}
                         </div>
 
                         <a
@@ -513,7 +550,7 @@ const Magaza = () => {
                           className="w-full py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-400 hover:text-emerald-300 text-xs font-semibold tracking-wide transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5 active:scale-[0.98]"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
-                          <span>WhatsApp ile Teklif Al</span>
+                          <span>WhatsApp ile Fiyat & Stok Sor</span>
                         </a>
                       </div>
                     </div>

@@ -1,12 +1,11 @@
 import Layout from "@/components/layout/Layout";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from "lucide-react";
-import { useState, lazy, Suspense } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { dbClient } from "@/lib/db-client";
 import SEO, { breadcrumbSchema } from "@/components/seo/SEO";
 import JsonLd from "@/components/seo/JsonLd";
-
-const InteractiveMap = lazy(() => import("@/components/contact/InteractiveMap"));
+import InteractiveMap from "@/components/contact/InteractiveMap";
 import SafeEmail from "@/components/ui/SafeEmail";
 
 const origin = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
@@ -208,10 +207,8 @@ const Iletisim = () => {
           </div>
 
           <div className="max-w-5xl mx-auto mt-12 w-full">
-            <div id="harita" className="h-[400px] sm:h-[480px] w-full relative overflow-hidden rounded-[24px] border border-white/10 shadow-2xl bg-muted scroll-mt-24">
-              <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">Harita Yükleniyor...</div>}>
-                <InteractiveMap />
-              </Suspense>
+            <div id="harita" className="h-[440px] sm:h-[480px] w-full relative overflow-hidden rounded-[24px] border border-white/10 shadow-2xl bg-slate-900 scroll-mt-24">
+              <InteractiveMap />
             </div>
           </div>
         </div>

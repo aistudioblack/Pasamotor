@@ -25,6 +25,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 const ShowroomCylinder3D = React.lazy(() => import("./ShowroomCylinder3D"));
 import { useMotorcycles } from "@/hooks/useMotorcycles";
+import { formatColorName } from "@/lib/colorUtils";
 
 const tl = (n: number) =>
   new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(n);
@@ -231,6 +232,7 @@ export const HeroShowroom3D: React.FC<HeroShowroom3DProps> = ({
 
                 <img
                   src={(() => {
+                    if (selectedColor?.imageUrl) return selectedColor.imageUrl;
                     if (!selectedColor) return currentBike.images[0];
                     let targetIdx = currentBike.colors.findIndex(c => c.name === selectedColor.name);
                     if (targetIdx < 0) targetIdx = 0;
@@ -246,6 +248,7 @@ export const HeroShowroom3D: React.FC<HeroShowroom3DProps> = ({
                   })()}
                   alt={`${currentBike.brand} ${currentBike.model} (${selectedColor?.name || ''})`}
                   onError={(e) => { e.currentTarget.src = "/placeholder.webp"; }}
+                  referrerPolicy="no-referrer"
                   className="max-h-[230px] sm:max-h-[285px] md:max-h-[335px] max-w-full object-contain filter hover:scale-105 transition-transform duration-500 relative z-10 [filter:drop-shadow(0_14px_28px_rgba(0,0,0,0.95))_contrast(1.02)] mix-blend-normal"
                 />
 
@@ -360,50 +363,71 @@ export const HeroShowroom3D: React.FC<HeroShowroom3DProps> = ({
 
               {/* 3. Price Block */}
               <div className="py-6 border-b border-neutral-800/50">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                  <div>
-                    <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5">
-                      {currentBike.cashPrice ? "Nakit / Peşin Satış Fiyatı" : "Tavsiye Edilen Satış Fiyatı"}
-                    </div>
-                    <div className="flex items-baseline gap-3">
-                      <span className="font-heading font-black text-4xl text-white tracking-tighter">
-                        {tl(currentBike.price)}
-                      </span>
-                      {currentBike.originalPrice && currentBike.originalPrice > currentBike.price && (
-                        <span className="text-sm text-slate-500 line-through font-semibold">
-                          {tl(currentBike.originalPrice)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="sm:text-right">
-                    <div className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1.5 flex items-center sm:justify-end gap-1.5">
-                      <CreditCard className="w-3.5 h-3.5" /> 
-                      {currentBike.installment12Price ? "12 Taksit Fiyatı" : "12 Taksit İmkanı"}
-                    </div>
-                    <div className="text-sm text-slate-300 font-bold">
-                      {currentBike.installment12Price ? (
-                        <>
-                          {tl(currentBike.installment12Price)}{" "}
-                          <span className="text-slate-500 font-normal text-xs">
-                            ({Math.round(currentBike.installment12Price / 12).toLocaleString("tr-TR")} ₺/ay)
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          {Math.round(currentBike.price / 12).toLocaleString("tr-TR")} ₺{" "}
-                          <span className="text-slate-500 font-normal">/ ay</span>
-                        </>
-                      )}
-                    </div>
-                    {currentBike.installment6Price && (
-                      <div className="text-xs text-slate-400 mt-1 font-medium">
-                        6 Taksit: <strong className="text-slate-200">{tl(currentBike.installment6Price)}</strong>
+                {currentBike.price > 0 ? (
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                    <div>
+                      <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5">
+                        {currentBike.cashPrice ? "Nakit / Peşin Satış Fiyatı" : "Tavsiye Edilen Satış Fiyatı"}
                       </div>
-                    )}
+                      <div className="flex items-baseline gap-3">
+                        <span className="font-heading font-black text-4xl text-white tracking-tighter">
+                          {tl(currentBike.price)}
+                        </span>
+                        {currentBike.originalPrice && currentBike.originalPrice > currentBike.price && (
+                          <span className="text-sm text-slate-500 line-through font-semibold">
+                            {tl(currentBike.originalPrice)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="sm:text-right">
+                      <div className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1.5 flex items-center sm:justify-end gap-1.5">
+                        <CreditCard className="w-3.5 h-3.5" /> 
+                        {currentBike.installment12Price ? "12 Taksit Fiyatı" : "12 Taksit İmkanı"}
+                      </div>
+                      <div className="text-sm text-slate-300 font-bold">
+                        {currentBike.installment12Price ? (
+                          <>
+                            {tl(currentBike.installment12Price)}{" "}
+                            <span className="text-slate-500 font-normal text-xs">
+                              ({Math.round(currentBike.installment12Price / 12).toLocaleString("tr-TR")} ₺/ay)
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            {Math.round(currentBike.price / 12).toLocaleString("tr-TR")} ₺{" "}
+                            <span className="text-slate-500 font-normal">/ ay</span>
+                          </>
+                        )}
+                      </div>
+                      {currentBike.installment6Price && (
+                        <div className="text-xs text-slate-400 mt-1 font-medium">
+                          6 Taksit: <strong className="text-slate-200">{tl(currentBike.installment6Price)}</strong>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5">
+                        Bayi Satış Durumu
+                      </div>
+                      <div className="font-heading font-black text-2xl sm:text-3xl text-red-500 tracking-tight">
+                        Fiyat ve Stok Sorunuz
+                      </div>
+                    </div>
+                    <div className="sm:text-right space-y-1">
+                      <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center sm:justify-end gap-1.5">
+                        <ShieldCheck className="w-4 h-4" /> 0 KM Resmî Garanti
+                      </div>
+                      <div className="text-xs text-slate-400 font-medium">
+                        Kredi Kartına 12 Taksit & Takas
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Color Options Selector */}
@@ -411,16 +435,19 @@ export const HeroShowroom3D: React.FC<HeroShowroom3DProps> = ({
                 <div className="py-4 border-b border-neutral-800/50">
                   <div className="flex items-center justify-between text-xs mb-2.5">
                     <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Renk Seçeneği:</span>
-                    <span className="text-white font-bold text-xs">{selectedColor?.name || currentBike.colors[0]?.name}</span>
+                    <span className="text-white font-bold text-xs">
+                      {formatColorName(selectedColor?.name || currentBike.colors[0]?.name, selectedColor?.hex || currentBike.colors[0]?.hex)}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {currentBike.colors.map((c, idx) => {
                       const isActive = selectedColor?.name === c.name || (!selectedColor && idx === 0);
+                      const displayName = formatColorName(c.name, c.hex);
                       return (
                         <button
-                          key={c.name}
+                          key={c.name + idx}
                           onClick={() => setSelectedColor(c)}
-                          title={c.name}
+                          title={displayName}
                           style={isActive ? { borderColor: c.hex, backgroundColor: `${c.hex}25`, boxShadow: `0 4px 12px ${c.hex}15` } : {}}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
                             isActive
@@ -432,7 +459,7 @@ export const HeroShowroom3D: React.FC<HeroShowroom3DProps> = ({
                             className="w-3 h-3 rounded-full border border-black/40 shadow-inner shrink-0"
                             style={{ backgroundColor: c.hex }}
                           />
-                          <span>{c.name}</span>
+                          <span>{displayName}</span>
                         </button>
                       );
                     })}

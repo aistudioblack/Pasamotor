@@ -89,10 +89,11 @@ export const MotorcycleCompareModal: React.FC<MotorcycleCompareModalProps> = ({
                           src={b.images[0]}
                           alt={b.model}
                           onError={(e) => { e.currentTarget.src = "/placeholder.webp"; }}
+                          referrerPolicy="no-referrer"
                           className="h-24 w-full object-contain mx-auto"
                         />
                         <div className="font-bold text-sm text-foreground">{b.brand} {b.model}</div>
-                        <div className="text-red-500 font-extrabold text-base">{tl(b.price)}</div>
+                        <div className="text-red-500 font-extrabold text-base">{b.price > 0 ? tl(b.price) : "Fiyat Sorunuz"}</div>
                       </div>
                     </th>
                   ))}

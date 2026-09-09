@@ -251,3 +251,33 @@ export function matchColorNameInput(input: string): { name: string; hex: string 
 
   return null;
 }
+
+/**
+ * Renk adını kullanıcı dostu ve kurumsal formatta döner.
+ * Açıkça yazılan HEX kodlarını (#2D4A4C gibi) veya teknik kodları gizler,
+ * gerekirse doğal Türkçe renk adıyla eşleştirir.
+ */
+export function formatColorName(name?: string, hex?: string): string {
+  if (!name || name.trim() === "") {
+    return hex ? getClosestColorName(hex) : "Standart";
+  }
+
+  const cleanName = name.trim();
+
+  // Eğer isim doğrudan veya parantez içinde HEX kodu içeriyorsa (#...)
+  if (cleanName.includes("#") || cleanName.toLowerCase().includes("özel renk")) {
+    if (hex) {
+      return getClosestColorName(hex);
+    }
+    const hexMatch = cleanName.match(/#([0-9a-fA-F]{3,6})/);
+    if (hexMatch) {
+      return getClosestColorName("#" + hexMatch[1]);
+    }
+    const stripped = cleanName.replace(/\s*\(#[^)]+\)/gi, "").replace(/#[0-9a-fA-F]{3,6}/gi, "").trim();
+    return stripped && stripped.toLowerCase() !== "özel renk" ? stripped : "Özel Seri";
+  }
+
+  // Parantez içindeki herhangi bir teknik kodu temizle
+  const cleaned = cleanName.replace(/\s*\([^)]*#[^)]*\)/gi, "").replace(/#[0-9a-fA-F]{3,6}/gi, "").trim();
+  return cleaned || (hex ? getClosestColorName(hex) : "Standart");
+}

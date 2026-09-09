@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import InstallmentCalculatorModal from "@/components/magaza/InstallmentCalculatorModal";
 import { useCart } from "@/context/CartContext";
 import { useMotorcycles } from "@/hooks/useMotorcycles";
+import { formatColorName } from "@/lib/colorUtils";
 
 
 
@@ -167,6 +168,7 @@ const MagazaDetay = () => {
                     src={bike.images[activeImageIndex] || bike.images[0]}
                     alt={`${bike.brand} ${bike.model}`}
                     onError={(e) => { e.currentTarget.src = "/placeholder.webp"; }}
+                    referrerPolicy="no-referrer"
                     className="max-h-full max-w-full object-contain [filter:drop-shadow(0_14px_28px_rgba(0,0,0,0.9))] transition-all duration-300 relative z-10 mix-blend-normal"
                   />
                 </div>
@@ -205,6 +207,7 @@ const MagazaDetay = () => {
                         src={img} 
                         alt={`${bike.model} ${idx}`} 
                         onError={(e) => { e.currentTarget.src = "/placeholder.webp"; }}
+                        referrerPolicy="no-referrer"
                         className="w-full h-full object-contain" 
                       />
                     </button>
@@ -257,60 +260,108 @@ const MagazaDetay = () => {
 
                 {/* Official Dealer Price Block */}
                 <div className="p-4 rounded-2xl bg-muted/40 border border-border/70 space-y-3">
-                  <div className="flex items-baseline justify-between">
-                    <div>
-                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                        {bike.cashPrice ? "Nakit / Peşin Satış Fiyatı" : "Tavsiye Edilen Satış Fiyatı"}
-                      </span>
-                      <span className="font-heading font-black text-3xl text-foreground tracking-tight">
-                        {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.price)}
-                      </span>
-                    </div>
-                    {bike.originalPrice && bike.originalPrice > bike.price && (
-                      <span className="text-sm text-muted-foreground line-through font-semibold">
-                        {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.originalPrice)}
-                      </span>
-                    )}
-                  </div>
+                  {bike.price > 0 ? (
+                    <>
+                      <div className="flex items-baseline justify-between">
+                        <div>
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                            {bike.cashPrice ? "Nakit / Peşin Satış Fiyatı" : "Tavsiye Edilen Satış Fiyatı"}
+                          </span>
+                          <span className="font-heading font-black text-3xl text-foreground tracking-tight">
+                            {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.price)}
+                          </span>
+                        </div>
+                        {bike.originalPrice && bike.originalPrice > bike.price && (
+                          <span className="text-sm text-muted-foreground line-through font-semibold">
+                            {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.originalPrice)}
+                          </span>
+                        )}
+                      </div>
 
-                  {/* Installment Pricing Details */}
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/50 text-xs">
-                    <div className="p-2.5 rounded-xl bg-card border border-border/60">
-                      <span className="text-[10px] text-muted-foreground font-semibold uppercase block">6 Taksit Fiyatı</span>
-                      <strong className="text-foreground text-sm">
-                        {bike.installment6Price 
-                          ? new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.installment6Price)
-                          : `${Math.round(bike.price / 6).toLocaleString("tr-TR")} ₺/ay`}
-                      </strong>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-card border border-border/60">
-                      <span className="text-[10px] text-amber-500 font-bold uppercase flex items-center gap-1">
-                        <CreditCard className="w-3 h-3" /> 12 Taksit
-                      </span>
-                      <strong className="text-foreground text-sm">
-                        {bike.installment12Price 
-                          ? new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.installment12Price)
-                          : `${Math.round(bike.price / 12).toLocaleString("tr-TR")} ₺/ay`}
-                      </strong>
-                    </div>
-                  </div>
+                      {/* Installment Pricing Details */}
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/50 text-xs">
+                        <div className="p-2.5 rounded-xl bg-card border border-border/60">
+                          <span className="text-[10px] text-muted-foreground font-semibold uppercase block">6 Taksit Fiyatı</span>
+                          <strong className="text-foreground text-sm">
+                            {bike.installment6Price 
+                              ? new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.installment6Price)
+                              : `${Math.round(bike.price / 6).toLocaleString("tr-TR")} ₺/ay`}
+                          </strong>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-card border border-border/60">
+                          <span className="text-[10px] text-amber-500 font-bold uppercase flex items-center gap-1">
+                            <CreditCard className="w-3 h-3" /> 12 Taksit
+                          </span>
+                          <strong className="text-foreground text-sm">
+                            {bike.installment12Price 
+                              ? new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(bike.installment12Price)
+                              : `${Math.round(bike.price / 12).toLocaleString("tr-TR")} ₺/ay`}
+                          </strong>
+                        </div>
+                      </div>
 
-                  {/* Calculator trigger button */}
-                  <button
-                    type="button"
-                    onClick={() => setIsLoanCalcOpen(true)}
-                    className="w-full py-2 px-3 rounded-xl bg-red-600/10 hover:bg-red-600/20 text-red-600 border border-red-500/20 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                  >
-                    <Calculator className="w-3.5 h-3.5" />
-                    <span>Kredi Kartına 3 - 6 - 9 - 12 Taksit Hesapla</span>
-                  </button>
+                      {/* Calculator trigger button */}
+                      <button
+                        type="button"
+                        onClick={() => setIsLoanCalcOpen(true)}
+                        className="w-full py-2 px-3 rounded-xl bg-red-600/10 hover:bg-red-600/20 text-red-600 border border-red-500/20 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <Calculator className="w-3.5 h-3.5" />
+                        <span>Kredi Kartına 3 - 6 - 9 - 12 Taksit Hesapla</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                            Bayi Özel Satış Fiyatı
+                          </span>
+                          <span className="font-heading font-black text-2xl text-red-500 tracking-tight">
+                            Fiyat ve Stok Sorunuz
+                          </span>
+                        </div>
+                        <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
+                          0 KM Bayi Stokta
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/50 text-xs">
+                        <div className="p-2.5 rounded-xl bg-card border border-border/60">
+                          <span className="text-[10px] text-muted-foreground font-semibold uppercase block">Ödeme Seçenekleri</span>
+                          <strong className="text-foreground text-xs font-bold">
+                            Kredi Kartına 12 Taksit
+                          </strong>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-card border border-border/60">
+                          <span className="text-[10px] text-emerald-500 font-bold uppercase flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3" /> Takas Desteği
+                          </span>
+                          <strong className="text-foreground text-xs font-bold">
+                            Tüm İkinci El Takasları
+                          </strong>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsLoanCalcOpen(true)}
+                        className="w-full py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-foreground border border-white/10 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <Calculator className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Örnek Taksit Tutarlarını Hesapla</span>
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 {/* Color Selector */}
                 <div>
                   <div className="flex items-center justify-between text-xs font-semibold mb-2">
                     <span className="text-muted-foreground">Renk Seçeneği:</span>
-                    <span className="text-foreground font-bold">{selectedColor?.name || bike.colors[0]?.name}</span>
+                    <span className="text-foreground font-bold">
+                      {formatColorName(selectedColor?.name || bike.colors[0]?.name, selectedColor?.hex || bike.colors[0]?.hex)}
+                    </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {bike.colors.map((c, i) => {
@@ -323,6 +374,7 @@ const MagazaDetay = () => {
                       }
                       
                       const isActive = selectedColor?.name === c.name || (!selectedColor && i === 0);
+                      const displayName = formatColorName(c.name, c.hex);
                       
                       return (
                         <button
@@ -333,7 +385,7 @@ const MagazaDetay = () => {
                               setActiveImageIndex(targetIdx);
                             }
                           }}
-                          title={c.name}
+                          title={displayName}
                           style={isActive ? { borderColor: c.hex, backgroundColor: `${c.hex}15` } : {}}
                           className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 text-xs font-medium transition-all ${
                             isActive
@@ -345,7 +397,7 @@ const MagazaDetay = () => {
                             className="w-3.5 h-3.5 rounded-full border border-black/20 dark:border-white/20 shrink-0 shadow-inner"
                             style={{ backgroundColor: c.hex }}
                           />
-                          <span>{c.name}</span>
+                          <span>{displayName}</span>
                         </button>
                       );
                     })}
@@ -447,7 +499,7 @@ const MagazaDetay = () => {
                     </button>
 
                     <a
-                      href={`https://wa.me/905348996817?text=Merhaba,%20MotoLux%20${encodeURIComponent(bike.model)}%20modeli%20i%C3%A7in%20stok,%20renk%20(${encodeURIComponent(selectedColor?.name || "Standart")})%20ve%20taksit%20teklifi%20almak%20istiyorum.`}
+                      href={`https://wa.me/905348996817?text=Merhaba,%20MotoLux%20${encodeURIComponent(bike.model)}%20modeli%20i%C3%A7in%20stok,%20renk%20(${encodeURIComponent(formatColorName(selectedColor?.name || "Standart", selectedColor?.hex))})%20ve%20taksit%20teklifi%20almak%20istiyorum.`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="py-2.5 px-4 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-400 hover:text-emerald-300 font-semibold text-xs tracking-wide transition-all duration-200 shadow-sm flex items-center justify-center gap-2 active:scale-[0.98]"

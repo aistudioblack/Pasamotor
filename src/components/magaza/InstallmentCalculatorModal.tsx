@@ -16,13 +16,13 @@ export const InstallmentCalculatorModal: React.FC<InstallmentCalculatorModalProp
   onClose,
   selectedBike,
 }) => {
-  const [totalPrice, setTotalPrice] = useState<number>(selectedBike ? selectedBike.price : 75000);
+  const [totalPrice, setTotalPrice] = useState<number>(selectedBike && selectedBike.price > 0 ? selectedBike.price : 65000);
   const [downPayment, setDownPayment] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState<number>(12);
 
   useEffect(() => {
     if (selectedBike) {
-      setTotalPrice(selectedBike.price);
+      setTotalPrice(selectedBike.price > 0 ? selectedBike.price : 65000);
       setDownPayment(0); // Default to 0 down payment so they can see full installment options easily
     }
   }, [selectedBike]);
