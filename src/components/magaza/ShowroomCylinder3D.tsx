@@ -432,6 +432,18 @@ const ShowroomCylinderCanvas: React.FC<ShowroomCylinder3DProps & {
         }
       });
 
+      // Proactively release WebGL context to prevent "Too many active WebGL contexts"
+      try {
+        renderer.forceContextLoss();
+        const gl = renderer.getContext();
+        if (gl && typeof gl.getExtension === "function") {
+          const loseExt = gl.getExtension("WEBGL_lose_context");
+          if (loseExt) loseExt.loseContext();
+        }
+      } catch {
+        // Safe fallback if already lost
+      }
+
       renderer.dispose();
       if (renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);

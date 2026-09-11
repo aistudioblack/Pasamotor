@@ -2783,45 +2783,19 @@ if (!isServerless) {
         });
       }
 
-      // In AI Studio Dev Sandbox, CONTROL_PLANE_PORT is set and Nginx proxies to port 3000.
-      // In deployed Cloud Run service, Cloud Run injects PORT (default 8080) and expects 0.0.0.0:${PORT}.
-      const isDevSandbox = Boolean(process.env.CONTROL_PLANE_PORT);
-      const primaryPort = isDevSandbox
-        ? (Number(process.env.DEFAULT_APP_PORT) || 3000)
-        : (Number(process.env.PORT) || 8080);
+      // In Google AI Studio & Cloud Run container architecture, Nginx listens on the external
+      // ingress port (8080) and proxies all incoming application traffic directly to 0.0.0.0:3000.
+      // Therefore, the Node application MUST strictly bind to port 3000 on 0.0.0.0.
+      const PORT = 3000;
 
-      const activeServers: any[] = [];
-
-      const mainServer = app.listen(primaryPort, "0.0.0.0", () => {
-        console.log(`Main server listening on http://0.0.0.0:${primaryPort}`);
-        console.log(`API endpoints ready at http://0.0.0.0:${primaryPort}/api/products`);
+      const mainServer = app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Server running on port ${PORT}`);
+        console.log(`API endpoints ready at http://0.0.0.0:${PORT}/api/products`);
       });
-      activeServers.push(mainServer);
 
       mainServer.on("error", (err: any) => {
-        console.error("HTTP Server Error on primary port", primaryPort, err);
+        console.error("HTTP Server Error on port", PORT, err);
       });
-
-      // Also listen on auxiliary port (3000 or 8080) if different, handling any EADDRINUSE gracefully
-      const auxiliaryPort = (primaryPort !== 3000) ? 3000 : (primaryPort !== 8080 && !isDevSandbox ? 8080 : null);
-      if (auxiliaryPort) {
-        try {
-          const auxServer = app.listen(auxiliaryPort, "0.0.0.0", () => {
-            console.log(`Auxiliary server listening on http://0.0.0.0:${auxiliaryPort}`);
-          });
-          activeServers.push(auxServer);
-
-          auxServer.on("error", (err: any) => {
-            if (err.code === "EADDRINUSE") {
-              console.log(`Auxiliary port ${auxiliaryPort} already handled.`);
-            } else {
-              console.warn(`Auxiliary port ${auxiliaryPort} error:`, err.message);
-            }
-          });
-        } catch (e: any) {
-          // ignore
-        }
-      }
 
       // Background tasks are started AFTER the HTTP server is bound so startup probes never block
       const activeSupabase = getSupabase();
@@ -2851,20 +2825,10 @@ if (!isServerless) {
 
       const handleShutdown = (signal: string) => {
         console.log(`Received ${signal}, shutting down gracefully...`);
-        let closedCount = 0;
-        const total = activeServers.length;
-        if (total === 0) process.exit(0);
-
-        activeServers.forEach((srv) => {
-          srv.close(() => {
-            closedCount++;
-            if (closedCount >= total) {
-              console.log("HTTP server closed.");
-              process.exit(0);
-            }
-          });
+        mainServer.close(() => {
+          console.log("HTTP server closed.");
+          process.exit(0);
         });
-
         setTimeout(() => {
           console.warn("Forcing shutdown after timeout.");
           process.exit(0);

@@ -313,7 +313,7 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
   };
 
   // Küçük dosyaları 3'lü paketler halinde, büyük dosyaları (>1MB) tekli olarak yükleyerek GitHub API 500 hatalarını önleme
-  const CHUNK_SIZE = 3;
+  const CHUNK_SIZE = 1;
   for (let i = 0; i < filesToUpload.length; i += CHUNK_SIZE) {
     const chunk = filesToUpload.slice(i, i + CHUNK_SIZE);
     const results = await Promise.all(chunk.map(uploadSingleFile));
@@ -333,7 +333,20 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     createTreeParams.base_tree = baseTree;
   }
 
-  const newTree = await octokit.git.createTree(createTreeParams);
+  
+  let newTree: any;
+  let treeRetry = 0;
+  while(treeRetry < 3) {
+    try {
+      newTree = await octokit.git.createTree(createTreeParams);
+      break;
+    } catch(err: any) {
+      treeRetry++;
+      if(treeRetry >= 3) throw new Error("createTree failed: " + err.message);
+      await new Promise(r => setTimeout(r, 2000 * treeRetry));
+    }
+  }
+  
 
   // Create Commit
   const createCommitParams: any = {
@@ -344,7 +357,20 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     parents: latestCommitSha ? [latestCommitSha] : []
   };
 
-  const newCommit = await octokit.git.createCommit(createCommitParams);
+  
+  let newCommit: any;
+  let commitRetry = 0;
+  while(commitRetry < 3) {
+    try {
+      newCommit = await octokit.git.createCommit(createCommitParams);
+      break;
+    } catch(err: any) {
+      commitRetry++;
+      if(commitRetry >= 3) throw new Error("createCommit failed: " + err.message);
+      await new Promise(r => setTimeout(r, 2000 * commitRetry));
+    }
+  }
+  
 
   // Update Ref
   if (latestCommitSha) {

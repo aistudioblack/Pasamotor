@@ -1,0 +1,25 @@
+              console.log("HTTP server closed.");
+              process.exit(0);
+            }
+          });
+        });
+
+        setTimeout(() => {
+          console.warn("Forcing shutdown after timeout.");
+          process.exit(0);
+        }, 5000).unref();
+      };
+
+      process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+      process.on("SIGINT", () => handleShutdown("SIGINT"));
+    } catch (startupErr) {
+      console.error("Fatal startup error:", startupErr);
+      process.exit(1);
+    }
+  })().catch((unhandledErr) => {
+    console.error("Unhandled error during async server startup:", unhandledErr);
+    process.exit(1);
+  });
+}
+
+export default app;

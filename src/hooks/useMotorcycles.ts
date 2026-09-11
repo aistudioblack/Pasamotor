@@ -3,7 +3,26 @@ import { dbClient } from "@/lib/db-client";
 import { MOTORCYCLES, Motorcycle } from "@/data/motorcycles";
 
 export const MOTORCYCLES_QUERY_KEY = ["motorcycles"] as const;
-const LOCAL_STORAGE_CACHE_KEY = "pasamotor_motorcycles_cache_v6_motolux";
+const LOCAL_STORAGE_CACHE_KEY = "pasamotor_motorcycles_cache_v7_local";
+
+/**
+ * Eski harici motolux URL'lerini yerel proje içi yollara dönüştüren yardımcı
+ */
+function normalizeMotorcycleImages(bike: Motorcycle): Motorcycle {
+  const sanitizeUrl = (url?: string) => {
+    if (!url) return url;
+    return url.replace(/https:\/\/motolux\.com\.tr\/wp-content\/uploads\//g, '/images/motorcycles/');
+  };
+
+  return {
+    ...bike,
+    images: Array.isArray(bike.images) ? bike.images.map(img => sanitizeUrl(img) || img) : [],
+    colors: Array.isArray(bike.colors) ? bike.colors.map(c => ({
+      ...c,
+      imageUrl: sanitizeUrl(c.imageUrl) || c.imageUrl
+    })) : bike.colors
+  };
+}
 
 /**
  * İlk render veya sayfa açılışında en son bilinen önbelleği ya da yerel kataloğu
@@ -16,7 +35,7 @@ export function getCachedMotorcycles(): Motorcycle[] {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          return parsed.map(normalizeMotorcycleImages);
         }
       }
     } catch {
@@ -43,7 +62,7 @@ export async function fetchMotorcyclesFromDb(): Promise<Motorcycle[]> {
     }
 
     if (data && Array.isArray(data.sections) && data.sections.length > 0) {
-      const list = data.sections as unknown as Motorcycle[];
+      const list = (data.sections as unknown as Motorcycle[]).map(normalizeMotorcycleImages);
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(LOCAL_STORAGE_CACHE_KEY, JSON.stringify(list));

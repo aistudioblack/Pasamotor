@@ -1,3 +1,4 @@
+@import "leaflet/dist/leaflet.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,6 +10,18 @@
   width: 100% !important;
   height: 100% !important;
   background-color: #f1f5f9 !important;
+}
+
+/* Ensure Leaflet tiles render smoothly with no overflow/gray glitches */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #0f172a !important;
+  font-family: inherit !important;
+}
+
+.leaflet-tile {
+  visibility: inherit !important;
 }
 
 [class*="ymaps-2-1-"][class*="-map"] {
@@ -889,5 +902,28 @@ html {
 
 .animate-red-breathing {
   animation: redGlowBreathing 4s ease-in-out infinite;
+}
+
+@keyframes whatsappPulseBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.45);
+  }
+  30% {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 16px 32px rgba(37, 211, 102, 0.65);
+  }
+  50% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.45);
+  }
+  70% {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 10px 24px rgba(37, 211, 102, 0.55);
+  }
+}
+
+.animate-whatsapp-float {
+  animation: whatsappPulseBounce 3.2s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
 }
 
