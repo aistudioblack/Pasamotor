@@ -9,9 +9,7 @@ interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElemen
 }
 
 const DEFAULT_FALLBACK_IMAGES = [
-  "/placeholder.webp",
-  "/images/blog-cover-images/motosiklet-yedek-parca-fiyatlari-kapak.webp",
-  "/images/blog-cover-images/tvs-motosiklet-bakimi-servis-kapak.webp"
+  "/placeholder.webp"
 ];
 
 export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({ 

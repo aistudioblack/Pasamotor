@@ -22,6 +22,8 @@ import {
   BatteryCharging,
   ArrowUpDown,
   ChevronRight,
+  ChevronDown,
+  HelpCircle,
   Scale,
   Calculator,
   SlidersHorizontal,
@@ -60,6 +62,7 @@ const Magaza = () => {
   const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false);
   const [calculatorBike, setCalculatorBike] = useState<Motorcycle | null>(null);
   const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState<boolean>(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const [displayedCount, setDisplayedCount] = useState<number>(12);
 
@@ -135,11 +138,15 @@ const Magaza = () => {
   return (
     <Layout>
       <Helmet>
-        <title>MotoLux 0 KM Motosiklet & 3D Showroom | Paşa Motor Fatih</title>
+        <title>0 KM Motosiklet Fiyatları & Taksitli Satış | Paşa Motor Fatih Showroom</title>
         <meta
           name="description"
-          content="Paşa Motor Resmî MotoLux Yetkili Satış Bayisi. 3D silindir vitrinde Americano 125, Rossi 50 RS, Cappadocia 125, CEO 110, Drift 200 ve 60'tan fazla modeli kredi kartına 3-6-9-12 taksit ve garantiyle inceleyin."
+          content="İstanbul Fatih TVS, Falcon, Işıldar, MotoLux yetkili bayisi. 50cc B-ehliyet scooter, 125cc commuter modelleri kredi kartına 12 taksit ve aynı gün anahtar teslim garantisi ile Paşa Motor Showroom'da."
         />
+        <meta property="og:title" content="0 KM Motosiklet Fiyatları & Taksitli Satış | Paşa Motor Fatih Showroom" />
+        <meta property="og:description" content="TVS, Falcon, Işıldar, MotoLux sıfır 0 KM motosiklet modelleri. Kredi kartına 12 taksit imkanı ve aynı gün noter tescilli anahtar teslimat." />
+        <meta property="og:url" content="https://pasamotor.com.tr/magaza" />
+        <link rel="canonical" href="https://pasamotor.com.tr/magaza" />
       </Helmet>
 
       <div className="bg-background min-h-screen pt-24 pb-20">
@@ -359,18 +366,14 @@ const Magaza = () => {
                     {/* High-Res Studio Image Area - Direct Link to Detail Page */}
                     <Link
                       to={`/magaza/${bike.slug}`}
-                      className="relative h-64 w-full bg-gradient-to-b from-[#171b26] via-[#10131c] to-[#090b10] overflow-hidden flex items-center justify-center p-6 cursor-pointer select-none border-b border-border/40"
+                      className="relative h-64 w-full bg-white overflow-hidden flex items-center justify-center p-6 cursor-pointer select-none border-b border-border/40"
                     >
-                      {/* Senior Architectural Contact Shadow (Absorbs transparent PNG white fringe artifacts) */}
-                      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-[70%] h-6 bg-black/95 blur-md rounded-[100%] pointer-events-none z-0" />
-                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[48%] h-2.5 bg-black blur-[1.5px] rounded-[100%] pointer-events-none z-0" />
-
                       <img
                         src={activeImage}
                         alt={`${bike.brand} ${bike.model} (${activeColor?.name || ''})`}
                         onError={(e) => { e.currentTarget.src = "/placeholder.webp"; }}
                         referrerPolicy="no-referrer"
-                        className="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-500 [filter:drop-shadow(0_12px_24px_rgba(0,0,0,0.9))] relative z-10 mix-blend-normal"
+                        className="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-500 relative z-10 mix-blend-multiply"
                         loading="lazy"
                         decoding="async"
                       />
@@ -584,10 +587,10 @@ const Magaza = () => {
                   <MapPin className="w-3.5 h-3.5" /> Fatih Kızılelma Showroom
                 </div>
                 <h3 className="font-heading font-black text-2xl md:text-3xl text-white">
-                  MotoLux Modellerini Canlı İncelemek İçin Mağazamıza Bekliyoruz
+                  0 KM TVS, Falcon, Işıldar ve MotoLux Modelleri Showroom Alanımızda
                 </h3>
                 <p className="text-slate-300 text-xs md:text-sm leading-relaxed">
-                  İstanbul Fatih Kızılelma Caddesi'ndeki yetkili satış mağazamızda tüm MotoLux modellerini yakından görebilir, ergonomisini test edebilir ve uzman ekibimizle çay eşliğinde size en uygun ödeme planını oluşturabilirsiniz.
+                  İstanbul Fatih Kızılelma Caddesi'ndeki yetkili satış mağazamızda sıfır motosiklet modellerimizi yakından görebilir, ergonomisini inceleyebilir ve uzman ekibimizle çay eşliğinde 12 taksit ve anahtar teslim avantajlı ödeme planınızı oluşturabilirsiniz.
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-2 text-xs text-slate-300">
@@ -597,7 +600,7 @@ const Magaza = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>Aynı Gün Anahtar Teslim Plaka Desteği</span>
+                    <span>Aynı Gün Stoktan Anahtar Teslim Plaka Desteği</span>
                   </div>
                 </div>
               </div>
@@ -620,6 +623,73 @@ const Magaza = () => {
                   Showroom Satış Yetkilisini Ara
                 </a>
               </div>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* FREQUENTLY ASKED QUESTIONS (AEO & SEO DIRECT ANSWERS)                     */}
+          {/* ========================================================================= */}
+          <div className="mt-16 bg-card border border-border rounded-3xl p-6 md:p-10 shadow-sm">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-xl bg-red-500/10 text-red-500">
+                <HelpCircle className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-red-500">
+                AEO & Rehber
+              </span>
+            </div>
+            <h3 className="font-heading font-black text-2xl md:text-3xl text-foreground mb-3">
+              0 KM Motosiklet Alımı Hakkında Sıkça Sorulan Sorular
+            </h3>
+            <p className="text-xs md:text-sm text-muted-foreground mb-8 max-w-2xl">
+              Showroom'umuzdan sıfır motor alımı, kredi kartı taksit seçenekleri, plaka tescil evrakları ve garanti süreçleri hakkında merak edilenler:
+            </p>
+
+            <div className="space-y-3">
+              {[
+                {
+                  q: "Paşa Motor Fatih Showroom'da hangi marka sıfır motosikletler satılıyor?",
+                  a: "Paşa Motor; TVS (Jupiter 125, Raider 125, Apache RTR serisi), Falcon (Mocco 50, Techno, FR 125), Işıldar, MotoLux (Americano, Rossi 50 RS, Cappadocia 125) ve Kuba-RKS modellerinin resmî yetkili satış ve servis noktasıdır. 50cc B-ehliyet scooterlardan 125cc commuter ve vitesli motorlara kadar geniş bir model gamı mevcuttur."
+                },
+                {
+                  q: "Kredi kartına kaç taksit yapılıyor?",
+                  a: "Tüm anlaşmalı banka kredi kartlarına (Bonus, World, Axess, Maximum, Bankkart, CardFinans ve Paraf) 3, 6, 9 ve 12 aya varan taksit seçenekleri sunuyoruz. Dilerseniz peşin alımlarda özel nakit indirimlerinden de faydalanabilirsiniz."
+                },
+                {
+                  q: "50cc scooter modelleri B sınıfı otomobil ehliyeti ile kullanılabilir mi?",
+                  a: "Evet, 50cc motor modellerimiz B sınıfı otomobil ehliyetiyle yasal olarak kullanılabilir; ayrıca MTV (Motorlu Taşıtlar Vergisi) ve zorunlu trafik sigortasından tamamen muaftır."
+                },
+                {
+                  q: "Plaka, ruhsat ve teslimat süreci nasıl işliyor?",
+                  a: "Motosikletlerimiz mağazamızda stoktan hemen teslim edilir. Plaka, ruhsat ve noter tescil evrakları aynı gün içerisinde uzman satış ekibimiz tarafından tamamlanır. (Not: Mağazamızda test sürüşü hizmeti verilmemektedir; sıfır 0 KM kondisyondaki tüm modeller showroom alanımızda sergilenmekte olup detaylıca incelenebilir.)"
+                },
+                {
+                  q: "Satın aldığım motosikletin garantisi ve servis desteği var mı?",
+                  a: "Satın aldığınız her motosiklet 2 yıl resmî fabrika ve distribütör garantisi kapsamındadır. Aynı zamanda Paşa Motor yetkili servis güvencesiyle periyodik bakım, onarım ve orijinal yedek parça desteğini doğrudan kendi servisimizden temin edebilirsiniz."
+                }
+              ].map((faq, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-border/80 bg-muted/20 overflow-hidden transition-colors"
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
+                    className="w-full text-left p-4 md:p-5 flex items-center justify-between gap-4 font-bold text-sm md:text-base text-foreground hover:text-red-500 transition-colors"
+                  >
+                    <span>{faq.q}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-200 ${
+                        openFaqIndex === idx ? "rotate-180 text-red-500" : ""
+                      }`}
+                    />
+                  </button>
+                  {openFaqIndex === idx && (
+                    <div className="px-4 md:px-5 pb-5 pt-1 text-xs md:text-sm text-muted-foreground leading-relaxed border-t border-border/50">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 

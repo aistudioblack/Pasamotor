@@ -215,108 +215,122 @@ const Blog = () => {
           ) : (
             <div className="max-w-6xl mx-auto">
               {/* Featured */}
-              {featured && !q && (
-                <Link
-                  to={`/blog/${featured.slug}`}
-                  className="group block rounded-3xl overflow-hidden bg-card border border-border hover:border-primary/40 transition-all duration-500 mb-12 lg:mb-16"
-                >
-                  <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
-                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-950 flex items-center justify-center">
-                      <img
-                        src={getPostCoverImage(featured)}
-                        alt={featured.title}
-                        width={1200}
-                        height={675}
-                        className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-700"
-                        loading="eager"
-                        decoding="sync"
-                        {...{ fetchpriority: "high" }}
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = "/placeholder.webp";
-                        }}
-                      />
-                      <span className="absolute top-5 left-5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold tracking-wide shadow-md z-10">
-                        ÖNE ÇIKAN
-                      </span>
-                    </div>
-                    <div className="p-8 lg:p-12 flex flex-col justify-center">
-                      <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground mb-4 bg-muted/40 w-fit px-3 py-1.5 rounded-md">
-                        <span className="inline-flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5" />
-                          {formatDate(featured.created_at || featured.published_at)}
-                        </span>
-                        <div className="w-1 h-1 rounded-full bg-border" />
-                        <span className="inline-flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5" />
-                          {featured.calcReadingTime} dk okuma
+              {featured && !q && (() => {
+                const featuredCover = getPostCoverImage(featured);
+                return (
+                  <Link
+                    to={`/blog/${featured.slug}`}
+                    className="group block rounded-3xl overflow-hidden bg-card border border-border hover:border-primary/40 transition-all duration-500 mb-12 lg:mb-16"
+                  >
+                    <div className={featuredCover ? "grid grid-cols-1 lg:grid-cols-2 items-center" : "p-8 lg:p-12 relative"}>
+                      {!featuredCover && (
+                        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary via-rose-500 to-amber-500" />
+                      )}
+                      {featuredCover && (
+                        <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-950 flex items-center justify-center">
+                          <img
+                            src={featuredCover}
+                            alt={featured.title}
+                            width={1200}
+                            height={675}
+                            className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-700"
+                            loading="eager"
+                            decoding="sync"
+                            referrerPolicy="no-referrer"
+                            {...{ fetchpriority: "high" }}
+                          />
+                          <span className="absolute top-5 left-5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold tracking-wide shadow-md z-10">
+                            ÖNE ÇIKAN
+                          </span>
+                        </div>
+                      )}
+                      <div className={featuredCover ? "p-8 lg:p-12 flex flex-col justify-center" : "flex flex-col justify-center"}>
+                        <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground mb-4 bg-muted/40 w-fit px-3 py-1.5 rounded-md">
+                          {!featuredCover && (
+                            <span className="px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold tracking-wide shadow-sm">
+                              ÖNE ÇIKAN
+                            </span>
+                          )}
+                          <span className="inline-flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5" />
+                            {formatDate(featured.created_at || featured.published_at)}
+                          </span>
+                          <div className="w-1 h-1 rounded-full bg-border" />
+                          <span className="inline-flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5" />
+                            {featured.calcReadingTime} dk okuma
+                          </span>
+                        </div>
+                        <h2 className="font-heading font-black text-3xl md:text-5xl text-foreground mb-5 leading-[1.1] tracking-tight group-hover:text-primary transition-colors duration-300 drop-shadow-sm">
+                          {featured.title}
+                        </h2>
+                        {featured.excerpt && (
+                          <p className="text-muted-foreground leading-relaxed mb-8 line-clamp-3 md:text-lg">
+                            {featured.excerpt}
+                          </p>
+                        )}
+                        <span className="mt-auto inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-sm w-fit px-5 py-2.5 rounded-lg group-hover:bg-primary/90 transition-all duration-300 shadow-md group-hover:shadow-lg">
+                          Yazıyı Oku
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </span>
                       </div>
-                      <h2 className="font-heading font-black text-3xl md:text-5xl text-foreground mb-5 leading-[1.1] tracking-tight group-hover:text-primary transition-colors duration-300 drop-shadow-sm">
-                        {featured.title}
-                      </h2>
-                      {featured.excerpt && (
-                        <p className="text-muted-foreground leading-relaxed mb-8 line-clamp-3 md:text-lg">
-                          {featured.excerpt}
-                        </p>
-                      )}
-                      <span className="mt-auto inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-sm w-fit px-5 py-2.5 rounded-lg group-hover:bg-primary/90 transition-all duration-300 shadow-md group-hover:shadow-lg">
-                        Yazıyı Oku
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </span>
                     </div>
-                  </div>
-                </Link>
-              )}
+                  </Link>
+                );
+              })()}
 
               {/* Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {(q ? filtered : visibleRest).map((post) => (
-                  <Link
-                    key={post.id}
-                    to={`/blog/${post.slug}`}
-                    className="group flex flex-col rounded-3xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 shadow-sm hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.2)] transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <div className="relative aspect-[16/9] overflow-hidden bg-slate-950 flex items-center justify-center">
-                      <img
-                        src={getPostCoverImage(post)}
-                        alt={post.title}
-                        width={1200}
-                        height={630}
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-in-out"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = "/placeholder.webp";
-                        }}
-                      />
-                    </div>
-                    <div className="p-6 md:p-8 flex flex-col flex-1">
-                      <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                        <span className="inline-flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(post.created_at || post.published_at)}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded">
-                          <Clock className="w-3 h-3" />
-                          {post.calcReadingTime} dk
+                {(q ? filtered : visibleRest).map((post) => {
+                  const postCover = getPostCoverImage(post);
+                  return (
+                    <Link
+                      key={post.id}
+                      to={`/blog/${post.slug}`}
+                      className="group flex flex-col rounded-3xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 shadow-sm hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.2)] transition-all duration-300 hover:-translate-y-1"
+                    >
+                      {postCover ? (
+                        <div className="relative aspect-[16/9] overflow-hidden bg-slate-950 flex items-center justify-center">
+                          <img
+                            src={postCover}
+                            alt={post.title}
+                            width={1200}
+                            height={630}
+                            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-2 w-full bg-gradient-to-r from-primary/80 via-primary to-amber-500/80" />
+                      )}
+                      <div className="p-6 md:p-8 flex flex-col flex-1">
+                        <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">
+                          <span className="inline-flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded">
+                            <Calendar className="w-3 h-3" />
+                            {formatDate(post.created_at || post.published_at)}
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded">
+                            <Clock className="w-3 h-3" />
+                            {post.calcReadingTime} dk
+                          </span>
+                        </div>
+                        <h3 className="font-heading font-bold text-xl text-foreground mb-3 group-hover:text-primary transition-colors leading-[1.3] line-clamp-2 tracking-tight">
+                          {post.title}
+                        </h3>
+                        {post.excerpt && (
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-6">
+                            {post.excerpt}
+                          </p>
+                        )}
+                        <span className="mt-auto inline-flex items-center gap-2 text-sm bg-primary text-primary-foreground font-bold w-fit px-4 py-2 rounded-lg group-hover:bg-primary/90 transition-all duration-300 shadow-sm group-hover:shadow-md">
+                          Devamını Oku
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </span>
                       </div>
-                      <h3 className="font-heading font-bold text-xl text-foreground mb-3 group-hover:text-primary transition-colors leading-[1.3] line-clamp-2 tracking-tight">
-                        {post.title}
-                       </h3>
-                      {post.excerpt && (
-                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-6">
-                          {post.excerpt}
-                        </p>
-                      )}
-                      <span className="mt-auto inline-flex items-center gap-2 text-sm bg-primary text-primary-foreground font-bold w-fit px-4 py-2 rounded-lg group-hover:bg-primary/90 transition-all duration-300 shadow-sm group-hover:shadow-md">
-                        Devamını Oku
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
 
               {/* Load more button */}

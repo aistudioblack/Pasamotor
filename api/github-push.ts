@@ -231,6 +231,7 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
 
   const treeData: any[] = [];
   const filesToUpload: { file: string; filePath: string; buf: Buffer; sha: string; isBinary: boolean }[] = [];
+  const localPaths = new Set<string>();
 
   for (const file of files) {
     const filePath = path.join(process.cwd(), file);
@@ -251,16 +252,13 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
 
     const sha = computeGitBlobSha(buf);
     const normalizedRelativePath = file.replace(/\\/g, "/");
+    localPaths.add(normalizedRelativePath);
     const remoteSha = remoteBlobMap.get(normalizedRelativePath);
 
     if (remoteSha && remoteSha === sha) {
-      // Dosya uzak depoda zaten birebir aynı hash ile mevcut, blob oluşturmaya gerek yok
-      treeData.push({
-        path: normalizedRelativePath,
-        mode: "100644" as const,
-        type: "blob" as const,
-        sha
-      });
+      // Dosya uzak depoda zaten birebir aynı hash ile mevcut. 
+      // base_tree kullandığımız için unchanged dosyaları treeData'ya eklemiyoruz!
+      // Bu sayede createTree payload boyutu çok küçülür ve 500 hataları önlenir.
     } else {
       const ext = path.extname(file).toLowerCase();
       const isBinary = [".png", ".jpg", ".jpeg", ".gif", ".ico", ".webp", ".svg", ".eot", ".ttf", ".woff", ".woff2", ".mp3", ".mp4", ".pdf", ".zip", ".webm"].includes(ext);
@@ -274,7 +272,19 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     }
   }
 
-  console.log(`[GitHub SDK] Toplam dosya: ${files.length}. Değişmeyen dosya: ${treeData.length}, Yüklenecek: ${filesToUpload.length}`);
+  // Uzak depoda olup lokalde SİLİNMİŞ olan dosyaları tespit edip ağaçtan kaldıralım
+  for (const remotePath of Array.from(remoteBlobMap.keys())) {
+    if (!localPaths.has(remotePath)) {
+      treeData.push({
+        path: remotePath,
+        mode: "100644" as const,
+        type: "blob" as const,
+        sha: null // null sha means delete in base_tree
+      });
+    }
+  }
+
+  console.log(`[GitHub SDK] Toplam dosya: ${files.length}. Yüklenecek: ${filesToUpload.length}, Silinecek: ${treeData.length}`);
 
   const uploadSingleFile = async (item: typeof filesToUpload[0]) => {
     let retryCount = 0;
@@ -320,6 +330,11 @@ export async function pushToGithubSdk(githubUrl: string, token: string) {
     for (const r of results) {
       if (r) treeData.push(r);
     }
+  }
+
+  if (treeData.length === 0 && filesToUpload.length === 0) {
+    console.log(`[GitHub SDK] Değişen veya yüklenmesi gereken yeni bir dosya yok. İşlem atlanıyor.`);
+    return;
   }
 
   // Create new Tree

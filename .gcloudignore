@@ -1,0 +1,9 @@
+.gcloudignore
+.git
+node_modules/
+.agents/
+.img_cache/
+coverage/
+*.log
+bun.lock
+bun.lockb

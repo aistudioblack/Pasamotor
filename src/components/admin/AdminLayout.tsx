@@ -136,13 +136,19 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   useEffect(() => {
     let mounted = true;
 
+    const safetyTimeout = setTimeout(() => {
+      if (mounted) {
+        setLoading(false);
+      }
+    }, 4000);
+
     const checkAccess = async (currentUser: User | null) => {
       if (!currentUser) {
         if (mounted) {
           setIsAdmin(false);
-          setLoading(true);
+          setLoading(false);
         }
-        navigate("/admin/giris");
+        navigate("/admin/giris", { replace: true });
         return;
       }
       const { data: initialData, error: userError } = await dbClient
@@ -227,6 +233,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimeout);
       sub.subscription.unsubscribe();
     };
   }, [navigate]);

@@ -3,7 +3,7 @@ import { dbClient } from "@/lib/db-client";
 import { MOTORCYCLES, Motorcycle } from "@/data/motorcycles";
 
 export const MOTORCYCLES_QUERY_KEY = ["motorcycles"] as const;
-const LOCAL_STORAGE_CACHE_KEY = "pasamotor_motorcycles_cache_v7_local";
+const LOCAL_STORAGE_CACHE_KEY = "pasamotor_motorcycles_cache_v8_hd";
 
 /**
  * Eski harici motolux URL'lerini yerel proje içi yollara dönüştüren yardımcı

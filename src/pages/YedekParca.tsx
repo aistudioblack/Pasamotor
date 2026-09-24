@@ -32,26 +32,14 @@ import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { CITIES } from "@/data/cities";
 import { PhotoPartFinderModal } from "@/components/PhotoPartFinderModal";
 import { useCart } from "@/context/CartContext";
+import { 
+  getProductCache, 
+  setProductCache, 
+  getCachedProductsSync, 
+  getLastSyncTimeSync 
+} from "@/lib/product-cache";
 
 type Product = Tables<"products">;
-
-// Modül düzeyinde anlık önbellek (Sınırsız bakiye ve hızlı render)
-let cachedProductsList: Product[] | null = null;
-let lastSyncTime: number | null = null;
-
-// Initialize cache from sessionStorage if available to persist between page refreshes and route swaps
-try {
-  if (typeof window !== "undefined") {
-    const localCached = sessionStorage.getItem("pasa_motor_yedek_parca_cache");
-    const localTime = sessionStorage.getItem("pasa_motor_yedek_parca_time");
-    if (localCached && localTime && Date.now() - parseInt(localTime) < 10 * 60 * 1000) {
-      cachedProductsList = JSON.parse(localCached);
-      lastSyncTime = parseInt(localTime, 10);
-    }
-  }
-} catch (e) {
-  console.warn("Session storage read failed:", e);
-}
 
 const BRANDS_LIST = ["Tümü", "TRW", "TVS", "Falcon", "Işıldar", "Motolux", "Vox", "RapidoX", "Kuba", "RKS", "Mondial", "HONDA", "BAJAJ", "BANDO", "NGK", "VARTA", "CFMOTO", "YAMAHA", "SUZUKI", "VESPA", "SYM"] as const;
 
@@ -169,42 +157,44 @@ const YedekParca = () => {
   const loadProducts = async (forceSync = false) => {
     try {
       const now = Date.now();
-      const needsSync = !lastSyncTime || (now - lastSyncTime > 5 * 60 * 1000); // 5 dakika
 
-      if (cachedProductsList && !forceSync) {
-        setAllProducts(cachedProductsList);
+      // 1. Önce anlık in-memory önbelleğe bak
+      const syncCached = getCachedProductsSync();
+      const syncTime = getLastSyncTimeSync();
+      if (syncCached && !forceSync) {
+        setAllProducts(syncCached);
         setLoading(false);
-        // Sadece 5 dakikadan önce güncellendiyse arka planda sessizce senkronize et
-        if (needsSync) {
+        if (!syncTime || now - syncTime > 5 * 60 * 1000) {
           silentSync();
         }
         return;
       }
 
+      // 2. IndexedDB kalıcı önbelleğe bak (Kota aşımı riski yok)
+      if (!forceSync) {
+        const idbCached = await getProductCache();
+        if (idbCached && idbCached.products.length > 0) {
+          setAllProducts(idbCached.products);
+          setLoading(false);
+          if (now - idbCached.timestamp > 5 * 60 * 1000) {
+            silentSync();
+          }
+          return;
+        }
+      }
+
       setLoading(true);
       setError(null);
       const data = await fetchActiveProductsFromDB();
-      cachedProductsList = data;
-      lastSyncTime = Date.now();
-      
-      // Save to sessionStorage to fast-load on subsequent visits or reload
-      try {
-        sessionStorage.setItem("pasa_motor_yedek_parca_cache", JSON.stringify(data));
-        sessionStorage.setItem("pasa_motor_yedek_parca_time", lastSyncTime.toString());
-      } catch (e) {
-        console.warn("Session storage write failed:", e);
-      }
-
+      await setProductCache(data);
       setAllProducts(data);
     } catch (err: any) {
       console.error("Yedek parça yükleme hatası:", err);
-      // Failover to local cache if possible so user has immediate access
+      // Ağ hatası durumunda kalıcı önbelleğe geri dön
       try {
-        const localCached = sessionStorage.getItem("pasa_motor_yedek_parca_cache");
-        if (localCached) {
-          const fallbackData = JSON.parse(localCached);
-          setAllProducts(fallbackData);
-          cachedProductsList = fallbackData;
+        const idbFallback = await getProductCache();
+        if (idbFallback && idbFallback.products.length > 0) {
+          setAllProducts(idbFallback.products);
           setError(null);
           return;
         }
@@ -220,16 +210,7 @@ const YedekParca = () => {
   const silentSync = async () => {
     try {
       const data = await fetchActiveProductsFromDB();
-      cachedProductsList = data;
-      lastSyncTime = Date.now();
-      
-      try {
-        sessionStorage.setItem("pasa_motor_yedek_parca_cache", JSON.stringify(data));
-        sessionStorage.setItem("pasa_motor_yedek_parca_time", lastSyncTime.toString());
-      } catch (e) {
-        console.warn("Session storage write failed:", e);
-      }
-
+      await setProductCache(data);
       setAllProducts(data);
     } catch (err: any) {
       console.warn("Sessiz arka plan senkronizasyonu geçici bir ağ aksaklığı nedeniyle ertelendi. Mevcut önbellek kullanılmaya devam ediyor:", err?.message || err);
@@ -819,8 +800,8 @@ const YedekParca = () => {
                         {/* Ürün Görseli */}
                         <div className={`relative overflow-hidden rounded-xl shrink-0 ${
                           viewMode === "list" 
-                            ? "w-full sm:w-40 h-36 bg-slate-950 flex items-center justify-center border border-border/80" 
-                            : "w-full h-44 mb-3 bg-slate-950 flex items-center justify-center border border-border/80"
+                            ? "w-full sm:w-40 h-36 bg-white flex items-center justify-center border border-border/80" 
+                            : "w-full h-44 mb-3 bg-white flex items-center justify-center border border-border/80"
                         }`}>
                           {p.images && p.images.length > 0 ? (
                             <ImageWithFallback
@@ -829,7 +810,7 @@ const YedekParca = () => {
                               width={240}
                               height={176}
                               referrerPolicy="no-referrer"
-                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                              className="w-full h-full object-contain transition-transform duration-500 hover:scale-110 mix-blend-multiply"
                               loading="lazy"
                               fallbackIcon={<ProductImagePlaceholder brand={p.brand || "ALT-GRUP"} />}
                             />

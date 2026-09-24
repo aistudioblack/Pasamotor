@@ -19,6 +19,8 @@ import {
   Clock,
   Gift,
   ChevronRight,
+  ChevronDown,
+  HelpCircle,
   ArrowLeft,
   Fuel,
   BatteryCharging,
@@ -53,6 +55,7 @@ const MagazaDetay = () => {
 
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState<MotorcycleColor | null>(
     bike && bike.colors.length > 0 ? bike.colors[0] : null
   );
@@ -83,7 +86,7 @@ const MagazaDetay = () => {
           <Layers className="w-16 h-16 text-muted-foreground/40 mx-auto mb-4" />
           <h1 className="font-heading font-black text-2xl text-foreground mb-2">Motosiklet Modeli Bulunamadı</h1>
           <p className="text-sm text-muted-foreground mb-6">
-            Aradığınız MotoLux modeli kaldırılmış veya adresi değişmiş olabilir.
+            Aradığınız motosiklet modeli kaldırılmış veya adresi değişmiş olabilir.
           </p>
           <Link
             to="/magaza"
@@ -105,14 +108,100 @@ const MagazaDetay = () => {
     "kargo-uc-teker": "3 Tekerlekli & Kargo Triportör"
   };
 
+  const formattedPrice = Number(bike.price || 0).toLocaleString("tr-TR");
+  const bikePageUrl = `https://pasamotor.com.tr/magaza/${bike.slug}`;
+  const bikeImageUrl = bike.images && bike.images[0] ? bike.images[0] : "https://pasamotor.com.tr/pasa-motor-logo.webp";
+
   return (
     <Layout>
       <Helmet>
-        <title>{`${bike.brand} ${bike.model} 0 KM Fiyatı & Teknik Özellikleri | Paşa Motor Fatih Bayi`}</title>
+        <title>{`${bike.brand} ${bike.model} 0 KM Fiyatı & Taksit Seçenekleri | Paşa Motor Fatih Bayi`}</title>
         <meta
           name="description"
-          content={`${bike.brand} ${bike.model} 0 KM sıfır satış fiyatı, 12 taksit imkanı, ${bike.licenseType}, motor gücü, yakıt tüketimi ve tüm teknik detayları Paşa Motor Fatih Showroom'da.`}
+          content={`${bike.brand} ${bike.model} 0 KM peşin ${formattedPrice} TL veya 12 taksit seçenekleriyle Paşa Motor Showroom'da. ${bike.licenseType}, ${bike.engineSize}. Aynı gün noter tescilli anahtar teslimat.`}
         />
+        <meta property="og:title" content={`${bike.brand} ${bike.model} 0 KM Fiyatı | Paşa Motor Fatih`} />
+        <meta property="og:description" content={`${bike.brand} ${bike.model} sıfır motosiklet. Peşin ${formattedPrice} TL veya 12 aya varan taksitle Paşa Motor Fatih Showroom'da stoktan hemen teslim.`} />
+        <meta property="og:image" content={bikeImageUrl} />
+        <meta property="og:url" content={bikePageUrl} />
+        <link rel="canonical" href={bikePageUrl} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": ["Vehicle", "Motorcycle", "Product"],
+                "@id": `${bikePageUrl}#vehicle`,
+                "name": `${bike.brand} ${bike.model}`,
+                "description": `${bike.brand} ${bike.model} 0 KM sıfır motosiklet. Peşin ${formattedPrice} TL veya 12 taksit imkanı. ${bike.licenseType}, ${bike.engineSize}. Aynı gün plaka tescili ve mağazadan hemen teslim Paşa Motor Showroom'da.`,
+                "image": bike.images && bike.images.length > 0 ? bike.images : [bikeImageUrl],
+                "brand": { "@type": "Brand", "name": bike.brand },
+                "model": bike.model,
+                "itemCondition": "https://schema.org/NewCondition",
+                "offers": {
+                  "@type": "Offer",
+                  "priceCurrency": "TRY",
+                  "price": bike.price,
+                  "availability": "https://schema.org/InStock",
+                  "url": bikePageUrl,
+                  "seller": {
+                    "@type": "AutoDealer",
+                    "name": "Paşa Motor Motosiklet Showroom",
+                    "telephone": "0212 586 85 98",
+                    "address": {
+                      "@type": "PostalAddress",
+                      "streetAddress": "Kızılelma Cad. No:66/A Kocamustafapaşa",
+                      "addressLocality": "Fatih",
+                      "addressRegion": "İstanbul",
+                      "addressCountry": "TR"
+                    }
+                  }
+                },
+                "vehicleEngine": {
+                  "@type": "EngineSpecification",
+                  "engineDisplacement": bike.engineSize
+                }
+              },
+              {
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": `${bike.brand} ${bike.model} hangi ehliyet sınıfı ile kullanılır?`,
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": `${bike.brand} ${bike.model} modeli ${bike.licenseType} ile yasal olarak kullanılabilir.`
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": `${bike.brand} ${bike.model} için kredi kartına taksit var mı?`,
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Evet, Paşa Motor Showroom'da tüm anlaşmalı bonus, axess, maximum, world, bankkart ve paraf kredi kartlarına 3, 6, 9 ve 12 taksit imkanı sunulmaktadır."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Motosiklet teslimat süresi ve plaka tescil işlemleri nasıl yapılıyor?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Motosikletlerimiz mağazamızda stoktan hemen teslim edilir. Plaka, ruhsat ve noter tescil evrakları aynı gün içerisinde uzman ekibimiz tarafından düzenlenir. (Not: Test sürüşü hizmetimiz yoktur; mağazamızda detaylı canlı inceleme yapılmaktadır.)"
+                    }
+                  }
+                ]
+              },
+              {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  { "@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "https://pasamotor.com.tr/" },
+                  { "@type": "ListItem", "position": 2, "name": "Motosiklet Mağazası", "item": "https://pasamotor.com.tr/magaza" },
+                  { "@type": "ListItem", "position": 3, "name": `${bike.brand} ${bike.model}`, "item": bikePageUrl }
+                ]
+              }
+            ]
+          })}
+        </script>
       </Helmet>
 
       <div className="bg-background min-h-screen pt-24 pb-20">
@@ -136,7 +225,7 @@ const MagazaDetay = () => {
             <div className="lg:col-span-7 space-y-4">
               
               {/* Main Image Container */}
-              <div className="relative rounded-3xl bg-gradient-to-b from-[#181d2a] via-[#10141f] to-[#0a0d14] border border-border/80 p-4 md:p-8 overflow-hidden shadow-xl">
+              <div className="relative rounded-3xl bg-white border border-border/80 p-4 md:p-8 overflow-hidden shadow-xl">
                 
                 {/* Floating Top Badges */}
                 <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20 pointer-events-none">
@@ -160,16 +249,13 @@ const MagazaDetay = () => {
 
                 {/* Hero Image & Studio Ground Shadow */}
                 <div className="w-full h-80 md:h-[420px] flex items-center justify-center relative select-none">
-                  {/* Senior Contact Shadow Layer (Defringes cutout artifacts on dark floor) */}
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[74%] h-7 bg-black/95 blur-lg rounded-[100%] pointer-events-none z-0" />
-                  <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-[52%] h-3 bg-black blur-[1.5px] rounded-[100%] pointer-events-none z-0" />
 
                   <img
                     src={bike.images[activeImageIndex] || bike.images[0]}
                     alt={`${bike.brand} ${bike.model}`}
                     onError={(e) => { e.currentTarget.src = "/placeholder.webp"; }}
                     referrerPolicy="no-referrer"
-                    className="max-h-full max-w-full object-contain [filter:drop-shadow(0_14px_28px_rgba(0,0,0,0.9))] transition-all duration-300 relative z-10 mix-blend-normal"
+                    className="max-h-full max-w-full object-contain  transition-all duration-300 relative z-10 mix-blend-multiply"
                   />
                 </div>
 
@@ -199,7 +285,7 @@ const MagazaDetay = () => {
                           setSelectedColor(bike.colors[idx]);
                         }
                       }}
-                      className={`relative w-20 h-20 rounded-2xl bg-card border-2 p-2 overflow-hidden shrink-0 transition-all ${
+                      className={`relative w-20 h-20 rounded-2xl bg-white border-2 p-2 overflow-hidden shrink-0 transition-all ${
                         activeImageIndex === idx ? "border-red-500 scale-105 shadow-md" : "border-border/60 hover:border-border"
                       }`}
                     >
@@ -208,7 +294,7 @@ const MagazaDetay = () => {
                         alt={`${bike.model} ${idx}`} 
                         onError={(e) => { e.currentTarget.src = "/placeholder.webp"; }}
                         referrerPolicy="no-referrer"
-                        className="w-full h-full object-contain" 
+                        className="w-full h-full object-contain mix-blend-multiply" 
                       />
                     </button>
                   ))}
@@ -704,7 +790,7 @@ const MagazaDetay = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-heading font-black text-2xl text-foreground">
-                    Diğer {categoryNames[bike.category] || "MotoLux"} Modelleri
+                    Diğer {categoryNames[bike.category] || `${bike.brand} Motosiklet`} Modelleri
                   </h3>
                   <p className="text-xs text-muted-foreground">
                     Aynı kategorideki alternatif modelleri inceleyin
@@ -751,6 +837,106 @@ const MagazaDetay = () => {
               </div>
             </div>
           )}
+
+          {/* ========================================================================= */}
+          {/* FAQ & SIKÇA SORULAN SORULAR (AEO SCHEMA COMPLIANT ACCORDION)              */}
+          {/* ========================================================================= */}
+          <div className="mt-16 bg-card border border-border rounded-3xl p-6 md:p-10 shadow-sm">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-xl bg-red-500/10 text-red-500">
+                <HelpCircle className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-red-500">
+                Model Rehberi & SSS
+              </span>
+            </div>
+            <h3 className="font-heading font-black text-2xl md:text-3xl text-foreground mb-3">
+              {bike.brand} {bike.model} Hakkında Sıkça Sorulan Sorular
+            </h3>
+            <p className="text-xs md:text-sm text-muted-foreground mb-8 max-w-2xl">
+              Bu model için ehliyet gereksinimi, kredi kartı taksit koşulları ve plaka teslim süreçleri:
+            </p>
+
+            <div className="space-y-3">
+              {[
+                {
+                  q: `${bike.brand} ${bike.model} hangi ehliyet sınıfı ile kullanılır?`,
+                  a: `${bike.brand} ${bike.model}, ${bike.licenseType} ile yasal olarak kullanılabilir. 50cc motorlarımız B sınıfı otomobil ehliyetiyle doğrudan kullanılabilir ve MTV ile zorunlu trafik sigortasından muaftır.`
+                },
+                {
+                  q: `${bike.brand} ${bike.model} için kredi kartına taksit imkanı var mı?`,
+                  a: `Evet. Paşa Motor Fatih Showroom'da tüm anlaşmalı bonus, axess, maximum, world, bankkart ve paraf kredi kartlarına 3, 6, 9 ve 12 aya varan taksit seçenekleri mevcuttur. Peşin ödemede özel indirimler geçerlidir.`
+                },
+                {
+                  q: "Plaka, tescil ve teslimat süreci nasıl yapılıyor?",
+                  a: "Motosikletiniz mağazamızda stoktan hemen teslim edilir. Plaka, noter tescili ve ruhsat evrakları uzman satış ekibimiz tarafından aynı gün içinde sonuçlandırılır. (Not: Araçlarımız sıfır 0 KM olarak teslim edildiğinden test sürüşü hizmetimiz yoktur; mağazamızda detaylı canlı inceleme yapabilirsiniz.)"
+                },
+                {
+                  q: `${bike.brand} ${bike.model} garanti süresi ve yetkili servis bakımı nasıl?`,
+                  a: `Aracınız 2 yıl resmî fabrika ve distribütör garantilidir. Paşa Motor yetkili teknik servisimiz sayesinde periyodik bakımlar, orijinal yedek parça ve garanti içi işlemler doğrudan kendi merkezimizde gerçekleştirilir.`
+                }
+              ].map((faq, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-border/80 bg-muted/20 overflow-hidden transition-colors"
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
+                    className="w-full text-left p-4 md:p-5 flex items-center justify-between gap-4 font-bold text-sm md:text-base text-foreground hover:text-red-500 transition-colors"
+                  >
+                    <span>{faq.q}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-200 ${
+                        openFaqIndex === idx ? "rotate-180 text-red-500" : ""
+                      }`}
+                    />
+                  </button>
+                  {openFaqIndex === idx && (
+                    <div className="px-4 md:px-5 pb-5 pt-1 text-xs md:text-sm text-muted-foreground leading-relaxed border-t border-border/50">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* SHOWROOM VISIT & LOCAL PURCHASE CTA                                       */}
+          {/* ========================================================================= */}
+          <div className="mt-10 rounded-3xl bg-gradient-to-r from-red-950/40 via-card to-card border border-red-500/20 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 text-center md:text-left">
+              <span className="text-xs font-bold text-red-500 uppercase tracking-wider flex items-center justify-center md:justify-start gap-1">
+                <MapPin className="w-4 h-4" /> Paşa Motor Fatih Showroom
+              </span>
+              <h4 className="font-heading font-black text-xl md:text-2xl text-foreground">
+                {bike.brand} {bike.model} Modelini Mağazamızda Canlı İnceleyin
+              </h4>
+              <p className="text-xs md:text-sm text-muted-foreground max-w-xl">
+                Kızılelma Caddesi'ndeki mağazamızda bu motoru yakından görebilir, peşin veya 12 taksit seçenekleriyle aynı gün anahtar teslim satın alabilirsiniz.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <a
+                href="https://maps.google.com/?q=Seyid+Ömer+Mah.+Kızılelma+Cad.+No:66/A+Fatih+İstanbul"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-3 rounded-xl bg-card border border-border hover:bg-muted font-bold text-xs md:text-sm text-foreground flex items-center gap-2 transition-all"
+              >
+                <MapPin className="w-4 h-4 text-red-500" />
+                Yol Tarifi Al
+              </a>
+              <a
+                href={`https://wa.me/905348996817?text=${encodeURIComponent(`Merhaba, Paşa Motor web sitesinden ${bike.brand} ${bike.model} sıfır motosiklet hakkında plaka dahil anahtar teslim fiyat teklifi ve taksit detayları almak istiyorum.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-xs md:text-sm text-white flex items-center gap-2 transition-all shadow-md shadow-emerald-600/20"
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp Teklif Al
+              </a>
+            </div>
+          </div>
 
         </div>
       </div>

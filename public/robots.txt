@@ -2,16 +2,36 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
-Sitemap: https://pasamotor.com.tr/sitemap.xml
 
+# Explicitly allow AI search bots and LLM crawlers for AI visibility
 User-agent: GPTBot
-Disallow: /
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
 
 User-agent: GeminiBot
-Disallow: /
+Allow: /
 
 User-agent: ClaudeBot
-Disallow: /
+Allow: /
+
+User-agent: Omgilibot
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
 
 User-agent: PerplexityBot
-Disallow: /
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: cohere-ai
+Allow: /
+
+Sitemap: https://pasamotor.com.tr/sitemap.xml

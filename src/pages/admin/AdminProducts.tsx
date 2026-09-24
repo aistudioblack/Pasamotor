@@ -10,6 +10,7 @@ import {
 import type { Tables } from "@/lib/db-types";
 import { convertToWebP, getWebPFileName } from "@/lib/imageOptimization";
 import BarcodeScanner from "@/components/admin/BarcodeScanner";
+import { clearProductCache } from "@/lib/product-cache";
 
 type Product = Tables<"products">;
 
@@ -623,10 +624,7 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
       toast({ title: "Hata", description: error.message, variant: "destructive" });
     } else {
       toast({ title: editing ? "Güncellendi" : "Eklendi" });
-      try {
-        sessionStorage.removeItem("pasamotor_yedek_parca_cache");
-        sessionStorage.removeItem("pasamotor_yedek_parca_sync");
-      } catch (e) { /* fallback if session storage is disabled */ }
+      clearProductCache().catch(() => {});
       setOpen(false);
       load();
       // Notify IndexNow
@@ -896,9 +894,11 @@ BEKLENEN ÇIKTI (Sadece ham JSON):
         toast({ title: `${deletedCount} ürün başarıyla silindi` });
         setSelected(new Set());
         setIsAllDBSelected(false);
+        clearProductCache().catch(() => {});
       } else if (confirmModal.id) {
         const { error } = await supabase.from("products").delete().eq("id", confirmModal.id);
         if (error) throw error;
+        clearProductCache().catch(() => {});
         toast({ title: "Ürün silindi" });
       }
     } catch (error: any) {

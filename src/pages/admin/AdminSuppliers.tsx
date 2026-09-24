@@ -267,7 +267,10 @@ const AdminSuppliers = () => {
            })
          });
          
-        if (!authRes.ok) throw new Error("Portal oturum açma hatası.");
+        if (!authRes.ok) {
+           const errJson = await authRes.json().catch(()=>({}));
+           throw new Error(errJson.error || "Portal oturum açma hatası.");
+        }
         const authJson = await authRes.json();
         if (!authJson.success || !authJson.cookies) throw new Error("Kimlik doğrulama başarısız.");
         

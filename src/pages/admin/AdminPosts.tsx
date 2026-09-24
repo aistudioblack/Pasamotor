@@ -557,13 +557,18 @@ const AdminPosts = () => {
                     />
 
                     {/* Kapak Görseli Küçük Önizleme */}
-                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted shrink-0 border border-border">
-                      <img 
-                        src={getPostCoverImage(p)} 
-                        alt={p.title} 
-                        className="w-full h-full object-cover" 
-                        loading="lazy" 
-                      />
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted shrink-0 border border-border flex items-center justify-center">
+                      {p.cover_image ? (
+                        <img 
+                          src={p.cover_image} 
+                          alt={p.title} 
+                          className="w-full h-full object-cover" 
+                          loading="lazy" 
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <FileText className="w-5 h-5 text-muted-foreground/60" />
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0 ml-1">

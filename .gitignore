@@ -27,7 +27,7 @@ check-*.mjs
 reset-*.mjs
 
 # Build outputs
-dist/
+# Note: dist/ is included for production Cloud Run deployment
 dist-ssr/
 
 # Temporary and cache folders

@@ -217,7 +217,7 @@ const YedekParcaDetay = () => {
             {/* Left Column: Images (Sticky Area) */}
             <div className="lg:col-span-5 lg:sticky lg:top-32 space-y-4">
               <div
-                className="relative aspect-square rounded-2xl overflow-hidden bg-slate-950 border border-border/80 group shadow-sm cursor-zoom-in"
+                className="relative aspect-square rounded-2xl overflow-hidden bg-white border border-border/80 group shadow-sm cursor-zoom-in"
                 onClick={() =>
                   product?.images?.length ? setIsLightboxOpen(true) : null
                 }
@@ -240,7 +240,7 @@ const YedekParcaDetay = () => {
                       alt={product.title}
                       width={800}
                       height={800}
-                      className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${isMainImageLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md"}`}
+                      className={`w-full h-full object-contain transition-all duration-700 ease-out group-hover:scale-105 ${isMainImageLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md"}`}
                       loading="eager"
                       onLoad={() => setIsMainImageLoaded(true)}
                       fallbackIcon={<ProductImagePlaceholder brand={product.brand || "PAŞA MOTOR"} />}
@@ -280,7 +280,7 @@ const YedekParcaDetay = () => {
                         alt={`${product.title} ${i + 1}`}
                         width={96}
                         height={96}
-                        className="max-w-full max-h-full object-contain p-2"
+                        className="max-w-full max-h-full object-contain p-2 mix-blend-multiply"
                         loading="lazy"
                       />
                     </button>
@@ -536,14 +536,16 @@ const YedekParcaDetay = () => {
           </button>
 
           <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
-            <img
-              src={product.images[selectedImage]}
-              alt={product.title}
-              className="max-w-full max-h-full object-contain select-none"
-              onClick={(e) => e.stopPropagation()}
-              loading="lazy"
-              decoding="async"
-            />
+            <div className="w-full max-w-5xl h-full max-h-[85vh] bg-white rounded-3xl flex items-center justify-center p-8">
+              <img
+                src={product.images[selectedImage]}
+                alt={product.title}
+                className="max-w-full max-h-full object-contain select-none mix-blend-multiply"
+                onClick={(e) => e.stopPropagation()}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           </div>
 
           {product.images.length > 1 && (

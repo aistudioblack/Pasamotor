@@ -283,7 +283,9 @@ const BlogDetay = () => {
   const articleSchema = useMemo(() => {
     if (!post) return null;
     const origin = typeof window !== "undefined" ? window.location.origin : "https://pasamotor.com.tr";
-    const resolvedImg = coverImg.startsWith("http") ? coverImg : `${origin}${coverImg}`;
+    const resolvedImg = coverImg
+      ? (coverImg.startsWith("http") ? coverImg : `${origin}${coverImg}`)
+      : `${origin}/favicon.png`;
     return {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
@@ -400,7 +402,7 @@ const BlogDetay = () => {
         title={post.meta_title || post.title}
         description={post.meta_description || post.excerpt || `${post.title} - Paşa Motor uzman rehber yazısı.`}
         canonical={`/blog/${post.slug}`}
-        image={coverImg}
+        image={coverImg || undefined}
         type="article"
         publishedTime={post.published_at || undefined}
         modifiedTime={post.updated_at}
@@ -513,24 +515,24 @@ const BlogDetay = () => {
         </div>
       </header>
 
-      {/* Cover Image Container */}
-      <div className="container mx-auto px-4 max-w-5xl -mt-16 md:-mt-24 mb-16 relative z-10">
-        <div className="rounded-2xl md:rounded-3xl overflow-hidden border border-border/80 bg-slate-950/90 aspect-[16/9] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center">
-          <img
-            src={coverImg}
-            alt={post.title}
-            width={1200}
-            height={675}
-            className="w-full h-full object-cover object-center hover:scale-[1.01] transition-transform duration-700"
-            loading="eager"
-            decoding="sync"
-            {...{ fetchpriority: "high" }}
-            onError={(e) => { e.currentTarget.onerror = null;
-              e.currentTarget.src = "/placeholder.webp";
-            }}
-          />
+      {/* Cover Image Container (Sadece kapak görseli varsa gösterilir) */}
+      {coverImg && (
+        <div className="container mx-auto px-4 max-w-5xl -mt-16 md:-mt-24 mb-16 relative z-10">
+          <div className="rounded-2xl md:rounded-3xl overflow-hidden border border-border/80 bg-slate-950/90 aspect-[16/9] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center">
+            <img
+              src={coverImg}
+              alt={post.title}
+              width={1200}
+              height={675}
+              className="w-full h-full object-cover object-center hover:scale-[1.01] transition-transform duration-700"
+              loading="eager"
+              decoding="sync"
+              referrerPolicy="no-referrer"
+              {...{ fetchpriority: "high" }}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Grid: Content & Sticky TOC */}
       <section className="pb-24">
@@ -707,39 +709,44 @@ const BlogDetay = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {related.map((r) => (
-                <Link
-                  key={r.id}
-                  to={`/blog/${r.slug}`}
-                  className="group flex flex-col rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <div className="aspect-[16/9] bg-slate-950 overflow-hidden relative flex items-center justify-center">
-                    <img 
-                      src={getPostCoverImage(r)} 
-                      alt={r.title} 
-                      width={1200} 
-                      height={630} 
-                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" 
-                      loading="lazy" 
-                      onError={(e) => { e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/placeholder.webp";
-                      }}
-                    />
-                    <span className="absolute top-3 left-3 bg-slate-950/70 backdrop-blur-md text-foreground text-[10px] font-bold px-2.5 py-1 rounded-full uppercase border border-border/30">
-                      Rehber
-                    </span>
-                  </div>
-                  <div className="p-5 flex flex-col flex-1">
-                    <p className="text-[11px] text-muted-foreground mb-2 font-medium">{formatDate(r.published_at)}</p>
-                    <h3 className="font-heading font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug text-sm md:text-base mb-4">
-                      {r.title}
-                    </h3>
-                    <span className="inline-flex items-center gap-1 text-xs text-primary mt-auto font-bold">
-                      Hemen Oku <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                  </div>
-                </Link>
-              ))}
+              {related.map((r) => {
+                const relCover = getPostCoverImage(r);
+                return (
+                  <Link
+                    key={r.id}
+                    to={`/blog/${r.slug}`}
+                    className="group flex flex-col rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 transform hover:-translate-y-1"
+                  >
+                    {relCover ? (
+                      <div className="aspect-[16/9] bg-slate-950 overflow-hidden relative flex items-center justify-center">
+                        <img 
+                          src={relCover} 
+                          alt={r.title} 
+                          width={1200} 
+                          height={630} 
+                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" 
+                          loading="lazy" 
+                          referrerPolicy="no-referrer"
+                        />
+                        <span className="absolute top-3 left-3 bg-slate-950/70 backdrop-blur-md text-foreground text-[10px] font-bold px-2.5 py-1 rounded-full uppercase border border-border/30">
+                          Rehber
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="h-2 w-full bg-gradient-to-r from-primary/80 via-primary to-amber-500/80" />
+                    )}
+                    <div className="p-5 flex flex-col flex-1">
+                      <p className="text-[11px] text-muted-foreground mb-2 font-medium">{formatDate(r.published_at)}</p>
+                      <h3 className="font-heading font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug text-sm md:text-base mb-4">
+                        {r.title}
+                      </h3>
+                      <span className="inline-flex items-center gap-1 text-xs text-primary mt-auto font-bold">
+                        Hemen Oku <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>

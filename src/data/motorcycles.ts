@@ -78,6 +78,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-wow-01/wow01__1_.webp",
+      "/images/motorcycles/hd/motolux-wow-01/wow01__2_.webp",
+      "/images/motorcycles/hd/motolux-wow-01/wow01__4_.webp",
       "/images/motorcycles/2026/04/sdsds-scaled.jpg",
       "/images/motorcycles/2026/04/wow01-1.png",
       "/images/motorcycles/2026/04/wow01-2.png",
@@ -86,28 +89,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Beyaz",
-        "hex": "#ffffff",
+        "name": "Özel Seri",
+        "hex": "#e11d48",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-wow-01/wow01__1_.webp"
+      },
+      {
+        "name": "Özel Seri",
+        "hex": "#e11d48",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2026/04/wow01-1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-wow-01/wow01__2_.webp"
       },
       {
-        "name": "Turkuaz",
-        "hex": "#9fc9b3",
+        "name": "Özel Seri",
+        "hex": "#e11d48",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2026/04/wow01-2.png"
-      },
-      {
-        "name": "Turkuaz",
-        "hex": "#b6b6d2",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2026/04/wow01-4.png"
-      },
-      {
-        "name": "Kırmızı",
-        "hex": "#ff0000",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2026/04/Asset-11.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-wow-01/wow01__4_.webp"
       }
     ],
     "specs": {
@@ -201,22 +198,42 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B / A1 / A2 Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-cortado-200-off/cortado_200_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-cortado-200-off/cortado_200_of_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-cortado-200-off/cortado_200_of_s_yah.webp",
+      "/images/motorcycles/hd/motolux-cortado-200-off/cortado_200_s_yah.webp",
+      "/images/motorcycles/hd/motolux-cortado-200-off/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-cortado-200-off/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-cortado-200-off/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-cortado-200-off/gallery_4.webp",
       "/images/motorcycles/2024/11/WEB-ONIZLEME-50-scaled.jpg",
       "/images/motorcycles/2025/06/CORTADO-200_3@2000x-8.png",
       "/images/motorcycles/2025/06/CORTADO-200_2@2000x-8.png"
     ],
     "colors": [
       {
-        "name": "Siyah",
-        "hex": "#000000",
-        "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/CORTADO-200_3@2000x-8.png"
+        "name": "Kırmızı",
+        "hex": "#dc2626",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-cortado-200-off/cortado_200_kirmizi.webp"
       },
       {
         "name": "Kırmızı",
-        "hex": "#F40000",
+        "hex": "#dc2626",
+        "imageIndex": 1,
+        "imageUrl": "/images/motorcycles/hd/motolux-cortado-200-off/cortado_200_of_kirmizi.webp"
+      },
+      {
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/CORTADO-200_2@2000x-8.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-cortado-200-off/cortado_200_of_s_yah.webp"
+      },
+      {
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
+        "imageIndex": 3,
+        "imageUrl": "/images/motorcycles/hd/motolux-cortado-200-off/cortado_200_s_yah.webp"
       }
     ],
     "specs": {
@@ -316,6 +333,15 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_dalma_ya.webp",
+      "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_krem.webp",
+      "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_mav_.webp",
+      "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_s_yah.webp",
+      "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_turuncu.webp",
+      "/images/motorcycles/hd/motolux-cappadocia125/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-cappadocia125/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-cappadocia125/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-cappadocia125/gallery_4.webp",
       "/images/motorcycles/2024/10/WEB-ONIZLEME-1.jpg",
       "/images/motorcycles/2025/05/Cappadocia-125_2.png",
       "/images/motorcycles/2025/05/Cappadocia-125_4-1.png",
@@ -325,34 +351,34 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Açık Gri / Gümüş",
-        "hex": "#F4ECDC",
+        "name": "Dalmaçya Özel Seri",
+        "hex": "#e2e8f0",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_dalma_ya.webp"
+      },
+      {
+        "name": "Vadi Kremi",
+        "hex": "#d7cdb7",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/05/Cappadocia-125_2.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_krem.webp"
       },
       {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
+        "name": "Okyanus Mavisi",
+        "hex": "#2563eb",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/05/Cappadocia-125_4-1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_mav_.webp"
       },
       {
-        "name": "Siyah",
-        "hex": "#000000",
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
         "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/05/Cappadocia-125-1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_s_yah.webp"
       },
       {
-        "name": "Askeri Yeşil",
-        "hex": "#2D4A4C",
+        "name": "Kapadokya Turuncusu",
+        "hex": "#ea580c",
         "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2025/05/Cappadocia-125_3.png"
-      },
-      {
-        "name": "Sarı / Altın",
-        "hex": "#FF9700",
-        "imageIndex": 5,
-        "imageUrl": "/images/motorcycles/2025/05/Cappadocia-125_1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-cappadocia125/cappadocia_125_turuncu.webp"
       }
     ],
     "specs": {
@@ -452,6 +478,10 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-ceo-110/layer_6.webp",
+      "/images/motorcycles/hd/motolux-ceo-110/vibrance_1.webp",
+      "/images/motorcycles/hd/motolux-ceo-110/beyaz.webp",
+      "/images/motorcycles/hd/motolux-ceo-110/k_rm_z_.webp",
       "/images/motorcycles/2024/05/CEO-110-84-scaled.jpg",
       "/images/motorcycles/2025/07/CEO-110-GRI.png",
       "/images/motorcycles/2025/07/CEO-110-BEYAZ.png",
@@ -460,28 +490,28 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Gri / Titanyum",
-        "hex": "#898989",
+        "name": "Özel Seri",
+        "hex": "#e11d48",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-ceo-110/layer_6.webp"
+      },
+      {
+        "name": "Özel Seri",
+        "hex": "#e11d48",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/07/CEO-110-GRI.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-ceo-110/vibrance_1.webp"
       },
       {
-        "name": "Beyaz",
-        "hex": "#fff",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/07/CEO-110-BEYAZ.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-ceo-110/beyaz.webp"
       },
       {
-        "name": "Karamel Kahve",
-        "hex": "#62232e",
+        "name": "Kırmızı",
+        "hex": "#dc2626",
         "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/07/CEO-110-KIRMIZI.png"
-      },
-      {
-        "name": "Okyanus Mavisi",
-        "hex": "#0A72EA",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2025/07/CEO-110-MAVI.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-ceo-110/k_rm_z_.webp"
       }
     ],
     "specs": {
@@ -581,6 +611,14 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-americano-125/americno_125__1_.webp",
+      "/images/motorcycles/hd/motolux-americano-125/americno_125__2_.webp",
+      "/images/motorcycles/hd/motolux-americano-125/americno_125__3_.webp",
+      "/images/motorcycles/hd/motolux-americano-125/americno_125__4_.webp",
+      "/images/motorcycles/hd/motolux-americano-125/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-americano-125/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-americano-125/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-americano-125/gallery_4.webp",
       "/images/motorcycles/2024/08/WEB-ONIZLEME-09-scaled.jpg",
       "/images/motorcycles/2025/05/Americano-125_3.png",
       "/images/motorcycles/2025/05/Americano-125.png",
@@ -589,28 +627,28 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Orman Yeşili",
-        "hex": "#0A4407",
+        "name": "Özel Seri",
+        "hex": "#e11d48",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-americano-125/americno_125__1_.webp"
+      },
+      {
+        "name": "Özel Seri",
+        "hex": "#e11d48",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/05/Americano-125_3.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-americano-125/americno_125__2_.webp"
       },
       {
-        "name": "Gri / Titanyum",
-        "hex": "#898989",
+        "name": "Özel Seri",
+        "hex": "#e11d48",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/05/Americano-125.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-americano-125/americno_125__3_.webp"
       },
       {
-        "name": "Kahverengi / Bronz",
-        "hex": "#6B2E00",
+        "name": "Özel Seri",
+        "hex": "#e11d48",
         "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/05/Americano-125_1.png"
-      },
-      {
-        "name": "Turkuaz / Buz Mavisi",
-        "hex": "#7FEEF4",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2025/05/Americano-125_2.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-americano-125/americno_125__4_.webp"
       }
     ],
     "specs": {
@@ -712,6 +750,13 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-ceo-125/ceo_125_beyaz.webp",
+      "/images/motorcycles/hd/motolux-ceo-125/ceo_125_gr_.webp",
+      "/images/motorcycles/hd/motolux-ceo-125/ceo_125_kirmizi_.webp",
+      "/images/motorcycles/hd/motolux-ceo-125/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-ceo-125/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-ceo-125/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-ceo-125/gallery_4.webp",
       "/images/motorcycles/2024/05/CEO-110-VE-125-19-scaled.jpg",
       "/images/motorcycles/2025/05/ceo125_1.png",
       "/images/motorcycles/2025/05/ceo125_2.png",
@@ -719,22 +764,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Füme / Antrasit",
-        "hex": "#939089",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-ceo-125/ceo_125_beyaz.webp"
+      },
+      {
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/05/ceo125_1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-ceo-125/ceo_125_gr_.webp"
       },
       {
         "name": "Kırmızı",
-        "hex": "#e80000",
+        "hex": "#dc2626",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/05/ceo125_2.png"
-      },
-      {
-        "name": "Beyaz",
-        "hex": "#fff",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/05/ceo125.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-ceo-125/ceo_125_kirmizi_.webp"
       }
     ],
     "specs": {
@@ -834,6 +879,15 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-macchiato-125/macchiato_125_gr_.webp",
+      "/images/motorcycles/hd/motolux-macchiato-125/macchiato_125_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-macchiato-125/macchiato_125_s_yah.webp",
+      "/images/motorcycles/hd/motolux-macchiato-125/macchiato_125_ye__l.webp",
+      "/images/motorcycles/hd/motolux-macchiato-125/macchiato_lac_vert_sari.webp",
+      "/images/motorcycles/hd/motolux-macchiato-125/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-macchiato-125/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-macchiato-125/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-macchiato-125/gallery_4.webp",
       "/images/motorcycles/2024/03/AMERICANO-125-54-scaled.jpg",
       "/images/motorcycles/2025/06/WEB-ONIZLEME-20-54-scaled.png",
       "/images/motorcycles/2025/06/WEB-ONIZLEME-20-52.png",
@@ -844,40 +898,34 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Açık Yeşil",
-        "hex": "#66806f",
-        "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/WEB-ONIZLEME-20-54-scaled.png"
-      },
-      {
-        "name": "Füme / Antrasit",
-        "hex": "#2b3447",
-        "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/WEB-ONIZLEME-20-52.png"
-      },
-      {
-        "name": "Mavi",
-        "hex": "#7588a1",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/WEB-ONIZLEME-20-53.png"
-      },
-      {
-        "name": "Siyah",
-        "hex": "#040607",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2025/06/WEB-ONIZLEME-20-55.png"
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-macchiato-125/macchiato_125_gr_.webp"
       },
       {
         "name": "Kırmızı",
-        "hex": "#af0816",
-        "imageIndex": 5,
-        "imageUrl": "/images/motorcycles/2025/06/WEB-ONIZLEME-20-56.png"
+        "hex": "#dc2626",
+        "imageIndex": 1,
+        "imageUrl": "/images/motorcycles/hd/motolux-macchiato-125/macchiato_125_kirmizi.webp"
       },
       {
-        "name": "Turuncu / Krem",
-        "hex": "#f58220",
-        "imageIndex": 6,
-        "imageUrl": "/images/motorcycles/2025/05/MACCHIATO-125-5.png"
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
+        "imageIndex": 2,
+        "imageUrl": "/images/motorcycles/hd/motolux-macchiato-125/macchiato_125_s_yah.webp"
+      },
+      {
+        "name": "Askeri Haki / Yeşil",
+        "hex": "#16a34a",
+        "imageIndex": 3,
+        "imageUrl": "/images/motorcycles/hd/motolux-macchiato-125/macchiato_125_ye__l.webp"
+      },
+      {
+        "name": "Güneş Sarısı",
+        "hex": "#eab308",
+        "imageIndex": 4,
+        "imageUrl": "/images/motorcycles/hd/motolux-macchiato-125/macchiato_lac_vert_sari.webp"
       }
     ],
     "specs": {
@@ -977,6 +1025,13 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-ist-34/ist_34_beyaz.webp",
+      "/images/motorcycles/hd/motolux-ist-34/ist_34_mav_.webp",
+      "/images/motorcycles/hd/motolux-ist-34/ist_34_sari.webp",
+      "/images/motorcycles/hd/motolux-ist-34/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-ist-34/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-ist-34/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-ist-34/gallery_4.webp",
       "/images/motorcycles/2025/06/IST-34-60-scaled.jpg",
       "/images/motorcycles/2025/06/IST-34-BEYAZ.png",
       "/images/motorcycles/2025/06/IST-34-SARI.png",
@@ -984,22 +1039,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-ist-34/ist_34_beyaz.webp"
+      },
+      {
+        "name": "Okyanus Mavisi",
+        "hex": "#2563eb",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/IST-34-BEYAZ.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-ist-34/ist_34_mav_.webp"
       },
       {
-        "name": "Sarı",
-        "hex": "#ffff00",
+        "name": "Güneş Sarısı",
+        "hex": "#eab308",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/IST-34-SARI.png"
-      },
-      {
-        "name": "Turkuaz Mavisi",
-        "hex": "#30D5C8",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/IST-34-MAVI.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-ist-34/ist_34_sari.webp"
       }
     ],
     "specs": {
@@ -1095,6 +1150,14 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-mcx-125/mcx_125_beyaz.webp",
+      "/images/motorcycles/hd/motolux-mcx-125/mcx_125_gr_.webp",
+      "/images/motorcycles/hd/motolux-mcx-125/mcx_125_s_yah.webp",
+      "/images/motorcycles/hd/motolux-mcx-125/mcx_125_ye__l.webp",
+      "/images/motorcycles/hd/motolux-mcx-125/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-mcx-125/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-mcx-125/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-mcx-125/gallery_4.webp",
       "/images/motorcycles/2024/07/MCX-125-32-scaled.jpg",
       "/images/motorcycles/2025/06/MCX-125-34-scaled.png",
       "/images/motorcycles/2025/06/MCX-125-33.png",
@@ -1103,28 +1166,28 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Füme / Antrasit",
-        "hex": "#8D8B88",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-mcx-125/mcx_125_beyaz.webp"
+      },
+      {
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/MCX-125-34-scaled.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-mcx-125/mcx_125_gr_.webp"
       },
       {
-        "name": "Siyah",
-        "hex": "#000000",
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/MCX-125-33.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-mcx-125/mcx_125_s_yah.webp"
       },
       {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
+        "name": "Askeri Haki / Yeşil",
+        "hex": "#16a34a",
         "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/MCX-125-35.png"
-      },
-      {
-        "name": "Füme / Antrasit",
-        "hex": "#55503A",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2025/06/MCX-125-32.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-mcx-125/mcx_125_ye__l.webp"
       }
     ],
     "specs": {
@@ -1226,6 +1289,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-mw-46/mw_46_turkuaz.webp",
+      "/images/motorcycles/hd/motolux-mw-46/mw46_sari.webp",
+      "/images/motorcycles/hd/motolux-mw-46/mw46_turuncu.webp",
       "/images/motorcycles/2024/03/WEB-ONIZLEME-15-scaled.jpg",
       "/images/motorcycles/2025/05/MW46_2.png",
       "/images/motorcycles/2025/05/MW46_1-1.png",
@@ -1233,22 +1299,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Sarı / Altın",
-        "hex": "#FFED00",
+        "name": "Buz Turkuazı",
+        "hex": "#06b6d4",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-mw-46/mw_46_turkuaz.webp"
+      },
+      {
+        "name": "Güneş Sarısı",
+        "hex": "#eab308",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/05/MW46_2.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-mw-46/mw46_sari.webp"
       },
       {
-        "name": "Turuncu",
-        "hex": "#EF7D00",
+        "name": "Kapadokya Turuncusu",
+        "hex": "#ea580c",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/05/MW46_1-1.png"
-      },
-      {
-        "name": "Okyanus Mavisi",
-        "hex": "#009BAC",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/05/MW46-1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-mw-46/mw46_turuncu.webp"
       }
     ],
     "specs": {
@@ -1594,6 +1660,13 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı Ehliyet Uyumlu (Sigortadan Muaf)",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-rossirs-50/rossi_rs__50_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-rossirs-50/rossi_rs_50_beyaz.webp",
+      "/images/motorcycles/hd/motolux-rossirs-50/rossi_rs_50_siyah.webp",
+      "/images/motorcycles/hd/motolux-rossirs-50/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-rossirs-50/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-rossirs-50/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-rossirs-50/gallery_4.webp",
       "/images/motorcycles/2024/05/ROSSI-RS-125-42-scaled.jpg",
       "/images/motorcycles/2025/06/ROSSI-RS-50-51.png",
       "/images/motorcycles/2025/06/ROSSI-RS-50-49.png",
@@ -1601,22 +1674,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Beyaz",
-        "hex": "#fff",
-        "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/ROSSI-RS-50-51.png"
-      },
-      {
-        "name": "Siyah",
-        "hex": "#0F0F0F",
-        "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/ROSSI-RS-50-49.png"
-      },
-      {
         "name": "Kırmızı",
-        "hex": "#D20017",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/ROSSI-RS-50-50.png"
+        "hex": "#dc2626",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-rossirs-50/rossi_rs__50_kirmizi.webp"
+      },
+      {
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 1,
+        "imageUrl": "/images/motorcycles/hd/motolux-rossirs-50/rossi_rs_50_beyaz.webp"
+      },
+      {
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
+        "imageIndex": 2,
+        "imageUrl": "/images/motorcycles/hd/motolux-rossirs-50/rossi_rs_50_siyah.webp"
       }
     ],
     "specs": {
@@ -1722,6 +1795,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı Ehliyet Uyumlu (Sigortadan Muaf)",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-rossi-fx-50-2/rossi_fx_50_beyaz.webp",
+      "/images/motorcycles/hd/motolux-rossi-fx-50-2/rossi_fx_50_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-rossi-fx-50-2/ross__fx_50_siyah.webp",
       "/images/motorcycles/2024/09/Artboard-13.jpg",
       "/images/motorcycles/2025/07/Asset-59@2000x-8.png",
       "/images/motorcycles/2025/07/Asset-57@2000x-8.png",
@@ -1729,22 +1805,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-rossi-fx-50-2/rossi_fx_50_beyaz.webp"
+      },
+      {
         "name": "Kırmızı",
-        "hex": "#E30613",
+        "hex": "#dc2626",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/07/Asset-59@2000x-8.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-rossi-fx-50-2/rossi_fx_50_kirmizi.webp"
       },
       {
-        "name": "Siyah",
-        "hex": "#1D1D1B",
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/07/Asset-57@2000x-8.png"
-      },
-      {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/07/Asset-58@2000x-8.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-rossi-fx-50-2/ross__fx_50_siyah.webp"
       }
     ],
     "specs": {
@@ -1844,6 +1920,13 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-rossi-rs-125/rossi_rs_125_beyaz.webp",
+      "/images/motorcycles/hd/motolux-rossi-rs-125/rossi_rs_125_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-rossi-rs-125/rossi_rs_125_siyah.webp",
+      "/images/motorcycles/hd/motolux-rossi-rs-125/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-rossi-rs-125/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-rossi-rs-125/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-rossi-rs-125/gallery_4.webp",
       "/images/motorcycles/2024/03/ROSSI-RS-125-40-scaled.jpg",
       "/images/motorcycles/2025/06/ROSSI-RS-125-40-1.png",
       "/images/motorcycles/2025/06/ROSSI-RS-125-41-1.png",
@@ -1851,22 +1934,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-rossi-rs-125/rossi_rs_125_beyaz.webp"
+      },
+      {
         "name": "Kırmızı",
-        "hex": "#C80016",
+        "hex": "#dc2626",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/ROSSI-RS-125-40-1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-rossi-rs-125/rossi_rs_125_kirmizi.webp"
       },
       {
-        "name": "Füme / Antrasit",
-        "hex": "#252828",
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/ROSSI-RS-125-41-1.png"
-      },
-      {
-        "name": "Beyaz",
-        "hex": "#fff",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/ROSSI-RS-125-42-1-scaled.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-rossi-rs-125/rossi_rs_125_siyah.webp"
       }
     ],
     "specs": {
@@ -1972,6 +2055,14 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-sst-125/sst_mav_.webp",
+      "/images/motorcycles/hd/motolux-sst-125/sst_s_yah.webp",
+      "/images/motorcycles/hd/motolux-sst-125/sst-beyaz.webp",
+      "/images/motorcycles/hd/motolux-sst-125/sst-sari.webp",
+      "/images/motorcycles/hd/motolux-sst-125/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-sst-125/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-sst-125/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-sst-125/gallery_4.webp",
       "/images/motorcycles/2025/06/Artboard-1.png",
       "/images/motorcycles/2025/06/Asset-63@2000x-8.png",
       "/images/motorcycles/2025/06/Asset-60@2000x-8-1.png",
@@ -1980,28 +2071,28 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Turkuaz Mavisi",
-        "hex": "#06DDF9",
+        "name": "Okyanus Mavisi",
+        "hex": "#2563eb",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-sst-125/sst_mav_.webp"
+      },
+      {
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/Asset-63@2000x-8.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-sst-125/sst_s_yah.webp"
       },
       {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/Asset-60@2000x-8-1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-sst-125/sst-beyaz.webp"
       },
       {
-        "name": "Siyah",
-        "hex": "#000000",
+        "name": "Güneş Sarısı",
+        "hex": "#eab308",
         "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/Asset-61@2000x-8-1.png"
-      },
-      {
-        "name": "Sarı / Altın",
-        "hex": "#FFCE00",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2025/06/Asset-60@2000x-8-2.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-sst-125/sst-sari.webp"
       }
     ],
     "specs": {
@@ -2103,6 +2194,13 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B / A1 / A2 Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-drift-200/drift_200_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-drift-200/drift_200_sari.webp",
+      "/images/motorcycles/hd/motolux-drift-200/drift_200_turkuaz.webp",
+      "/images/motorcycles/hd/motolux-drift-200/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-drift-200/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-drift-200/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-drift-200/gallery_4.webp",
       "/images/motorcycles/2024/05/WEB-ONIZLEME-46-scaled.jpg",
       "/images/motorcycles/2026/06/drift200-1-1.png",
       "/images/motorcycles/2026/06/drift200-2.png",
@@ -2110,22 +2208,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Turkuaz Mavisi",
-        "hex": "#02B2DF",
-        "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2026/06/drift200-1-1.png"
-      },
-      {
         "name": "Kırmızı",
-        "hex": "#BF1818",
-        "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2026/06/drift200-2.png"
+        "hex": "#dc2626",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-drift-200/drift_200_kirmizi.webp"
       },
       {
-        "name": "Sarı / Altın",
-        "hex": "#F4CF31",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2026/06/drift200-3.png"
+        "name": "Güneş Sarısı",
+        "hex": "#eab308",
+        "imageIndex": 1,
+        "imageUrl": "/images/motorcycles/hd/motolux-drift-200/drift_200_sari.webp"
+      },
+      {
+        "name": "Buz Turkuazı",
+        "hex": "#06b6d4",
+        "imageIndex": 2,
+        "imageUrl": "/images/motorcycles/hd/motolux-drift-200/drift_200_turkuaz.webp"
       }
     ],
     "specs": {
@@ -2225,6 +2323,10 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı Ehliyet Uyumlu (Sigortadan Muaf)",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-wow-150/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-wow-150/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-wow-150/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-wow-150/gallery_4.webp",
       "/images/motorcycles/2024/03/WOW-150-33-32-scaled.jpg",
       "/images/motorcycles/2025/06/WOW-150-34.png",
       "/images/motorcycles/2025/06/WOW-150-32-scaled.png",
@@ -2354,6 +2456,14 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı Ehliyet Uyumlu (Sigortadan Muaf)",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-vintage-s/vintage_s_gr_.webp",
+      "/images/motorcycles/hd/motolux-vintage-s/vintage_s_pembe.webp",
+      "/images/motorcycles/hd/motolux-vintage-s/vintage_s_sari.webp",
+      "/images/motorcycles/hd/motolux-vintage-s/vintage_s_su_ye__l_.webp",
+      "/images/motorcycles/hd/motolux-vintage-s/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-vintage-s/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-vintage-s/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-vintage-s/gallery_4.webp",
       "/images/motorcycles/2024/11/VINTAGE-S-SARI-39-scaled.jpg",
       "/images/motorcycles/2025/06/VINTAGE-S-36-scaled.png",
       "/images/motorcycles/2025/06/VINTAGE-S-37.png",
@@ -2362,28 +2472,28 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Turkuaz",
-        "hex": "#88CAB8",
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-vintage-s/vintage_s_gr_.webp"
+      },
+      {
+        "name": "Pastel Pembe",
+        "hex": "#ec4899",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/VINTAGE-S-36-scaled.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-vintage-s/vintage_s_pembe.webp"
       },
       {
-        "name": "Gri / Titanyum",
-        "hex": "#898989",
+        "name": "Güneş Sarısı",
+        "hex": "#eab308",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/VINTAGE-S-37.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-vintage-s/vintage_s_sari.webp"
       },
       {
-        "name": "Turkuaz",
-        "hex": "#E2BDBA",
+        "name": "Askeri Haki / Yeşil",
+        "hex": "#16a34a",
         "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/VINTAGE-S-38.png"
-      },
-      {
-        "name": "Altın Sarısı",
-        "hex": "#D1C858",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2025/06/VINTAGE-S-39.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-vintage-s/vintage_s_su_ye__l_.webp"
       }
     ],
     "specs": {
@@ -2479,6 +2589,13 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı (125cc Yasası) / A1 / A2",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-vegas125/vegas_gr_.webp",
+      "/images/motorcycles/hd/motolux-vegas125/vegas_mav_.webp",
+      "/images/motorcycles/hd/motolux-vegas125/vegas_ye__l.webp",
+      "/images/motorcycles/hd/motolux-vegas125/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-vegas125/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-vegas125/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-vegas125/gallery_4.webp",
       "/images/motorcycles/2024/09/WEB-ONIZLEME-45-scaled.jpg",
       "/images/motorcycles/2025/06/VEGAS-125-45.png",
       "/images/motorcycles/2025/06/VEGAS-125-43.png",
@@ -2486,22 +2603,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Orman Yeşili",
-        "hex": "#0A4407",
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-vegas125/vegas_gr_.webp"
+      },
+      {
+        "name": "Okyanus Mavisi",
+        "hex": "#2563eb",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/VEGAS-125-45.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-vegas125/vegas_mav_.webp"
       },
       {
-        "name": "Gri / Titanyum",
-        "hex": "#898989",
+        "name": "Askeri Haki / Yeşil",
+        "hex": "#16a34a",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/VEGAS-125-43.png"
-      },
-      {
-        "name": "Mavi",
-        "hex": "#0804A0",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/VEGAS-125-44-scaled.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-vegas125/vegas_ye__l.webp"
       }
     ],
     "specs": {
@@ -2607,6 +2724,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı Ehliyet Uyumlu (Sigortadan Muaf)",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-mz46-a/mz_46_a_beyaz.webp",
+      "/images/motorcycles/hd/motolux-mz46-a/mz_46_a_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-mz46-a/mz_46_a_s_yah.webp",
       "/images/motorcycles/2024/03/WEB-ONIZLEME.jpg",
       "/images/motorcycles/2025/07/MZ46A-2.png",
       "/images/motorcycles/2025/07/MZ46A-1.png",
@@ -2614,22 +2734,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Şeker Pembe",
-        "hex": "C75D86",
-        "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/07/MZ46A-2.png"
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-mz46-a/mz_46_a_beyaz.webp"
       },
       {
         "name": "Kırmızı",
-        "hex": "#bf0000",
-        "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/07/MZ46A-1.png"
+        "hex": "#dc2626",
+        "imageIndex": 1,
+        "imageUrl": "/images/motorcycles/hd/motolux-mz46-a/mz_46_a_kirmizi.webp"
       },
       {
-        "name": "Siyah",
-        "hex": "#090A0B",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/07/MZ46A-3.png"
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
+        "imageIndex": 2,
+        "imageUrl": "/images/motorcycles/hd/motolux-mz46-a/mz_46_a_s_yah.webp"
       }
     ],
     "specs": {
@@ -2729,6 +2849,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-eceo/e-ceo_kahvereng_.webp",
+      "/images/motorcycles/hd/motolux-eceo/e-ceo_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-eceo/e-ceo_mav_.webp",
       "/images/motorcycles/2024/03/E-CEO-61-scaled.jpg",
       "/images/motorcycles/2025/06/E-CEO-KAHVERENGI-scaled.png",
       "/images/motorcycles/2025/06/E-CEO-KIRMIZI-scaled.png",
@@ -2736,22 +2859,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Füme / Antrasit",
-        "hex": "#8b887f",
+        "name": "Moka Kahve",
+        "hex": "#78350f",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-eceo/e-ceo_kahvereng_.webp"
+      },
+      {
+        "name": "Kırmızı",
+        "hex": "#dc2626",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/E-CEO-KAHVERENGI-scaled.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-eceo/e-ceo_kirmizi.webp"
       },
       {
-        "name": "Metalik Bordo",
-        "hex": "#920417",
+        "name": "Okyanus Mavisi",
+        "hex": "#2563eb",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/E-CEO-KIRMIZI-scaled.png"
-      },
-      {
-        "name": "Titanyum Füme",
-        "hex": "#496389",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/E-CEO-MAVI.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-eceo/e-ceo_mav_.webp"
       }
     ],
     "specs": {
@@ -2849,6 +2972,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı Ehliyet Uyumlu (Sigortadan Muaf)",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-mz46-t/mz_46_t_beyaz.webp",
+      "/images/motorcycles/hd/motolux-mz46-t/mz_46_t_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-mz46-t/mz_46_t_s_yah.webp",
       "/images/motorcycles/2024/03/MZ-46-T-scaled.jpg",
       "/images/motorcycles/2025/07/mz-46-t-1.png",
       "/images/motorcycles/2025/07/mz-46-t-3.png",
@@ -2856,22 +2982,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-mz46-t/mz_46_t_beyaz.webp"
+      },
+      {
         "name": "Kırmızı",
-        "hex": "FF0A26",
+        "hex": "#dc2626",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/07/mz-46-t-1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-mz46-t/mz_46_t_kirmizi.webp"
       },
       {
-        "name": "Kırmızı",
-        "hex": "#bf0000",
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/07/mz-46-t-3.png"
-      },
-      {
-        "name": "Siyah",
-        "hex": "#111318",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/07/mz-46-t-2.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-mz46-t/mz_46_t_s_yah.webp"
       }
     ],
     "specs": {
@@ -2971,6 +3097,13 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-alf-pro/alf_pro_beyaz.webp",
+      "/images/motorcycles/hd/motolux-alf-pro/alf_pro_gr_.webp",
+      "/images/motorcycles/hd/motolux-alf-pro/alf_pro_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-alf-pro/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-alf-pro/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-alf-pro/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-alf-pro/gallery_4.webp",
       "/images/motorcycles/2025/04/WEB-ONIZLEME.jpg",
       "/images/motorcycles/2025/05/alf-pro_2.png",
       "/images/motorcycles/2025/05/alf-pro.png",
@@ -2978,22 +3111,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-alf-pro/alf_pro_beyaz.webp"
+      },
+      {
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/05/alf-pro_2.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-alf-pro/alf_pro_gr_.webp"
       },
       {
-        "name": "MotoLux Kırmızı",
-        "hex": "#F72259",
+        "name": "Kırmızı",
+        "hex": "#dc2626",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/05/alf-pro.png"
-      },
-      {
-        "name": "Füme / Antrasit",
-        "hex": "#7F7F7F",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/05/alf-pro_1.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-alf-pro/alf_pro_kirmizi.webp"
       }
     ],
     "specs": {
@@ -3091,6 +3224,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-alf-plus/alf_plus_beyaz.webp",
+      "/images/motorcycles/hd/motolux-alf-plus/alf_plus_gr_.webp",
+      "/images/motorcycles/hd/motolux-alf-plus/alf_plus_kirmizi.webp",
       "/images/motorcycles/2024/03/ALF-PLUS-64-scaled.jpg",
       "/images/motorcycles/2025/06/ALF-PLUS-64.png",
       "/images/motorcycles/2025/06/ALF-PLUS-65.png",
@@ -3099,28 +3235,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Gri",
-        "hex": "#808080",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-alf-plus/alf_plus_beyaz.webp"
+      },
+      {
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/ALF-PLUS-64.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-alf-plus/alf_plus_gr_.webp"
       },
       {
         "name": "Kırmızı",
-        "hex": "#FE284E",
+        "hex": "#dc2626",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/ALF-PLUS-65.png"
-      },
-      {
-        "name": "Beyaz",
-        "hex": "#EFEFEF",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/ALF-PLUS-BIRAZ-DAHA-GRI-66.png"
-      },
-      {
-        "name": "Gri",
-        "hex": "#808080",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2025/06/alf-plus-koruma-demir-66.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-alf-plus/alf_plus_kirmizi.webp"
       }
     ],
     "specs": {
@@ -3222,6 +3352,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-go-55-dubai/go_55_beyaz.webp",
+      "/images/motorcycles/hd/motolux-go-55-dubai/go_55_gr_.webp",
+      "/images/motorcycles/hd/motolux-go-55-dubai/go_55_pembe.webp",
       "/images/motorcycles/2025/11/101-scaled.jpg",
       "/images/motorcycles/2025/11/Asset-73.png",
       "/images/motorcycles/2025/11/Asset-72.png",
@@ -3229,22 +3362,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Turkuaz",
-        "hex": "#E5C1C6",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-go-55-dubai/go_55_beyaz.webp"
+      },
+      {
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/11/Asset-73.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-go-55-dubai/go_55_gr_.webp"
       },
       {
-        "name": "Beyaz",
-        "hex": "#DEDEDE",
+        "name": "Pastel Pembe",
+        "hex": "#ec4899",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/11/Asset-72.png"
-      },
-      {
-        "name": "Füme / Antrasit",
-        "hex": "#616161",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/11/Asset-74.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-go-55-dubai/go_55_pembe.webp"
       }
     ],
     "specs": {
@@ -3342,6 +3475,10 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-e-vintage/e-vintage__1_.webp",
+      "/images/motorcycles/hd/motolux-e-vintage/e-vintage__2_.webp",
+      "/images/motorcycles/hd/motolux-e-vintage/e-vintage__4_.webp",
+      "/images/motorcycles/hd/motolux-e-vintage/e-vintage-_3_.webp",
       "/images/motorcycles/2024/10/web-onizleme-Recovered.jpg",
       "/images/motorcycles/2024/10/w.png",
       "/images/motorcycles/2024/10/e.png",
@@ -3350,28 +3487,28 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Füme / Antrasit",
-        "hex": "#8D8B88",
+        "name": "Özel Seri",
+        "hex": "#e11d48",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-e-vintage/e-vintage__1_.webp"
+      },
+      {
+        "name": "Özel Seri",
+        "hex": "#e11d48",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2024/10/w.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-e-vintage/e-vintage__2_.webp"
       },
       {
-        "name": "Turkuaz",
-        "hex": "#E6EFAB",
+        "name": "Özel Seri",
+        "hex": "#e11d48",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2024/10/e.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-e-vintage/e-vintage__4_.webp"
       },
       {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
+        "name": "Özel Seri",
+        "hex": "#e11d48",
         "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2024/10/q.png"
-      },
-      {
-        "name": "Açık Gri / Gümüş",
-        "hex": "#E4CCC6",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2024/10/r.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-e-vintage/e-vintage-_3_.webp"
       }
     ],
     "specs": {
@@ -3463,6 +3600,8 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-gogo/gogo_kirmizi.webp",
+      "/images/motorcycles/hd/motolux-gogo/gogo_s_yah.webp",
       "/images/motorcycles/2024/05/GOGO-57-scaled.jpg",
       "/images/motorcycles/2025/06/Asset-61@2000x-8.png",
       "/images/motorcycles/2025/06/Asset-60@2000x-8.png"
@@ -3470,15 +3609,15 @@ export const MOTORCYCLES: Motorcycle[] = [
     "colors": [
       {
         "name": "Kırmızı",
-        "hex": "#e30613",
-        "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/Asset-61@2000x-8.png"
+        "hex": "#dc2626",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-gogo/gogo_kirmizi.webp"
       },
       {
-        "name": "Mat Siyah",
-        "hex": "#1A253E",
-        "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/Asset-60@2000x-8.png"
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
+        "imageIndex": 1,
+        "imageUrl": "/images/motorcycles/hd/motolux-gogo/gogo_s_yah.webp"
       }
     ],
     "specs": {
@@ -3576,6 +3715,14 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-valencia/valencia_beyaz_.webp",
+      "/images/motorcycles/hd/motolux-valencia/valencia_kahvereng__.webp",
+      "/images/motorcycles/hd/motolux-valencia/valencia_kirmizi_.webp",
+      "/images/motorcycles/hd/motolux-valencia/valencia_mav__.webp",
+      "/images/motorcycles/hd/motolux-valencia/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-valencia/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-valencia/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-valencia/gallery_4.webp",
       "/images/motorcycles/2025/09/VALENCIA--scaled.jpg",
       "/images/motorcycles/2026/06/lizbon.png",
       "/images/motorcycles/2026/06/lizbon_3.png",
@@ -3584,28 +3731,28 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-valencia/valencia_beyaz_.webp"
+      },
+      {
+        "name": "Moka Kahve",
+        "hex": "#78350f",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2026/06/lizbon.png"
-      },
-      {
-        "name": "Turkuaz Mavisi",
-        "hex": "#30D5C8",
-        "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2026/06/lizbon_3.png"
-      },
-      {
-        "name": "Turkuaz",
-        "hex": "#ECD8B1",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/09/VALENCIA-KAHVERENGI.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-valencia/valencia_kahvereng__.webp"
       },
       {
         "name": "Kırmızı",
-        "hex": "#ff0000",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2026/06/lizbon_2.png"
+        "hex": "#dc2626",
+        "imageIndex": 2,
+        "imageUrl": "/images/motorcycles/hd/motolux-valencia/valencia_kirmizi_.webp"
+      },
+      {
+        "name": "Okyanus Mavisi",
+        "hex": "#2563eb",
+        "imageIndex": 3,
+        "imageUrl": "/images/motorcycles/hd/motolux-valencia/valencia_mav__.webp"
       }
     ],
     "specs": {
@@ -3823,6 +3970,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-m111/m11_beyaz.webp",
+      "/images/motorcycles/hd/motolux-m111/m11_gr_.webp",
+      "/images/motorcycles/hd/motolux-m111/m111_s_yah.webp",
       "/images/motorcycles/2024/09/M111-70-scaled.jpg",
       "/images/motorcycles/2025/06/M111-BEYAZ-scaled.png",
       "/images/motorcycles/2025/06/M111-GRI.png",
@@ -3830,22 +3980,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-m111/m11_beyaz.webp"
+      },
+      {
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/06/M111-BEYAZ-scaled.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-m111/m11_gr_.webp"
       },
       {
-        "name": "Gri / Titanyum",
-        "hex": "#898989",
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/06/M111-GRI.png"
-      },
-      {
-        "name": "Siyah",
-        "hex": "#1D1D1B",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/06/M111-SIYAH.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-m111/m111_s_yah.webp"
       }
     ],
     "specs": {
@@ -4031,22 +4181,35 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-pitton-9000/pitton_gr_.webp",
+      "/images/motorcycles/hd/motolux-pitton-9000/pitton_turuncu.webp",
+      "/images/motorcycles/hd/motolux-pitton-9000/pitton_ye__l.webp",
+      "/images/motorcycles/hd/motolux-pitton-9000/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-pitton-9000/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-pitton-9000/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-pitton-9000/gallery_4.webp",
       "/images/motorcycles/2025/12/Pitton-9000.jpg",
       "/images/motorcycles/2025/12/Asset-75-8.png",
       "/images/motorcycles/2025/12/Asset-76-8.png"
     ],
     "colors": [
       {
-        "name": "Kırmızı",
-        "hex": "#CD131B",
-        "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/12/Asset-75-8.png"
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-pitton-9000/pitton_gr_.webp"
       },
       {
-        "name": "Beyaz",
-        "hex": "#FFFFFF",
+        "name": "Kapadokya Turuncusu",
+        "hex": "#ea580c",
+        "imageIndex": 1,
+        "imageUrl": "/images/motorcycles/hd/motolux-pitton-9000/pitton_turuncu.webp"
+      },
+      {
+        "name": "Askeri Haki / Yeşil",
+        "hex": "#16a34a",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/12/Asset-76-8.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-pitton-9000/pitton_ye__l.webp"
       }
     ],
     "specs": {
@@ -4144,6 +4307,13 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-super-54/gr__super_54.webp",
+      "/images/motorcycles/hd/motolux-super-54/kirmizi_super_54.webp",
+      "/images/motorcycles/hd/motolux-super-54/s_yah_super_54.webp",
+      "/images/motorcycles/hd/motolux-super-54/gallery_1.webp",
+      "/images/motorcycles/hd/motolux-super-54/gallery_2.webp",
+      "/images/motorcycles/hd/motolux-super-54/gallery_3.webp",
+      "/images/motorcycles/hd/motolux-super-54/gallery_4.webp",
       "/images/motorcycles/2026/05/super-54.jpg",
       "/images/motorcycles/2026/05/SUPER-54-MOTOLUX-2.png",
       "/images/motorcycles/2026/05/SUPER-54-MOTOLUX-1.png",
@@ -4151,22 +4321,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Siyah",
-        "hex": "#19161F",
-        "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2026/05/SUPER-54-MOTOLUX-2.png"
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-super-54/gr__super_54.webp"
       },
       {
         "name": "Kırmızı",
-        "hex": "#AC0503",
-        "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2026/05/SUPER-54-MOTOLUX-1.png"
+        "hex": "#dc2626",
+        "imageIndex": 1,
+        "imageUrl": "/images/motorcycles/hd/motolux-super-54/kirmizi_super_54.webp"
       },
       {
-        "name": "Açık Gri / Gümüş",
-        "hex": "#aaaaaa",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2026/05/SUPER-54-MOTOLUX-3.png"
+        "name": "Gece Siyahı",
+        "hex": "#1e1e24",
+        "imageIndex": 2,
+        "imageUrl": "/images/motorcycles/hd/motolux-super-54/s_yah_super_54.webp"
       }
     ],
     "specs": {
@@ -4366,22 +4536,24 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "B Sınıfı Ehliyet Uyumlu (Sigortadan Muaf)",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-africa-wolf-2/africa_wolf_2_mav_.webp",
+      "/images/motorcycles/hd/motolux-africa-wolf-2/africa_wolf_2_sari.webp",
       "/images/motorcycles/2024/05/AFRICA-WOLF-2-1-scaled.jpg",
       "/images/motorcycles/2025/07/Asset-51.png",
       "/images/motorcycles/2025/07/Asset-52.png"
     ],
     "colors": [
       {
-        "name": "Sarı / Altın",
-        "hex": "#ECD313",
-        "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/07/Asset-51.png"
+        "name": "Okyanus Mavisi",
+        "hex": "#2563eb",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-africa-wolf-2/africa_wolf_2_mav_.webp"
       },
       {
-        "name": "Kobalt Mavisi",
-        "hex": "#379ac8",
-        "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/07/Asset-52.png"
+        "name": "Güneş Sarısı",
+        "hex": "#eab308",
+        "imageIndex": 1,
+        "imageUrl": "/images/motorcycles/hd/motolux-africa-wolf-2/africa_wolf_2_sari.webp"
       }
     ],
     "specs": {
@@ -5775,19 +5947,19 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Kırmızı",
+        "name": "Ateş Kırmızısı",
         "hex": "#E53333",
         "imageIndex": 1,
         "imageUrl": "/images/motorcycles/2025/05/FX33-scaled.png"
       },
       {
-        "name": "Füme / Antrasit",
+        "name": "Mat Antrasit",
         "hex": "#4C4C4C",
         "imageIndex": 2,
         "imageUrl": "/images/motorcycles/2025/05/FX33_1-scaled.png"
       },
       {
-        "name": "Füme / Antrasit",
+        "name": "Gümüş Füme",
         "hex": "#848484",
         "imageIndex": 3,
         "imageUrl": "/images/motorcycles/2025/05/FX33_2.png"
@@ -5882,25 +6054,25 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Turkuaz",
+        "name": "Gökyüzü Mavisi",
         "hex": "#b2e0f5",
         "imageIndex": 1,
         "imageUrl": "/images/motorcycles/2025/05/fx23.png"
       },
       {
-        "name": "Gümüş Gri",
+        "name": "Adaçayı Yeşili",
         "hex": "#8fb387",
         "imageIndex": 2,
         "imageUrl": "/images/motorcycles/2025/05/fx23_2.png"
       },
       {
-        "name": "Turkuaz",
+        "name": "Açık Fıstık Yeşili",
         "hex": "#b3fea4",
         "imageIndex": 3,
         "imageUrl": "/images/motorcycles/2025/05/fx23_1.png"
       },
       {
-        "name": "Açık Gri / Gümüş",
+        "name": "Şampanya / Gümüş",
         "hex": "#c1ab9a",
         "imageIndex": 4,
         "imageUrl": "/images/motorcycles/2025/08/fx23s-2.png"
@@ -6297,19 +6469,19 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Beyaz",
+        "name": "İnci Beyazı",
         "hex": "#eaeaea",
         "imageIndex": 1,
         "imageUrl": "/images/motorcycles/2026/08/X-TANK-200-BEYAZ.png"
       },
       {
-        "name": "Füme / Antrasit",
+        "name": "Haki Yeşil",
         "hex": "#565547",
         "imageIndex": 2,
         "imageUrl": "/images/motorcycles/2026/08/X-TANK-200-HAKI.png"
       },
       {
-        "name": "Füme / Antrasit",
+        "name": "Çelik Mavisi",
         "hex": "#465363",
         "imageIndex": 3,
         "imageUrl": "/images/motorcycles/2026/08/X-TANK-200-MAVI.png"
@@ -6472,6 +6644,9 @@ export const MOTORCYCLES: Motorcycle[] = [
     "licenseType": "Ehliyetsiz / B Sınıfı Uyumlu",
     "price": 0,
     "images": [
+      "/images/motorcycles/hd/motolux-ist-1453-s/beyaz.webp",
+      "/images/motorcycles/hd/motolux-ist-1453-s/gr_.webp",
+      "/images/motorcycles/hd/motolux-ist-1453-s/sari_.webp",
       "/images/motorcycles/2025/10/IST-1453-S-1-scaled.jpg",
       "/images/motorcycles/2025/10/Asset-66.png",
       "/images/motorcycles/2025/10/Asset-64.png",
@@ -6481,34 +6656,22 @@ export const MOTORCYCLES: Motorcycle[] = [
     ],
     "colors": [
       {
-        "name": "Beyaz",
-        "hex": "#ffffff",
+        "name": "İnci Beyazı",
+        "hex": "#f8fafc",
+        "imageIndex": 0,
+        "imageUrl": "/images/motorcycles/hd/motolux-ist-1453-s/beyaz.webp"
+      },
+      {
+        "name": "Titanyum Gri",
+        "hex": "#64748b",
         "imageIndex": 1,
-        "imageUrl": "/images/motorcycles/2025/10/Asset-66.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-ist-1453-s/gr_.webp"
       },
       {
-        "name": "Sarı",
-        "hex": "#FFFF00",
+        "name": "Güneş Sarısı",
+        "hex": "#eab308",
         "imageIndex": 2,
-        "imageUrl": "/images/motorcycles/2025/10/Asset-64.png"
-      },
-      {
-        "name": "Füme / Antrasit",
-        "hex": "#293133",
-        "imageIndex": 3,
-        "imageUrl": "/images/motorcycles/2025/10/Asset-67.png"
-      },
-      {
-        "name": "Kırmızı",
-        "hex": "#FF0000",
-        "imageIndex": 4,
-        "imageUrl": "/images/motorcycles/2026/02/IST-1453-S-KIRMIZI.png"
-      },
-      {
-        "name": "Turkuaz",
-        "hex": "#FEECC8",
-        "imageIndex": 5,
-        "imageUrl": "/images/motorcycles/2026/02/IST-1453-S-KREM.png"
+        "imageUrl": "/images/motorcycles/hd/motolux-ist-1453-s/sari_.webp"
       }
     ],
     "specs": {

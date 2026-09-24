@@ -1,7 +1,9 @@
 import { runAutoSync } from "./src/lib/syncEngine";
 import { CITIES } from "./src/data/cities";
 import { BRANDS } from "./src/data/brands";
+import { MOTORCYCLES } from "./src/data/motorcycles";
 import express from "express";
+import http from "http";
 import helmet from "helmet";
 import path from "path";
 import cors from "cors";
@@ -13,6 +15,8 @@ import dotenv from "dotenv";
 import { pushToGithubSdk } from "./api/github-push";
 import { beautifyProduct } from "./src/lib/beautify-product";
 import { createClient } from "@supabase/supabase-js";
+import { encrypt, decrypt } from "./src/lib/crypto_util";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
 
@@ -231,14 +235,12 @@ async function generateText(prompt: string, isJson: boolean = true, useSearch = 
 // we need firebase-admin. It should be initialized with a service account.
 // Removed Firebase Admin implementation as part of clean up.
 
-
-import { encrypt, decrypt } from "./src/lib/crypto_util";
-
 const app = express();
+app.set("trust proxy", 1);
 
 // High-priority health check endpoints for Cloud Run and container readiness probes
 // Placed before all middlewares so health checks return immediately with zero overhead
-app.get(["/api/health", "/health", "/healthz", "/_health"], (_req, res) => {
+app.get(["/api/health", "/health", "/healthz", "/_health", "/_ah/health"], (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
@@ -262,7 +264,7 @@ process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
 });
 
-// Security: block access to dotfiles (like .env) and sensitive paths
+// Security: block access to dotfiles (like .env), source files, and sensitive build artifacts
 app.use((req, res, next) => {
   // Allow .well-known for ACME challenges and .vite for dev server
   if (req.path.includes('/.well-known/') || req.path.includes('/.vite/')) {
@@ -270,6 +272,17 @@ app.use((req, res, next) => {
   }
   // Block any path that contains a dot followed by letters, if it's a hidden file
   if (req.path.match(/(^|\/)\.[^/.]/g)) {
+    return res.status(404).send("Not found");
+  }
+  // Block direct access to server bundles, maps, or backend source code
+  const lowerPath = req.path.toLowerCase();
+  if (
+    lowerPath === '/server.ts' ||
+    lowerPath === '/sync.ts' ||
+    lowerPath.endsWith('.cjs') ||
+    lowerPath.endsWith('.cjs.map') ||
+    (process.env.NODE_ENV === "production" && (lowerPath.endsWith('.ts') || lowerPath.endsWith('.tsx')))
+  ) {
     return res.status(404).send("Not found");
   }
   next();
@@ -280,21 +293,47 @@ if (process.env.NODE_ENV === "production") {
   app.use(helmet({
     contentSecurityPolicy: false, // Prevents iframe blockage for previews
     crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: false,
+    frameguard: false, // CRITICAL: Disables X-Frame-Options: SAMEORIGIN so AI Studio preview and share iframes work
   }));
 }
 
+// Allow framing from AI Studio and Google domains
+app.use((_req, res, next) => {
+  res.removeHeader("X-Frame-Options");
+  res.setHeader(
+    "Content-Security-Policy",
+    "frame-ancestors 'self' https://*.google.com https://ai.studio https://*.ai.studio https://localhost.corp.google.com:26001;"
+  );
+  next();
+});
+
 const allowedOrigins = [
   process.env.VITE_APP_URL || "http://localhost:3000",
-  "https://pasamotor.com"
+  "https://pasamotor.com",
+  "https://pasamotor.com.tr",
+  "https://www.pasamotor.com.tr",
+  "https://www.pasamotor.com",
+  "https://ai.studio",
+  "https://aistudio.google.com"
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
     // In dev mode or allowed origins, accept
-    if (!origin || process.env.NODE_ENV !== "production" || allowedOrigins.includes(origin) || origin.includes("run.app")) {
+    if (
+      !origin ||
+      process.env.NODE_ENV !== "production" ||
+      allowedOrigins.includes(origin) ||
+      origin.includes("run.app") ||
+      origin.includes("google.com") ||
+      origin.includes("ai.studio") ||
+      origin.includes("localhost")
+    ) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(null, false);
     }
   },
   credentials: true,
@@ -304,16 +343,31 @@ app.use(cors({
 app.use(express.json({ limit: "10mb" })); // Reduced from 1GB to 10MB to prevent DoS / Memory exhaustion
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
+// Serve static images directly with permissive CORS and CORP headers
+const publicImagesPath = path.join(process.cwd(), "public/images");
+if (fs.existsSync(publicImagesPath)) {
+  app.use("/images", (req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  }, express.static(publicImagesPath, {
+    maxAge: "7d",
+    index: false,
+  }), (_req, res) => {
+    // Return 404 for missing images so browser never receives index.html as an image
+    res.status(404).send("Image not found");
+  });
+}
+
 // ==========================================
 // Paşa Motor API Endpoints
 // ==========================================
-
-import rateLimit from "express-rate-limit";
 
 // Rate limiter for contact form
 const contactLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 3, // limit each IP to 3 requests per windowMs
+  validate: { xForwardedForHeader: false },
   message: { error: "Çok fazla mesaj gönderdiniz, lütfen 1 dakika sonra tekrar deneyin." }
 });
 
@@ -476,7 +530,8 @@ app.post("/api/admin/products/bulk-margin", requireAdmin, async (req, res) => {
         const result = await runAutoSync();
         return res.json(result);
       } catch (err: any) {
-        return res.status(500).json({ error: err.message });
+        console.error("FCS Auth Error:", err);
+        return res.status(500).json({ error: err.message || "Bilinmeyen bir hata oluştu" });
       }
     });
 
@@ -559,7 +614,7 @@ app.post("/api/admin/products/bulk-margin", requireAdmin, async (req, res) => {
       return res.json({ success: true, cookies: allCookies });
     } catch (error: any) { 
       console.error("FCS Auth error:", error);
-      return res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." }); 
+      return res.status(500).json({ error: error.message || "İşlem sırasında beklenmeyen bir hata oluştu." }); 
     }
   });
 
@@ -2289,7 +2344,17 @@ KURALLAR:
   // SEO Optimizer & Dynamic Prerender Engine
   // ==========================================
 
-  async function serveSEOInjectedHtml(req: any, res: any, customTitle?: string, customDesc?: string, customImage?: string, canonicalUrl?: string) {
+  let globalViteInstance: any = null;
+
+  async function serveSEOInjectedHtml(
+    req: any, 
+    res: any, 
+    customTitle?: string, 
+    customDesc?: string, 
+    customImage?: string, 
+    canonicalUrl?: string,
+    customSchema?: any
+  ) {
     try {
       const pathsToTry = process.env.NODE_ENV === "production" ? [
         path.join(process.cwd(), "dist", "index.html"),
@@ -2315,12 +2380,22 @@ KURALLAR:
       }
       
       if (!targetPath) {
-        console.error("SEO/Vite Ingress: index.html not found inside paths:", pathsToTry);
-        return res.status(404).send("index.html not found");
+        console.warn("SEO/Vite Ingress: index.html not found, serving resilient fallback HTML");
+        const fallbackTitle = customTitle || "Paşa Motor | Yedek Parça & Yetkili Servis";
+        const fallbackDesc = customDesc || "İstanbul Fatih'te TVS, Falcon ve Işıldar yetkili servisi ve yedek parça merkezi.";
+        return res.status(200).send(`<!doctype html><html lang="tr"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>${fallbackTitle}</title><meta name="description" content="${fallbackDesc}" /></head><body><div id="root"></div></body></html>`);
       }
 
-            // eslint-disable-next-line security/detect-non-literal-fs-filename
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       let html = fs.readFileSync(targetPath, "utf8");
+
+      if (globalViteInstance && process.env.NODE_ENV !== "production") {
+        try {
+          html = await globalViteInstance.transformIndexHtml(req.originalUrl || req.url, html);
+        } catch (viteTransformErr) {
+          console.error("Vite transformIndexHtml error:", viteTransformErr);
+        }
+      }
 
       const title = customTitle || "Paşa Motor | Yedek Parça & Yetkili Servis";
       const desc = customDesc || "İstanbul'un en güvenilir motosiklet yedek parça merkezi ve TVS, Falcon, Işıldar yetkili servisi.";
@@ -2344,6 +2419,15 @@ KURALLAR:
       
       // Replace canonical link
       html = html.replace(/<link rel="canonical"[^>]+>/g, `<link rel="canonical" href="${canonical}" />`);
+
+      // Replace or inject Open Graph Image
+      if (image) {
+        if (html.includes('<meta property="og:image"')) {
+          html = html.replace(/<meta property="og:image"[^>]+>/g, `<meta property="og:image" content="${image}" />`);
+        } else {
+          html = html.replace("</head>", `<meta property="og:image" content="${image}" />\n</head>`);
+        }
+      }
 
       // Comprehensive JSON-LD representation (SEO Phase 2)
       const businessSchema = {
@@ -2423,7 +2507,7 @@ KURALLAR:
       
       const structuredData = `
       <script type="application/ld+json">
-      ${JSON.stringify(businessSchema, null, 2)}
+      ${JSON.stringify(customSchema || businessSchema, null, 2)}
       </script>
       `;
       html = html.replace("</body>", `${structuredData}\n</body>`);
@@ -2432,7 +2516,8 @@ KURALLAR:
       res.send(html);
     } catch (error: any) {
       console.error("HTML SEO Injector Error:", error);
-      res.status(500).send("İşlem sırasında beklenmeyen bir hata oluştu.");
+      res.header("Content-Type", "text/html; charset=utf-8");
+      res.status(200).send(`<!doctype html><html lang="tr"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Paşa Motor | Yetkili Servis & Yedek Parça</title></head><body><div id="root"></div></body></html>`);
     }
   }
 
@@ -2456,7 +2541,21 @@ KURALLAR:
         { loc: "https://pasamotor.com.tr/blog", changefreq: "daily", priority: "0.9" },
         { loc: "https://pasamotor.com.tr/iletisim", changefreq: "monthly", priority: "0.8" },
         { loc: "https://pasamotor.com.tr/galeri", changefreq: "weekly", priority: "0.7" },
+        { loc: "https://pasamotor.com.tr/magaza", changefreq: "daily", priority: "1.0" },
       ];
+
+      // Add motorcycle model showroom routes (SEO & AEO & GEO)
+      if (Array.isArray(MOTORCYCLES)) {
+        MOTORCYCLES.forEach(bike => {
+          if (bike && bike.slug) {
+            urls.push({
+              loc: `https://pasamotor.com.tr/magaza/${bike.slug}`,
+              changefreq: "daily",
+              priority: "0.9"
+            });
+          }
+        });
+      }
 
       // Add city routes
       CITIES.forEach(city => {
@@ -2546,18 +2645,49 @@ ${urls.map(u => `  <url>
     res.header("Content-Type", "text/plain");
     res.send(`User-agent: *
 Allow: /
+Disallow: /admin/
 Disallow: /api/
-Disallow: /assets/
+
+# Explicitly allow AI search bots and LLM crawlers for AI visibility
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GeminiBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Omgilibot
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: cohere-ai
+Allow: /
+
 Sitemap: https://pasamotor.com.tr/sitemap.xml
 `);
   });
 
-  // SEO Prerender Interceptors for high-value pages (Only in production to prevent bypassing Vite in dev)
+  // SEO Prerender Interceptors for high-value pages (All environments with Vite SSR transform support)
   const isCompiledApp = (typeof __filename !== "undefined" && (__filename.endsWith(".cjs") || __filename.includes("dist")));
   const isProdEnvironment = process.env.NODE_ENV === "production" || isCompiledApp;
 
-  if (isProdEnvironment) {
-    app.get("/yedek-parca/:slug", async (req, res) => {
+  app.get("/yedek-parca/:slug", async (req, res) => {
       try {
         const slug = req.params.slug;
         const supabase = getSupabase();
@@ -2735,15 +2865,223 @@ Sitemap: https://pasamotor.com.tr/sitemap.xml
       );
     });
 
-    app.get("/", (req, res) => {
+    // 0 KM Motosiklet Mağazası & Showroom (SEO & AEO & GEO)
+    app.get("/magaza", (req, res) => {
+      const storeSchema = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "AutoDealer",
+            "@id": "https://pasamotor.com.tr/magaza#dealer",
+            "name": "Paşa Motor Motosiklet Showroom & Yetkili Bayi",
+            "image": "https://pasamotor.com.tr/pasa-motor-logo.webp",
+            "url": "https://pasamotor.com.tr/magaza",
+            "description": "İstanbul Fatih'te TVS, Falcon, Işıldar, Kuba, RKS, MotoLux 0 KM sıfır motosiklet satış merkezi. Kredi kartına 3-6-9-12 taksit ve aynı gün anahtar teslim.",
+            "telephone": "0212 586 85 98",
+            "priceRange": "$$",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Kızılelma Cad. No:66/A Kocamustafapaşa",
+              "addressLocality": "Fatih",
+              "addressRegion": "İstanbul",
+              "addressCountry": "TR"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 41.0028,
+              "longitude": 28.9386
+            },
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                "opens": "09:00",
+                "closes": "19:00"
+              }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Paşa Motor Fatih Showroom'da hangi marka sıfır motosikletler satılıyor?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Paşa Motor; TVS, Falcon, Işıldar, Kuba, RKS ve MotoLux resmî yetkili satış bayisidir. 50cc scooterlardan 125cc commuter ve vitesli motorlara kadar geniş bir model yelpazesi mevcuttur."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Kredi kartına taksit imkanı var mı?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Evet. Tüm Bonus, Axess, Maximum, World, Bankkart ve Paraf kredi kartlarına 3, 6, 9 ve 12 aya varan taksit seçenekleri mevcuttur."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "50cc motosikletler B sınıfı otomobil ehliyeti ile kullanılabilir mi?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Evet, 50cc motor modellerimiz B sınıfı otomobil ehliyetiyle yasal olarak kullanılabilir; ayrıca MTV (Motorlu Taşıtlar Vergisi) ve zorunlu trafik sigortasından muaftır."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Motosiklet teslimat süresi ve plaka tescil işlemleri nasıl yapılıyor?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Motosikletlerimiz mağazamızda stoktan hemen teslim edilir. Plaka, ruhsat ve noter tescil evrakları aynı gün içerisinde uzman ekibimiz tarafından hazırlanır."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "https://pasamotor.com.tr/" },
+              { "@type": "ListItem", "position": 2, "name": "0 KM Motosiklet Mağazası", "item": "https://pasamotor.com.tr/magaza" }
+            ]
+          }
+        ]
+      };
+
       return serveSEOInjectedHtml(
-        req, 
-        res, 
-        "Paşa Motor - İstanbul Fatih Motosiklet Yetkili Servis Bayi", 
-        "TVS, Falcon, Işıldar yetkili satış ve teknik servis noktası. En geniş orijinal yedek parça yelpazesi, profesyonel motosiklet ustaları ve modern servis ekipmanları."
+        req,
+        res,
+        "0 KM Motosiklet Fiyatları & Taksitli Satış | Paşa Motor Fatih Showroom",
+        "İstanbul Fatih TVS, Falcon, Işıldar, Kuba, MotoLux yetkili bayisi. 50cc B-ehliyet scooter, 125cc commuter modelleri kredi kartına 12 taksit ve aynı gün teslimatla Paşa Motor'da.",
+        "https://pasamotor.com.tr/pasa-motor-logo.webp",
+        "https://pasamotor.com.tr/magaza",
+        storeSchema
       );
     });
-  }
+
+    // 0 KM Motosiklet Model Detay Sayfası (Dinamik SSR & Schema)
+    app.get("/magaza/:slug", (req, res) => {
+      const { slug } = req.params;
+      const bike = Array.isArray(MOTORCYCLES) 
+        ? MOTORCYCLES.find((m: any) => m.slug === slug || m.id === slug)
+        : null;
+
+      if (!bike) {
+        return serveSEOInjectedHtml(
+          req,
+          res,
+          "0 KM Motosiklet Modelleri | Paşa Motor Fatih",
+          "İstanbul Fatih yetkili motosiklet satış bayisi güncel 0 KM modeller ve fiyat listesi.",
+          "https://pasamotor.com.tr/pasa-motor-logo.webp",
+          `https://pasamotor.com.tr/magaza/${slug}`
+        );
+      }
+
+      const formattedPrice = Number(bike.price || 0).toLocaleString("tr-TR");
+      const title = `${bike.brand} ${bike.model} 0 KM Fiyatı & Taksit Seçenekleri | Paşa Motor Fatih`;
+      const desc = `${bike.brand} ${bike.model} 0 KM motosiklet. Peşin ${formattedPrice} TL veya kredi kartına 12 taksit imkanı. ${bike.licenseType}, ${bike.engineSize}. Aynı gün plaka tescil & teslimat garantisi ile Paşa Motor Showroom'da.`;
+      const img = bike.images && bike.images[0] ? bike.images[0] : "https://pasamotor.com.tr/pasa-motor-logo.webp";
+
+      const bikeSchema = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": ["Vehicle", "Motorcycle", "Product"],
+            "@id": `https://pasamotor.com.tr/magaza/${bike.slug}#vehicle`,
+            "name": `${bike.brand} ${bike.model}`,
+            "description": desc,
+            "image": bike.images && bike.images.length > 0 ? bike.images : [img],
+            "brand": {
+              "@type": "Brand",
+              "name": bike.brand
+            },
+            "model": bike.model,
+            "itemCondition": "https://schema.org/NewCondition",
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "TRY",
+              "price": bike.price,
+              "availability": "https://schema.org/InStock",
+              "url": `https://pasamotor.com.tr/magaza/${bike.slug}`,
+              "priceValidUntil": "2026-12-31",
+              "seller": {
+                "@type": "AutoDealer",
+                "name": "Paşa Motor Motosiklet Showroom",
+                "telephone": "0212 586 85 98",
+                "address": {
+                  "@type": "PostalAddress",
+                  "streetAddress": "Kızılelma Cad. No:66/A Kocamustafapaşa",
+                  "addressLocality": "Fatih",
+                  "addressRegion": "İstanbul",
+                  "addressCountry": "TR"
+                }
+              }
+            },
+            "vehicleEngine": {
+              "@type": "EngineSpecification",
+              "engineDisplacement": bike.engineSize
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": `${bike.brand} ${bike.model} hangi ehliyet sınıfı ile kullanılır?`,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": `${bike.brand} ${bike.model} modeli ${bike.licenseType} ile yasal olarak kullanılabilir.`
+                }
+              },
+              {
+                "@type": "Question",
+                "name": `${bike.brand} ${bike.model} için taksit imkanı var mı?`,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Evet, Paşa Motor Showroom'da tüm anlaşmalı kredi kartlarına 3, 6, 9 ve 12 aya varan taksit seçenekleri sunulmaktadır."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Teslimat ve plaka süreci nasıl işliyor?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Aracınız Fatih Kızılelma Caddesi'ndeki mağazamızdan stoktan aynı gün teslim edilir. Noter ve plaka evrakları uzman satış ekibimiz tarafından hızla düzenlenir."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "https://pasamotor.com.tr/" },
+              { "@type": "ListItem", "position": 2, "name": "Motosiklet Mağazası", "item": "https://pasamotor.com.tr/magaza" },
+              { "@type": "ListItem", "position": 3, "name": `${bike.brand} ${bike.model}`, "item": `https://pasamotor.com.tr/magaza/${bike.slug}` }
+            ]
+          }
+        ]
+      };
+
+      return serveSEOInjectedHtml(
+        req,
+        res,
+        title,
+        desc,
+        img,
+        `https://pasamotor.com.tr/magaza/${bike.slug}`,
+        bikeSchema
+      );
+    });
+
+    if (isProdEnvironment) {
+      app.get("/", (req, res) => {
+        return serveSEOInjectedHtml(
+          req, 
+          res, 
+          "Paşa Motor - İstanbul Fatih Motosiklet Yetkili Servis Bayi", 
+          "TVS, Falcon, Işıldar yetkili satış ve teknik servis noktası. En geniş orijinal yedek parça yelpazesi, profesyonel motosiklet ustaları ve modern servis ekipmanları."
+        );
+      });
+    }
 
   // ==========================================
 
@@ -2754,6 +3092,9 @@ if (!isServerless) {
   (async () => {
     try {
       const isCompiled = (typeof __filename !== "undefined" && (__filename.endsWith(".cjs") || __filename.includes("dist")));
+      if (isCompiled && !process.env.NODE_ENV) {
+        process.env.NODE_ENV = "production";
+      }
       const isProduction = process.env.NODE_ENV === "production" || isCompiled;
 
       if (!isProduction) {
@@ -2762,6 +3103,7 @@ if (!isServerless) {
           server: { middlewareMode: true, hmr: { port: 24678 } },
           appType: "spa",
         });
+        globalViteInstance = vite;
         app.use(vite.middlewares);
       } else {
         const rootDir = (typeof __dirname !== "undefined" && __dirname.endsWith("dist"))
@@ -2783,19 +3125,48 @@ if (!isServerless) {
         });
       }
 
-      // In Google AI Studio & Cloud Run container architecture, Nginx listens on the external
-      // ingress port (8080) and proxies all incoming application traffic directly to 0.0.0.0:3000.
-      // Therefore, the Node application MUST strictly bind to port 3000 on 0.0.0.0.
-      const PORT = 3000;
-
-      const mainServer = app.listen(PORT, "0.0.0.0", () => {
-        console.log(`Server running on port ${PORT}`);
-        console.log(`API endpoints ready at http://0.0.0.0:${PORT}/api/products`);
+      // Global Express error handler to prevent crashing or info disclosure
+      app.use((err: any, _req: any, res: any, _next: any) => {
+        console.error("Internal Server Error:", err?.message || err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: "İşlem sırasında beklenmeyen bir hata oluştu." });
+        }
       });
 
-      mainServer.on("error", (err: any) => {
-        console.error("HTTP Server Error on port", PORT, err);
-      });
+      // Multi-environment port resolution:
+      // Multi-environment port resolution:
+      // - Cloud Run live deployment sets process.env.PORT (typically 8080).
+      // - AI Studio dev & preview environment routes external traffic to port 3000 (via NGINX proxy on 8080).
+      // Binding to all candidate ports concurrently ensures both direct Cloud Run container probes
+      // (which check process.env.PORT / 8080) and NGINX reverse proxies (which forward to port 3000) succeed.
+      const activeServers: any[] = [];
+      const candidatePorts = [
+        ...(process.env.PORT ? [parseInt(process.env.PORT, 10)] : []),
+        ...(process.env.DEFAULT_APP_PORT ? [parseInt(process.env.DEFAULT_APP_PORT, 10)] : []),
+        3000,
+        8080
+      ].filter((p, i, a) => !isNaN(p) && p > 0 && a.indexOf(p) === i);
+
+      for (const port of candidatePorts) {
+        try {
+          const s = app.listen(port, "0.0.0.0", () => {
+            console.log(`Server successfully started and listening on http://0.0.0.0:${port}`);
+            console.log(`Health check available at http://0.0.0.0:${port}/api/health`);
+          });
+          activeServers.push(s);
+          s.on("error", (err: any) => {
+            const idx = activeServers.indexOf(s);
+            if (idx !== -1) activeServers.splice(idx, 1);
+            if (err.code === "EADDRINUSE") {
+              console.log(`Port ${port} is already in use (e.g. by reverse proxy), skipping.`);
+            } else {
+              console.error(`HTTP Server Error on port ${port}:`, err);
+            }
+          });
+        } catch (err: any) {
+          console.warn(`Failed to bind to port ${port}:`, err?.message || err);
+        }
+      }
 
       // Background tasks are started AFTER the HTTP server is bound so startup probes never block
       const activeSupabase = getSupabase();
@@ -2823,20 +3194,29 @@ if (!isServerless) {
         syncTimer.unref();
       }
 
+      let isShuttingDown = false;
       const handleShutdown = (signal: string) => {
+        if (isShuttingDown) return;
+        isShuttingDown = true;
         console.log(`Received ${signal}, shutting down gracefully...`);
-        mainServer.close(() => {
-          console.log("HTTP server closed.");
-          process.exit(0);
-        });
-        setTimeout(() => {
-          console.warn("Forcing shutdown after timeout.");
-          process.exit(0);
-        }, 5000).unref();
+        for (const s of activeServers) {
+          try {
+            s.close();
+          } catch (e) {
+            void e;
+          }
+        }
+        setTimeout(() => process.exit(0), 1000).unref();
       };
 
       process.on("SIGTERM", () => handleShutdown("SIGTERM"));
       process.on("SIGINT", () => handleShutdown("SIGINT"));
+      process.on("unhandledRejection", (reason) => {
+        console.error("Unhandled Rejection:", reason);
+      });
+      process.on("uncaughtException", (err) => {
+        console.error("Uncaught Exception:", err);
+      });
     } catch (startupErr) {
       console.error("Fatal startup error:", startupErr);
       process.exit(1);
@@ -2846,5 +3226,4 @@ if (!isServerless) {
     process.exit(1);
   });
 }
-
 export default app;
